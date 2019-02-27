@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
   locale_info = localeconv();
 
   struct list_elem *ap;
-  if (argc < 2) { LOG("no format string given\n"); return 1; }
+  if (argc < 2) { printf("no format string given\n"); return 1; }
 
   wchar_t *fmt = calloc(strlen(argv[1]) + 1, sizeof(wchar_t));
   mbstowcs(fmt, argv[1], strlen(argv[1]));
@@ -102,11 +102,14 @@ int main(int argc, char **argv) {
   }
 
   LOG("list element contents:\n");
+#ifdef DEBUG
   list_elem_inspect_all(ap);
+#endif
 
   wchar_t *str = altsprintf(fmt, ap);
 
   LOG("final output: '%ls'\n", str);
+  printf("%ls", str);
 
   free(fmt);
   free(str);
