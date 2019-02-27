@@ -13,6 +13,7 @@ CFLAGS += $($(TARGET)_cflags)
 
 all: $(target_dir)/altprintf
 
+.PRECIOUS: %.o
 %.o: ../../src/%.c
 	$(CC) $(CFLAGS) -o $*.o -c $(subst $(target_dir),src,$*).c
 
