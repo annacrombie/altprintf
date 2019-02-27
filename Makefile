@@ -33,7 +33,6 @@ debug: $(target_dir)/altprintf
 .PHONY: release
 release: CFLAGS += -O2
 release: $(target_dir)/altprintf
-	strip target/release/altprintf
 
 .PHONY: release
 run: $(TARGET)
