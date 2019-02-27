@@ -14,5 +14,9 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
+  config.before(:all) do
+    @exec = 'target/release/altprintf'
+  end
+
   config.include CliRunner
 end
