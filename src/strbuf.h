@@ -1,10 +1,10 @@
 #ifndef STRBUF_H
 #define STRBUF_H
+#include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <wchar.h>
 
 struct strbuf *strbuf_new();
 void strbuf_destroy(struct strbuf *sb);
@@ -21,6 +21,7 @@ struct strbuf {
   wchar_t *start;
   wchar_t *end;
   size_t len;
+  size_t width;
   size_t cap;
 };
 #endif

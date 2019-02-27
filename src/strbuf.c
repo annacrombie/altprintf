@@ -1,3 +1,4 @@
+#define _XOPEN_SOURCE
 #include <locale.h>
 #include "strbuf.h"
 #include "log.h"
@@ -24,6 +25,7 @@ struct strbuf *strbuf_new() {
 
   sb->len = 0;
   sb->cap = STRBUF_INI_SIZE;
+  sb->width = 0;
   return sb;
 }
 
@@ -56,6 +58,8 @@ void strbuf_append(struct strbuf *sb, wchar_t c)
   LOG("string so far: %ls\n", sb->start);
   sb->end = &sb->start[sb->len];
   sb->len++;
+  int w = wcwidth(c);
+  if (w >= 0) sb->width += w;
 }
 
 void strbuf_append_strbuf(struct strbuf *sb, void *sbuf)
