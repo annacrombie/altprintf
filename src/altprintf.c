@@ -43,14 +43,16 @@ void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, v
     case Right:
       strbuf_append_strbuf(sb, tmp);
       strbuf_pad(sb, f->padchar, pad);
+      break;
     case Left:
       strbuf_pad(sb, f->padchar, pad);
       strbuf_append_strbuf(sb, tmp);
+      break;
     case Center:
       strbuf_pad(sb, f->padchar, pad/2);
       strbuf_append_strbuf(sb, tmp);
       strbuf_pad(sb, f->padchar, pad/2 + pad%2);
-
+      break;
   }
 
   strbuf_destroy(tmp);
