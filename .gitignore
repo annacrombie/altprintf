@@ -1,4 +1,3 @@
-target/**/*.o
-target/**/altprintf
+target
 Gemfile.lock
 .rspec_status
