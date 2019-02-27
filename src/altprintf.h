@@ -10,7 +10,7 @@
 #include <wchar.h>
 #include "strbuf.h"
 #include "list.h"
-#include "tokens.h"
+#include "syntax.h"
 
 wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le);
 #endif

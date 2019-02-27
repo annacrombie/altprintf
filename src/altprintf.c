@@ -1,10 +1,11 @@
-#include "tokens.h"
+#include "syntax.h"
 #include "altprintf.h"
 #include "log.h"
 
 enum align {
   Left,
-  Right
+  Right,
+  Center
 };
 
 struct format {
@@ -38,9 +39,19 @@ void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, v
   int pad = f->width - width;
   LOG("padding: %d\n", pad);
 
-  if (f->align == Right) strbuf_pad(sb, f->padchar, pad);
-  strbuf_append_strbuf(sb, tmp);
-  if (f->align == Left) strbuf_pad(sb, f->padchar, pad);
+  switch(f->align) {
+    case Right:
+      strbuf_append_strbuf(sb, tmp);
+      strbuf_pad(sb, f->padchar, pad);
+    case Left:
+      strbuf_pad(sb, f->padchar, pad);
+      strbuf_append_strbuf(sb, tmp);
+    case Center:
+      strbuf_pad(sb, f->padchar, pad/2);
+      strbuf_append_strbuf(sb, tmp);
+      strbuf_pad(sb, f->padchar, pad/2 + pad%2);
+
+  }
 
   strbuf_destroy(tmp);
 }

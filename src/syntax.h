@@ -1,5 +1,5 @@
-#ifndef TOKENS_H
-#define TOKENS_H
+#ifndef SYNTAX_H
+#define SYNTAX_H
 
 #define FS_START    '%'
 #define FS_DOUBLE_SEP '.'

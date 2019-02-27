@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "list.h"
-#include "tokens.h"
+#include "syntax.h"
 
 struct list_elem *va_make_list(char *, ...);
 
