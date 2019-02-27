@@ -5,7 +5,11 @@ RSpec.describe('altprintf') do
     @exec = 'target/release/altprintf'
   end
 
-  it 'formats text' do
-    exec('test')
+  it 'can echo' do
+    expect(exec('test')).to eq('test')
+  end
+
+  it 'can insert a string' do
+    expect(exec('test %s', 'string')).to eq('test string')
   end
 end
