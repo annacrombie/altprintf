@@ -2,7 +2,7 @@ require_relative 'spec_helper'
 
 RSpec.describe('altprintf') do
   before(:all) do
-    @exec = './altprintf'
+    @exec = 'target/release/altprintf'
   end
 
   it 'formats text' do
