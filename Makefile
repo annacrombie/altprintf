@@ -1,31 +1,44 @@
-objs = $(patsubst src/%.c,build/release_%.o,$(wildcard src/*.c))
-dbg_objs = $(patsubst src/%.c,build/debug_%.o,$(wildcard src/*.c))
-headers := $(wildcard src/*.h)
-source := $(wildcard src/*.c)
-DEBUG := -g -D DEBUG
-RELEASE := -O2
+MAKEFLAGS += -rR --include-dir=$(CURDIR)
 
-all: altprintf
+TARGET ?= release
+target_dir := target/$(TARGET)
+objects := \
+  $(patsubst src/%.c,$(target_dir)/%.o,$(wildcard src/*.c))
 
-build/debug_%.o: src/%.h src/%.c
-	mkdir -p build
-	gcc $(DEBUG) -o build/debug_$*.o -c src/$*.c
+CC = gcc
 
-build/release_%.o: src/%.h src/%.c
-	mkdir -p build
-	gcc $(RELEASE) -o build/release_$*.o -c src/$*.c
 
-altprintf_debug: src/cli.c $(dbg_objs)
-	gcc $(DEBUG) -lm -o altprintf_debug build/debug_*.o
+all: $(TARGET)
 
-altprintf: src/cli.h $(objs)
-	gcc $(RELEASE) -lm -o altprintf build/release_*.o
+$(target_dir):
+	mkdir -p $(target_dir)
 
+%.o: ../../src/%.c | $(target_dir)
+	$(CC) $(CFLAGS) -o $*.o -c $(subst $(target_dir),src,$*).c
+
+%/altprintf: $(objects)
+	$(CC) $(CFLAGS) -lm -o $*/altprintf $(objects)
+
+.PHONY: clean
 clean:
-	rm -rf build/*.o altprintf altprintf_debug
+	rm target/release/*
+	touch target/release/.keep
+	rm target/debug/*
+	touch target/debug/.keep
 
-run: altprintf_debug
-	@./altprintf "test %s" string
+.PHONY: debug
+debug: CFLAGS += -g -D DEBUG
+debug: $(target_dir)/altprintf
 
-test: altprintf
+.PHONY: release
+release: CFLAGS += -O2
+release: $(target_dir)/altprintf
+	strip target/release/altprintf
+
+.PHONY: release
+run: $(TARGET)
+	@$(target_dir)/altprintf "hello world"
+
+.PHONY: test
+test: release
 	bundle exec rspec
