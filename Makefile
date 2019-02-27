@@ -16,7 +16,6 @@ target_dir := target/$(TARGET)
 objects := \
   $(patsubst src/%.c,$(target_dir)/%.o,$(wildcard src/*.c))
 
-
 debug_cflags := -g -D DEBUG
 release_cflags := -O2
 CFLAGS += $($(TARGET)_cflags)

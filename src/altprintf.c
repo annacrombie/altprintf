@@ -8,25 +8,29 @@ enum align {
   Center
 };
 
+struct width {
+  long int prec;
+  long int pad;
+};
+
 struct format {
   wchar_t *stringarg_start;
   wchar_t *stringarg_end;
   wint_t chararg;
   wint_t padchar;
   enum align align;
-  long int prec;
-  long int width;
+  struct width width;
   struct list_elem *le;
 };
 
 void default_format(struct format *f) {
+  struct width width = {.prec = 3, .pad = 0};
   f->stringarg_start = NULL;
   f->stringarg_end = NULL;
   f->chararg = L':';
   f->padchar = L' ';
   f->align = Right;
-  f->prec = 3;
-  f->width = -1;
+  f->width = width;
   f->le = NULL;
 }
 
@@ -35,24 +39,27 @@ void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, v
   struct strbuf *tmp = strbuf_new();
   to_s(tmp, f->le->data);
 
-  int width = wcswidth(tmp->start, tmp->len);
-  int pad = f->width - width;
-  LOG("padding: %d\n", pad);
+  int pad = f->width.pad - tmp->width;
 
-  switch(f->align) {
-    case Right:
-      strbuf_append_strbuf(sb, tmp);
-      strbuf_pad(sb, f->padchar, pad);
-      break;
-    case Left:
-      strbuf_pad(sb, f->padchar, pad);
-      strbuf_append_strbuf(sb, tmp);
-      break;
-    case Center:
-      strbuf_pad(sb, f->padchar, pad/2);
-      strbuf_append_strbuf(sb, tmp);
-      strbuf_pad(sb, f->padchar, pad/2 + pad%2);
-      break;
+  if (pad > 0) {
+    LOG("padding: %d\n", pad);
+    switch(f->align) {
+      case Right:
+        strbuf_append_strbuf(sb, tmp);
+        strbuf_pad(sb, f->padchar, pad);
+        break;
+      case Left:
+        strbuf_pad(sb, f->padchar, pad);
+        strbuf_append_strbuf(sb, tmp);
+        break;
+      case Center:
+        strbuf_pad(sb, f->padchar, pad/2);
+        strbuf_append_strbuf(sb, tmp);
+        strbuf_pad(sb, f->padchar, pad/2 + pad%2);
+        break;
+    }
+  } else {
+    strbuf_append_strbuf(sb, tmp);
   }
 
   strbuf_destroy(tmp);
@@ -66,6 +73,7 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 
   void (*append_func)(struct strbuf *, void *);
   struct format f;
+  long int *number_p = NULL;
 
   for (;fmt<end;fmt++) {
     LOG("checking char '%lc', lvl: '%d'\n", (wint_t)(*fmt), lvl);
@@ -98,9 +106,12 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
           case 0:
             f.padchar = '0';
             break;
+          case '.':
+            number_p = &f.width.prec;
           case '1': case '2': case '3': case '4': case '5':
           case '6': case '7': case '8': case '9':
-            f.width = wcstol(fmt, &jump, 10);
+            if (number_p == NULL) number_p = &f.width.pad;
+            *number_p = wcstol(fmt, &jump, 10);
             fmt = (jump-1);
             break;
 
