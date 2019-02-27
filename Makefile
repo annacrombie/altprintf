@@ -1,19 +1,19 @@
-MAKEFLAGS += -rR --include-dir=$(CURDIR)
+MAKEFLAGS += -j2 -rR --include-dir=$(CURDIR)
+CC = gcc
 
 TARGET ?= release
 target_dir := target/$(TARGET)
 objects := \
   $(patsubst src/%.c,$(target_dir)/%.o,$(wildcard src/*.c))
 
-CC = gcc
 
+debug_cflags := -g -D DEBUG
+release_cflags := -O2
+CFLAGS += $($(TARGET)_cflags)
 
-all: $(TARGET)
+all: $(target_dir)/altprintf
 
-$(target_dir):
-	mkdir -p $(target_dir)
-
-%.o: ../../src/%.c | $(target_dir)
+%.o: ../../src/%.c
 	$(CC) $(CFLAGS) -o $*.o -c $(subst $(target_dir),src,$*).c
 
 %/altprintf: $(objects)
@@ -21,23 +21,17 @@ $(target_dir):
 
 .PHONY: clean
 clean:
-	rm target/release/*
-	touch target/release/.keep
-	rm target/debug/*
-	touch target/debug/.keep
+	find target -type f -name \*.o -or -name altprintf \
+	  | xargs rm
 
-.PHONY: debug
-debug: CFLAGS += -g -D DEBUG
-debug: $(target_dir)/altprintf
+.PHONY: hello
+hello: ARGS = "hello world"
+hello: run
 
-.PHONY: release
-release: CFLAGS += -O2
-release: $(target_dir)/altprintf
-
-.PHONY: release
-run: $(TARGET)
-	@$(target_dir)/altprintf "hello world"
+.PHONY: run
+run: all
+	@$(target_dir)/altprintf $(ARGS)
 
 .PHONY: test
-test: release
+test: target/release/altprintf
 	bundle exec rspec
