@@ -65,7 +65,7 @@ void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, v
   strbuf_destroy(tmp);
 }
 
-wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
+wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le, int final_width) {
   int lvl = 0;
   struct strbuf *sb = strbuf_new();
   wchar_t *end = &fmt[wcslen(fmt)];
