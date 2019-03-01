@@ -20,12 +20,8 @@ debug_cflags := -g -D DEBUG
 release_cflags := -O2
 CFLAGS += $($(TARGET)_cflags)
 
-.PHONY: debug
-debug: all
-.PHONY: release
-release: all
-.PHONY: all
-all: $(target_dir)/altprintf
+.PHONY: all debug release
+all debug release: $(target_dir)/altprintf
 
 $(target_dir):
 	mkdir -p $(target_dir)
