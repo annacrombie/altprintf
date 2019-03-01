@@ -41,8 +41,8 @@ struct list_elem *argv_make_list(wchar_t *fmt, int argc, char **argv) {
                   goto match;
         case FS_T_INT:
                   if (arg_i >= argc) goto no_more_args;
-                  tmp_int = malloc(sizeof(int));
-                  *tmp_int = atoi(argv[arg_i]);
+                  tmp_int = malloc(sizeof(long int));
+                  *tmp_int = atol(argv[arg_i]);
                   le_cur = list_elem_ini(tmp_int, Int);
                   goto match;
         case FS_T_CHAR:
