@@ -88,9 +88,9 @@ void strbuf_append_str(struct strbuf *sb, void *str)
 
 void strbuf_append_int(struct strbuf *sb, void *in)
 {
-  long int *i;
+  long int *i = in;
   wchar_t wcs[50];
-  swprintf(wcs, 50, L"%d", *i);
+  swprintf(wcs, 50, L"%ld", *i);
   strbuf_append_str(sb, wcs);
 }
 
