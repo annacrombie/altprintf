@@ -1,5 +1,6 @@
 #define _XOPEN_SOURCE
 #include <locale.h>
+#include <limits.h>
 #include "strbuf.h"
 #include "log.h"
 
@@ -87,33 +88,18 @@ void strbuf_append_str(struct strbuf *sb, void *str)
 
 void strbuf_append_int(struct strbuf *sb, void *in)
 {
-  int *i = in;
-  char skip = 1;
-  if ((*i) < 0) { strbuf_append(sb, '-'); (*i) *= -1; }
-
-  int div =  1000000000;
-  while (div >= 1) {
-    int num = ((*i) / div);
-    LOG("%d\n", num);
-    if (skip && num != 0) skip = 0;
-    (*i) %= div;
-    div /= 10;
-
-    if (skip) continue;
-    strbuf_append(sb, (char)(num + 48));
-  }
+  long int *i;
+  wchar_t wcs[50];
+  swprintf(wcs, 50, L"%d", *i);
+  strbuf_append_str(sb, wcs);
 }
 
 void strbuf_append_double(struct strbuf *sb, void *dub)
 {
-  long int i;
   double *d = dub;
-  i = (long int)floor(*d);
-  strbuf_append_int(sb, &i);
-
-  strbuf_append(sb, *locale_info->decimal_point);
-  i = (long int)round((double)100 * (*d)) % 100;
-  strbuf_append_int(sb, &i);
+  wchar_t wcs[50];
+  swprintf(wcs, 50, L"%f", *d);
+  strbuf_append_str(sb, wcs);
 }
 
 void strbuf_pad(struct strbuf *sb, wchar_t pc, int amnt)
