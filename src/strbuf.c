@@ -78,12 +78,17 @@ void strbuf_append_char(struct strbuf *sb, void *chr)
   strbuf_append(sb, *c);
 }
 
-void strbuf_append_str(struct strbuf *sb, void *str)
+void strbuf_append_str(struct strbuf *sb, void *str, int maxwidth)
 {
   wchar_t *s = str;
   wchar_t *end = &s[wcslen(s)];
+  int width = 0;
 
-  for (;s<end;s++) strbuf_append(sb, *s);
+  for (;s<end;s++) {
+    width += wcwidth(*s);
+    if (width > maxwidth) return;
+    strbuf_append(sb, *s);
+  }
 }
 
 void strbuf_append_int(struct strbuf *sb, void *in)
@@ -91,15 +96,18 @@ void strbuf_append_int(struct strbuf *sb, void *in)
   long int *i = in;
   wchar_t wcs[50];
   swprintf(wcs, 50, L"%ld", *i);
-  strbuf_append_str(sb, wcs);
+  strbuf_append_str(sb, wcs, 50);
 }
 
-void strbuf_append_double(struct strbuf *sb, void *dub)
+void strbuf_append_double(struct strbuf *sb, void *dub, int prec)
 {
   double *d = dub;
   wchar_t wcs[50];
-  swprintf(wcs, 50, L"%f", *d);
-  strbuf_append_str(sb, wcs);
+  wchar_t format[30];
+  swprintf(format, 30, L"%%.%ldf", prec);
+  LOG("format: %ls\n", format);
+  swprintf(wcs, 50, format, *d);
+  strbuf_append_str(sb, wcs, 50);
 }
 
 void strbuf_pad(struct strbuf *sb, wchar_t pc, int amnt)
