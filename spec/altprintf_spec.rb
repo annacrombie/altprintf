@@ -10,7 +10,7 @@ RSpec.describe('altprintf') do
   end
 
   it 'can format doubles' do
-    expect(altprintf('%f', 80, 1.5)).to eq('1.500000')
+    expect(altprintf('%.3f', 80, 1.5)).to eq('1.500')
   end
 
   it 'can format ints' do
@@ -23,5 +23,9 @@ RSpec.describe('altprintf') do
 
   it 'can format *' do
     expect(altprintf('%~#*', 80, 10)).to eq('#' * 10)
+  end
+
+  it 'can format ?' do
+    expect(altprintf('%(a:b)?', 80, 1)).to eq('a')
   end
 end
