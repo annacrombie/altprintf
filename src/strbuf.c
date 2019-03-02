@@ -5,7 +5,7 @@
 #include "log.h"
 
 #define STRBUF_INI_SIZE 5
-#define STRBUF_GROW_STEP 5
+#define STRBUF_GROW_STEP 100
 
 extern struct lconv *locale_info;
 
