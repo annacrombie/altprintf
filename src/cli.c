@@ -25,6 +25,7 @@ struct list_elem *argv_make_list(wchar_t *fmt, int argc, char **argv) {
   wchar_t *end = &fmt[wcslen(fmt)];
 
   for (;fmt<end;fmt++) {
+    LOG("checking char '%lc', lvl: '%d'\n", (wint_t)(*fmt), mode);
     if (mode == 0) {
       switch(*fmt) {
         case FS_START: mode = 1;
@@ -32,6 +33,11 @@ struct list_elem *argv_make_list(wchar_t *fmt, int argc, char **argv) {
       }
     } else {
       switch (*fmt) {
+        case FS_A_CHARARG:
+          fmt++;
+          break;
+        case FS_A_STRINGSTART:
+          while (fmt < end && *fmt != FS_A_STRINGEND) fmt++;
         case FS_T_STRING:
                   if (arg_i >= argc) goto no_more_args;
                   int slen = strlen(argv[arg_i]) + 1;
@@ -39,6 +45,8 @@ struct list_elem *argv_make_list(wchar_t *fmt, int argc, char **argv) {
                   mbstowcs(tmp_str, argv[arg_i], slen);
                   le_cur = list_elem_ini(tmp_str, String);
                   goto match;
+        case FS_T_MUL:
+        case FS_T_TERN:
         case FS_T_INT:
                   if (arg_i >= argc) goto no_more_args;
                   tmp_int = malloc(sizeof(long int));
