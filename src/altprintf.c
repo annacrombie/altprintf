@@ -2,29 +2,8 @@
 #include "altprintf.h"
 #include "log.h"
 
-enum align {
-  Left,
-  Right,
-  Center
-};
-
-struct width {
-  long int prec;
-  long int pad;
-};
-
-struct format {
-  wchar_t *stringarg_start;
-  wchar_t *stringarg_end;
-  wint_t chararg;
-  wint_t padchar;
-  enum align align;
-  struct width width;
-  struct list_elem *le;
-};
-
 void default_format(struct format *f) {
-  struct width width = {.prec = 3, .pad = 0};
+  struct width width = {.prec = -1, .pad = 0};
   f->stringarg_start = NULL;
   f->stringarg_end = NULL;
   f->chararg = L':';
