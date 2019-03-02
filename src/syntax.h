@@ -8,6 +8,8 @@
 #define FS_T_CHAR   'c'
 #define FS_T_DOUBLE 'f'
 #define FS_T_INT    'd'
+#define FS_T_MUL    '*'
+#define FS_T_TERN   '?'
 
 #define FS_A_STRINGSTART '('
 #define FS_A_STRINGEND   ')'
