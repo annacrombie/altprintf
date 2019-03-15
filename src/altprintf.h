@@ -12,7 +12,7 @@
 #include "list.h"
 #include "syntax.h"
 
-wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le, int final_width);
+wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le);
 
 enum align {
   Left,

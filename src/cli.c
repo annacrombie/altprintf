@@ -93,7 +93,6 @@ void abortfunc(enum mcheck_status ms) {
 */
 
 int main(int argc, char **argv) {
-  int width;
   char *locale = setlocale(LC_ALL, "");
   LOG("locale: %s\n", locale);
   locale_info = localeconv();
@@ -107,10 +106,8 @@ int main(int argc, char **argv) {
   wchar_t *fmt = calloc(strlen(argv[1]) + 1, sizeof(wchar_t));
   mbstowcs(fmt, argv[1], strlen(argv[1]));
 
-  width = argc < 3 ? 80 : atoi(argv[2]);
-
-  if (argc > 3) {
-    ap = argv_make_list(fmt, argc - 2, &argv[3]);
+  if (argc > 2) {
+    ap = argv_make_list(fmt, argc - 2, &argv[2]);
   } else {
     ap = list_elem_create();
   }
@@ -120,7 +117,7 @@ int main(int argc, char **argv) {
   list_elem_inspect_all(ap);
 #endif
 
-  wchar_t *str = altsprintf(fmt, ap, width);
+  wchar_t *str = altsprintf(fmt, ap);
 
   LOG("final output: '%ls'\n", str);
   printf("%ls", str);
