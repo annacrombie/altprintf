@@ -68,26 +68,26 @@ AltPrintf.printf(
 ## General Formatter
 
 ### Arguments
-- [x] `<val>` - access the value of the given hash with key `:val` and store it as `value`
-- [ ] `(arg)` - the string within `()` is taken as a `string_argument`
+- [ ] `<val>` - access the value of the given hash with key `:val` and store it as `value`
+- [x] `(arg)` - the string within `()` is taken as a `string_argument`
 - [x] `~`     - the following character is taken as a `character_argument`.  There can only be one character argument so the last one parsed is the one that is used.
 - [x] `-`     - left-align output within given width
 - [x] ` `     - pad output with spaces (this is the default for strings)
 - [x] `0`     - pad output with zeroes (this is the default for numeric types)
 - [x] `0-9`   - starting with a `1-9` the integer is read as `field_width`
-- [ ] `.0-9`  - the integer after the `.` is read as `precision`
+- [x] `.0-9`  - the integer after the `.` is read as `precision`
 - [ ] `!0-9`  - the integer after the `!` is read as `absolute_width`
 
 ### Specifiers
 - [x] `*`     - print `value` occurences of `character_argument`
-- [ ] `?`     - given a `string_argument` like `true:false`, if `value` is true, print `true`, else print `false`.  If a `character_argument` is given, it is used as the separator in the `string_argument`.  The default separator is `:`
+- [x] `?`     - given a `string_argument` like `true:false`, if `value` is true, print `true`, else print `false`.  If a `character_argument` is given, it is used as the separator in the `string_argument`.  The default separator is `:`
 - [x] `s`     - print `value` as a string
 - [ ] `t`     - call `strftime` on `value`, passing `string_argument`
 - [x] `d`     - format `value` as an integer
 - [ ] `D`     - format `value` as a *duration*
 - [ ] `z`     - format `value` as a *filesize*
 - [x] `%`     - a literal `%`
-- [x] `=`     - right-align remainder of string
+- [ ] `=`     - right-align remainder of string
 
 ## Duration Formatter
 
