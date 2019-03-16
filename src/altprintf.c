@@ -84,13 +84,17 @@ void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, s
 
 wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
   int lvl = 0;
-  struct strbuf *sb = strbuf_new();
+  int split = 0;
+  struct strbuf *sbs[] = {strbuf_new(), strbuf_new()};
+  struct strbuf *sb = sbs[0];
   wchar_t *end = &fmt[wcslen(fmt)];
   wchar_t *jump;
 
   void (*append_func)(struct strbuf *, struct format *);
   struct format f;
   long int *number_p = NULL;
+  long int *width;
+  wint_t split_pad;
 
   for (;fmt<end;fmt++) {
     LOG("checking char '%lc', lvl: '%d'\n", (wint_t)(*fmt), lvl);
@@ -134,6 +138,20 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
             fmt = (jump-1);
             break;
 
+          /* align operator */
+          case FS_T_ALIGN:
+            split = 1;
+            split_pad = f.chararg;
+            sb = sbs[1];
+            if (le != NULL && le->type != Null) {
+              width = le->data;
+              le = le->next;
+            } else {
+              goto no_more_args;
+            }
+            lvl = 0;
+            break;
+
           /* types */
           case FS_T_STRING:
             append_func = format_string;
@@ -173,10 +191,19 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
     }
   }
 
-  wchar_t *str;
-  str = strbuf_cstr(sb);
 
-  strbuf_destroy(sb);
+  wchar_t *str;
+no_more_args:
+  if (split) {
+    lvl = *width - (sbs[0]->len + sbs[1]->len);
+    strbuf_pad(sbs[0], split_pad, lvl);
+    strbuf_append_strbuf(sbs[0], sbs[1]);
+  }
+
+  str = strbuf_cstr(sbs[0]);
+
+  strbuf_destroy(sbs[0]);
+  strbuf_destroy(sbs[1]);
 
   return str;
 }

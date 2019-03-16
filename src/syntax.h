@@ -10,6 +10,7 @@
 #define FS_T_INT    'd'
 #define FS_T_MUL    '*'
 #define FS_T_TERN   '?'
+#define FS_T_ALIGN  '='
 
 #define FS_A_STRINGSTART '('
 #define FS_A_STRINGEND   ')'
