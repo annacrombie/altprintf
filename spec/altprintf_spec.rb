@@ -28,9 +28,8 @@ RSpec.describe('altprintf') do
   it 'can format ?' do
     expect(altprintf('%(a:b)?', 1)).to eq('a')
   end
-end
 
-#
-#  "%~ *%(-:+)?%s%=%d", indent, expanded?, title, width, count
-#
-#
+  it 'can format =' do
+    expect(altprintf('a%~ =b', 10)).to eq('a        b')
+  end
+end
