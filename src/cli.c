@@ -38,6 +38,7 @@ struct list_elem *argv_make_list(wchar_t *fmt, int argc, char **argv) {
           break;
         case FS_A_STRINGSTART:
           while (fmt < end && *fmt != FS_A_STRINGEND) fmt++;
+          break;
         case FS_T_STRING:
                   if (arg_i >= argc) goto no_more_args;
                   int slen = strlen(argv[arg_i]) + 1;
@@ -52,6 +53,7 @@ struct list_elem *argv_make_list(wchar_t *fmt, int argc, char **argv) {
                   if (arg_i >= argc) goto no_more_args;
                   tmp_int = malloc(sizeof(long int));
                   *tmp_int = atol(argv[arg_i]);
+                  LOG("got int %ld, %s\n", *tmp_int, argv[arg_i]);
                   le_cur = list_elem_ini(tmp_int, Int);
                   goto match;
         case FS_T_CHAR:
