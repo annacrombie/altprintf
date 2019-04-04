@@ -4,6 +4,10 @@
 #define FS_START    '%'
 #define FS_DOUBLE_SEP '.'
 
+#define FS_ESC '\\'
+#define FS_ESC_NL 'n'
+#define FS_ESC_ESC 'e'
+
 #define FS_T_STRING 's'
 #define FS_T_CHAR   'c'
 #define FS_T_DOUBLE 'f'

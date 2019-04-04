@@ -102,11 +102,17 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
     LOG("checking char '%lc', lvl: '%d'\n", (wint_t)(*fmt), lvl);
     switch (lvl) {
       case 0:
-        if (*fmt == FS_START) {
-          default_format(&f);
-          lvl = 1;
-        } else {
-          strbuf_append(sb, *fmt);
+        switch(*fmt) {
+          case FS_START:
+            default_format(&f);
+            lvl = 1;
+            break;
+          case FS_ESC:
+            lvl = 3;
+            break;
+          default:
+            strbuf_append(sb, *fmt);
+            break;
         }; break;
       case 1:
         switch(*fmt) {
@@ -190,6 +196,20 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
           f.stringarg_end = fmt - 1;
           lvl = 1;
         }; break;
+      case 3:
+        switch(*fmt) {
+          case FS_ESC_NL:
+            strbuf_append(sb, '\n');
+            break;
+          case FS_ESC_ESC:
+            strbuf_append(sb, 27);
+            break;
+          default:
+            strbuf_append(sb, *fmt);
+            break;
+        };
+        lvl = 0;
+        break;
     }
   }
 
