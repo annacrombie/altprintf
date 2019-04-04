@@ -148,15 +148,16 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 
           /* align operator */
           case FS_T_ALIGN:
-            split = 1;
-            split_pad = f.chararg;
-            sb = sbs[1];
             if (le != NULL && le->type != Null) {
               width = le->data;
               le = le->next;
             } else {
               goto no_more_args;
             }
+
+            split = 1;
+            split_pad = f.chararg;
+            sb = sbs[1];
             lvl = 0;
             break;
 
