@@ -24,7 +24,7 @@ void format_tern(struct strbuf *sb, struct format *f)
   int first_half = 1;
   wchar_t sep = f->chararg;
   wchar_t *p = f->stringarg_start;
-  for (;p<f->stringarg_end;p++) {
+  for (;p<=f->stringarg_end;p++) {
     LOG("*p: %lc, first half? %d, bool: %ld, sep: %lc\n", (wint_t)*p, first_half, *b, (wint_t)sep);
     if (*p == sep) first_half = 0;
     else if (*b && first_half) strbuf_append_char(sb, p);
