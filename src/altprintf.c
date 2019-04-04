@@ -202,7 +202,7 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
             strbuf_append(sb, '\n');
             break;
           case FS_ESC_ESC:
-            strbuf_append(sb, 27);
+            strbuf_append(sb, '\e');
             break;
           default:
             strbuf_append(sb, *fmt);
