@@ -99,10 +99,10 @@ int main(int argc, char **argv) {
   char *locale = setlocale(LC_ALL, "");
   LOG("locale: %s\n", locale);
   locale_info = localeconv();
-
   struct list_elem *ap;
+
   if (argc < 2) {
-    printf("usage: %s format [width [arg1 [arg2 [...]]]]]\n", argv[0]);
+    printf("usage: %s format [arg1 [arg2 [...]]]\n", argv[0]);
     return 1;
   }
 
