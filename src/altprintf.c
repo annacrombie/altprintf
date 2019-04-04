@@ -56,6 +56,8 @@ void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, s
   struct strbuf *tmp = strbuf_new();
   to_s(tmp, f);
 
+  if (tmp->len == 0) return;
+
   int pad = f->width.pad - tmp->width;
 
   if (pad > 0) {
