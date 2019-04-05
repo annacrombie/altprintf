@@ -214,13 +214,25 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
     }
   }
 
-
   wchar_t *str;
 no_more_args:
   if (split) {
-    lvl = *width - (sbs[0]->len + sbs[1]->len);
-    strbuf_pad(sbs[0], split_pad, lvl);
-    strbuf_append_strbuf(sbs[0], sbs[1]);
+    LOG("splitting string\n");
+    lvl = *width - (sbs[0]->width + sbs[1]->width);
+    if (lvl >= 0) {
+      LOG("padding center\n");
+      strbuf_pad(sbs[0], split_pad, lvl);
+      strbuf_append_strbuf(sbs[0], sbs[1]);
+    } else if (sbs[0]->width > *width) {
+      LOG("the first half is longer than the requested with\n");
+      strbuf_destroy(sbs[1]);
+      sbs[1] = sbs[0];
+      sbs[0] = strbuf_new();
+      strbuf_appendw_strbuf(sbs[0], sbs[1], *width);
+    } else {
+      LOG("just shave some off the last half\n");
+      strbuf_appendw_strbuf(sbs[0], sbs[1], *width - sbs[0]->width);
+    }
   }
 
   str = strbuf_cstr(sbs[0]);

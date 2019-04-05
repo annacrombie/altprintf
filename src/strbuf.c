@@ -69,7 +69,24 @@ void strbuf_append_strbuf(struct strbuf *sb, void *sbuf)
   struct strbuf *frm = sbuf;
   LOG("frm->start: %p | frm->end: %p\n", frm->start, frm->end);
 
-  for (pos = frm->start;pos<=frm->end;pos++) strbuf_append(sb, *pos);
+  for (pos = frm->start;pos<=frm->end;pos++) {
+    strbuf_append(sb, *pos);
+  }
+}
+
+void strbuf_appendw_strbuf(struct strbuf *sb, void *sbuf, long w)
+{
+  wchar_t *pos;
+  long ws = 0;
+  struct strbuf *frm = sbuf;
+  LOG("frm->start: %p | frm->end: %p\n", frm->start, frm->end);
+
+  for (pos = frm->start;pos<=frm->end;pos++) {
+    ws += wcwidth(*pos);
+    LOG("new width would be: %ld, requested width: %ld\n", ws, w);
+    if (ws > w) break;
+    strbuf_append(sb, *pos);
+  }
 }
 
 void strbuf_append_char(struct strbuf *sb, void *chr)

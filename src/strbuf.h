@@ -14,6 +14,7 @@ void strbuf_append_str(struct strbuf *, void *, int);
 void strbuf_append_int(struct strbuf *sb, void *);
 void strbuf_append_double(struct strbuf *, void *, int);
 void strbuf_append_strbuf(struct strbuf *, void *);
+void strbuf_appendw_strbuf(struct strbuf *, void *, long);
 void strbuf_pad(struct strbuf *, wchar_t, int);
 wchar_t *strbuf_cstr(struct strbuf *);
 
