@@ -1,5 +1,5 @@
 require 'bundler/setup'
-require_relative 'cli_runner'
+require_relative 'backends'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -18,5 +18,5 @@ RSpec.configure do |config|
     @exec = 'target/release/altprintf'
   end
 
-  config.include CliRunner
+  config.include Backends
 end
