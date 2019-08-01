@@ -50,8 +50,9 @@ run: all
 test: target/release/altprintf
 	bundle exec rspec
 
-.PHONY: ruby
-ruby: target/release/altprintf.o target/release/list.o target/release/strbuf.o
-	cp target/release/plot.o ext/
+ext/Makefile:
 	cd ext/ && ruby extconf.rb
+
+.PHONY: ruby
+ruby: target/release/altprintf.o target/release/list.o target/release/strbuf.o ext/Makefile
 	make -C ext/
