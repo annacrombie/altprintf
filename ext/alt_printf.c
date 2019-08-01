@@ -9,7 +9,7 @@ VALUE rb_altprintf(size_t argc, VALUE *argv, VALUE self) {
   rb_scan_args(argc, argv, "*:", &fmt, &args);
 }
 
-void Init_altprintf()
+void Init_alt_printf()
 {
   VALUE mod = rb_define_module(MODNAME);
   rb_define_module_function(mod, "sprintf", rb_altprintf, 2);
