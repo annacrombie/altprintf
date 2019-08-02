@@ -97,8 +97,6 @@ void abortfunc(enum mcheck_status ms) {
 
 int main(int argc, char **argv) {
   setlocale(LC_ALL, "");
-
-  LOG("locale: %s\n", locale);
   locale_info = localeconv();
   struct list_elem *ap;
 
