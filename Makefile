@@ -21,7 +21,7 @@ release_cflags := -O2
 CFLAGS += $($(TARGET)_cflags)
 
 .PHONY: all debug release
-all debug release: $(target_dir)/altprintf
+all debug release: $(objects) $(target_dir)/altprintf
 
 $(target_dir):
 	mkdir -p $(target_dir)
@@ -47,12 +47,12 @@ run: all
 	@$(target_dir)/altprintf $(ARGS)
 
 .PHONY: test
-test: target/release/altprintf
+test: all
 	bundle exec rspec
 
-ext/Makefile:
+ext/Makefile: ext/extconf.rb
 	cd ext/ && ruby extconf.rb
 
 .PHONY: ruby
-ruby: target/release/altprintf.o target/release/list.o target/release/strbuf.o ext/Makefile
+ruby: $(objects) ext/Makefile
 	make -C ext/
