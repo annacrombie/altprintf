@@ -34,6 +34,7 @@ VALUE wcstorbs(const wchar_t *wstr) {
   size_t len;
   char *cstr;
   VALUE str;
+  rb_encoding *enc;
 
   len = wcsrtombs(NULL, &wstr, 0, NULL);
   cstr = calloc(len, sizeof(wchar_t));
@@ -41,10 +42,9 @@ VALUE wcstorbs(const wchar_t *wstr) {
 
   LOG("wcs to rbs, len: %d, cstr: '%s'\n", len, cstr);
 
-  str = rb_str_new_cstr(cstr);
+  enc = rb_enc_find("UTF-8");
+  str = rb_external_str_new_with_enc(cstr, len, enc);
   free(cstr);
-
-  rb_str_export_locale(str);
 
   return str;
 }
