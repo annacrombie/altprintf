@@ -1,67 +1,6 @@
 # AltPrintf
-[![Build Status](https://travis-ci.org/zashoku/alt_printf.svg?branch=master)](https://travis-ci.org/zashoku/alt_printf)
 
 AltPrintf is a alternative printf
-
-## Motivation
-
-The vanilla ruby Kernel#sprintf works fine for formatting most strings
-
-For example:
-```ruby
-favorite_animals = %w[cat dog elephant]
-
-favorite_animals.each_with_index do |animal, i|
-  puts sprintf("%-8s #%d", animal, i)
-end
-```
-
-Produces a nicely formatted list:
-
-```
-cat      #0
-dog      #1
-elephant #2
-```
-
-But it won't work as expected if you use strings containing wide characters
-
-```ruby
-favorite_animals = %w[cat dog キリン 野鳥 elephant]
-
-favorite_animals.each_with_index do |animal, i|
-  puts sprintf("%-8s #%d", animal, i)
-end
-```
-
-```
-cat      #0
-dog      #1
-キリン      #2
-野鳥       #3
-elephant #4
-```
-
-This is happening because strings like `キリン` and `帽子` have a length of 3
-and 2 respectively, but are "wide" so they really take up 6 and 4 screen
-columns.
-
-The solution?  There are many libraries that can provide the width of a string,
-however native ruby libraries are quite slow, therefore `alt_printf` is
-implemented as a native extension.  Since I went to all the trouble to
-re-implement `sprintf`, I thought I would also add some new functionality!
-
-```ruby
-AltPrintf.printf(
-  "%~|(yes|no)<bool>? %(%s)<time>t",
-  {bool: true, time: Time.now}
-)
-#=> "yes 1537537300"
-```
-
-## Usage
-
-`require 'alt_printf'`
 
 ## Format Spec
 
@@ -76,18 +15,19 @@ AltPrintf.printf(
 - [x] `0`     - pad output with zeroes (this is the default for numeric types)
 - [x] `0-9`   - starting with a `1-9` the integer is read as `field_width`
 - [x] `.0-9`  - the integer after the `.` is read as `precision`
-- [ ] `!0-9`  - the integer after the `!` is read as `absolute_width`
 
 ### Specifiers
 - [x] `*`     - print `value` occurences of `character_argument`
-- [x] `?`     - given a `string_argument` like `true:false`, if `value` is true, print `true`, else print `false`.  If a `character_argument` is given, it is used as the separator in the `string_argument`.  The default separator is `:`
+- [x] `?`     - given a `string_argument` like `true:false`, if `value` is true,
+  print `true`, else print `false`.  If a `character_argument` is given, it is
+  used as the separator in the `string_argument`.  The default separator is `:`
 - [x] `s`     - print `value` as a string
-- [ ] `t`     - call `strftime` on `value`, passing `string_argument`
 - [x] `d`     - format `value` as an integer
 - [ ] `D`     - format `value` as a *duration*
 - [ ] `z`     - format `value` as a *filesize*
 - [x] `%`     - a literal `%`
-- [ ] `=`     - right-align remainder of string
+- [x] `=`     - right-align remainder of string using `value` as the total
+  desired width
 
 ## Duration Formatter
 
