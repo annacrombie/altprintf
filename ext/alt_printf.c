@@ -13,6 +13,42 @@
 #define FS_A_HASHSTART '{'
 #define FS_A_HASHEND   '}'
 
+wchar_t *rbstowcs(VALUE str) {
+  char *cstr;
+  wchar_t *wstr;
+  long len;
+
+  cstr = StringValueCStr(str);
+  len = strlen(cstr);
+  LOG("string len: %ld\n", len);
+
+  wstr = calloc(len, sizeof(wchar_t));
+  mbstowcs(wstr, cstr, len);
+
+  LOG("wide string: '%ls'\n", wstr);
+
+  return wstr;
+}
+
+VALUE wcstorbs(const wchar_t *wstr) {
+  size_t len;
+  char *cstr;
+  VALUE str;
+
+  len = wcsrtombs(NULL, &wstr, 0, NULL);
+  cstr = calloc(len, sizeof(wchar_t));
+  wcsrtombs(cstr, &wstr, len, NULL);
+
+  LOG("wcs to rbs, len: %d, cstr: '%s'\n", len, cstr);
+
+  str = rb_str_new_cstr(cstr);
+  free(cstr);
+
+  rb_str_export_locale(str);
+
+  return str;
+}
+
 struct list_elem *rb_altprintf_make_list(wchar_t *fmt, VALUE *argv, VALUE *hash) {
   struct list_elem *le_cur;
   struct list_elem *le_start;
@@ -20,11 +56,12 @@ struct list_elem *rb_altprintf_make_list(wchar_t *fmt, VALUE *argv, VALUE *hash)
   /* create a dummy element as the head */
   le_start = le_prev = list_elem_create();
 
+  VALUE entry;
+
   long int *tmp_int;
   wint_t *tmp_char;
   double *tmp_double;
   wchar_t *tmp_str;
-  char *sstr;
 
   int mode  = 0;
   long argc = rb_array_len(*argv);
@@ -49,11 +86,8 @@ struct list_elem *rb_altprintf_make_list(wchar_t *fmt, VALUE *argv, VALUE *hash)
           break;
         case FS_T_STRING:
                   if (arg_i >= argc) goto no_more_args;
-		  VALUE entry = rb_ary_entry(*argv, arg_i);
-                  long slen = rb_str_strlen(entry);
-		  char *sstr = StringValueCStr(entry);
-                  tmp_str = calloc(slen, sizeof(wchar_t));
-                  mbstowcs(tmp_str, sstr, slen);
+		  entry = rb_ary_entry(*argv, arg_i);
+		  tmp_str = rbstowcs(entry);
                   le_cur = list_elem_ini(tmp_str, String);
                   goto match;
         case FS_T_MUL:
@@ -70,8 +104,8 @@ struct list_elem *rb_altprintf_make_list(wchar_t *fmt, VALUE *argv, VALUE *hash)
                   if (arg_i >= argc) goto no_more_args;
                   tmp_char = malloc(sizeof(wint_t));
 		  entry = rb_ary_entry(*argv, arg_i);
-		  sstr = StringValueCStr(entry);
-                  *tmp_char = btowc(sstr[0]);
+		  tmp_str = rbstowcs(entry);
+                  *tmp_char = btowc(tmp_str[0]);
                   le_cur = list_elem_ini(tmp_char, Char);
                   goto match;
         case FS_T_DOUBLE:
@@ -101,25 +135,27 @@ no_more_args:
   return le_cur;
 }
 
-
 VALUE rb_alt_printf(size_t argc, VALUE *argv, VALUE self) {
-  VALUE fmt, args, hash;
-  struct list_elem *le;
+  VALUE fmt, args, hash, final;
+  wchar_t *wfmt;
+  wchar_t *formatted;
+  struct list_elem *ap;
+
   rb_scan_args(argc, argv, "1*:", &fmt, &args, &hash);
 
-  char *sstr = StringValueCStr(fmt);
-  long slen = rb_str_strlen(fmt);
-  wchar_t* wfmt = calloc(slen, sizeof(wchar_t));
-  mbstowcs(wfmt, sstr, slen);
+  wfmt = rbstowcs(fmt);
 
-  le = rb_altprintf_make_list(wfmt, &args, &hash);
+  ap = rb_altprintf_make_list(wfmt, &args, &hash);
 
-  wchar_t *str = altsprintf(wfmt, le);
-  slen = wcslen(str);
-  char *sfinal = calloc(slen, sizeof(wchar_t));
-  wcstombs(sfinal, str, slen);
-  VALUE final = rb_str_new_cstr(sfinal);
-  rb_str_export_locale(final);
+  formatted = altsprintf(wfmt, ap);
+  LOG("formatted result: '%ls'\n", formatted);
+
+  free(wfmt);
+  list_elem_destroy(ap);
+
+  final = wcstorbs(formatted);
+
+  free(formatted);
 
   return final;
 }
