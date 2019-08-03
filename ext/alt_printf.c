@@ -85,12 +85,35 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE 
         case FS_A_CHARARG:
           fmt++;
           break;
+	case FS_A_HASHSTART:
+	  tmp_str = fmt + 1;
+
+	  use_hash = 0;
+	  while (fmt < end && *fmt != FS_A_HASHEND) {
+            fmt++;
+	    use_hash++;
+	  }
+
+          len = wcsnrtombs(NULL, &fmt, use_hash, 0, NULL);
+	  cstr = calloc(len + 1, sizeof(char));
+          wcsnrtombs(cstr, &fmt, use_hash, 0, NULL);
+
+	  symbol = rb_check_symbol_cstr(cstr, len, enc);
+          //rb_raise(rb_eRuntimeError, "Error code %+"PRIsVALUE" %d %c", sym, tag_len, *tag_start);
+          entry = rb_hash_lookup2(*hash, symbol, Qnil);
+	  free(cstr);
+	  use_hash = 1;
+
+	  break;
         case FS_A_STRINGSTART:
           while (fmt < end && *fmt != FS_A_STRINGEND) fmt++;
           break;
         case FS_T_STRING:
-                  if (arg_i >= argc) goto no_more_args;
-		  entry = rb_ary_entry(*argv, arg_i);
+	          if (!use_hash) {
+			  if (arg_i >= argc) goto no_more_args;
+			  entry = rb_ary_entry(*argv, arg_i);
+		  }
+
 		  tmp_str = rbstowcs(entry);
                   le_cur = list_elem_ini(tmp_str, String);
                   goto match;
@@ -98,24 +121,35 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE 
         case FS_T_TERN:
         case FS_T_ALIGN:
         case FS_T_INT:
-                  if (arg_i >= argc) goto no_more_args;
-                  tmp_int = malloc(sizeof(long int));
-                  *tmp_int = FIX2LONG(rb_ary_entry(*argv, arg_i));
+	          if (!use_hash) {
+			  if (arg_i >= argc) goto no_more_args;
+			  entry = rb_ary_entry(*argv, arg_i);
+		  }
+
+		  tmp_int = malloc(sizeof(long int));
+                  *tmp_int = FIX2LONG(entry);
                   LOG("got int %ld\n", *tmp_int);
                   le_cur = list_elem_ini(tmp_int, Int);
                   goto match;
         case FS_T_CHAR:
-                  if (arg_i >= argc) goto no_more_args;
+	          if (!use_hash) {
+			  if (arg_i >= argc) goto no_more_args;
+			  entry = rb_ary_entry(*argv, arg_i);
+		  }
+
                   tmp_char = malloc(sizeof(wint_t));
-		  entry = rb_ary_entry(*argv, arg_i);
 		  tmp_str = rbstowcs(entry);
                   *tmp_char = btowc(tmp_str[0]);
                   le_cur = list_elem_ini(tmp_char, Char);
                   goto match;
         case FS_T_DOUBLE:
-                  if (arg_i >= argc) goto no_more_args;
+	          if (!use_hash) {
+			  if (arg_i >= argc) goto no_more_args;
+			  entry = rb_ary_entry(*argv, arg_i);
+		  }
+
                   tmp_double = malloc(sizeof(double));
-                  *tmp_double = RFLOAT_VALUE(rb_ary_entry(*argv, arg_i));
+                  *tmp_double = RFLOAT_VALUE(entry);
                   le_cur = list_elem_ini(tmp_double, Double);
                   goto match;
         match: le_prev->next = le_cur;
