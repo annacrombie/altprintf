@@ -10,9 +10,6 @@
 
 #define MODNAME "AltPrintf"
 
-#define FS_A_HASHSTART '{'
-#define FS_A_HASHEND   '}'
-
 rb_encoding *enc;
 
 wchar_t *rbstowcs(VALUE str) {
@@ -85,21 +82,21 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE 
 			case FS_A_CHARARG:
 				fmt++;
 				break;
-			case FS_A_HASHSTART:
+			case FS_A_RBHASHSTART:
 				tmp_str = fmt + 1;
 
-				use_hash = 0;
-				while (fmt < end && *fmt != FS_A_HASHEND) {
+				use_hash = -1;
+				while (fmt < end && *fmt != FS_A_RBHASHEND) {
 					fmt++;
 					use_hash++;
 				}
 
 				len = wcsnrtombs(NULL, &fmt, use_hash, 0, NULL);
 				cstr = calloc(len + 1, sizeof(char));
-				wcsnrtombs(cstr, &fmt, use_hash, 0, NULL);
+				wcsnrtombs(cstr, &tmp_str, use_hash, len, NULL);
+				LOG("cstr: '%s'\n", cstr);
 
 				symbol = rb_check_symbol_cstr(cstr, len, enc);
-				//rb_raise(rb_eRuntimeError, "Error code %+"PRIsVALUE" %d %c", sym, tag_len, *tag_start);
 				entry = rb_hash_lookup2(*hash, symbol, Qnil);
 				free(cstr);
 				use_hash = 1;

@@ -22,6 +22,9 @@
 #define FS_A_LALIGN      '-'
 #define FS_A_SPAD        ' '
 
+#define FS_A_RBHASHSTART '<'
+#define FS_A_RBHASHEND   '>'
+
 #define FS_D_PREC   100
 
 #endif
