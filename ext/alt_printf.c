@@ -14,17 +14,17 @@
 #define FS_A_HASHEND   '}'
 
 wchar_t *rbstowcs(VALUE str) {
-  char *cstr;
+  const char *cstr;
   wchar_t *wstr;
-  long len;
+  size_t len;
 
   cstr = StringValueCStr(str);
-  len = strlen(cstr);
-  LOG("string len: %ld\n", len);
 
-  wstr = calloc(len, sizeof(wchar_t));
-  mbstowcs(wstr, cstr, len);
+  len = mbsrtowcs(NULL, &cstr, 0, NULL);
+  wstr = calloc(len + 1, sizeof(wchar_t));
+  len = mbsrtowcs(wstr, &cstr, len, NULL);
 
+  LOG("rbs to wcs, len: %d, cstr: '%s'\n", len, cstr);
   LOG("wide string: '%ls'\n", wstr);
 
   return wstr;
