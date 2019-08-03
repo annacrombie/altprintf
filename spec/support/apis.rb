@@ -10,7 +10,7 @@ module APIs
   class Cli < Generic
     EXEC = 'target/release/altprintf'
 
-    def format(*args)
+    def format(args)
       `#{EXEC} #{args.map(&:to_s).map(&:shellescape).join(' ')}`
     end
   end
@@ -20,8 +20,11 @@ module APIs
       require_relative '../../ext/alt_printf'
     end
 
-    def format(*args)
-      AltPrintf.sprintf(*args)
+    def format(args)
+      fmt = args.shift
+      hash = args.last.is_a?(Hash) ? args.pop : {}
+
+      AltPrintf.sprintf(fmt, *args, **hash)
     end
   end
 end

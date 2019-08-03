@@ -7,7 +7,7 @@ RSpec.describe('altprintf') do
         context group do
           tests.each do |args, result|
             it "\"#{args[0]}\" (#{args[1..].join(', ')}) => \"#{result}\"" do
-              expect(api.format(*args)).to eq(result)
+              expect(api.format(args)).to eq(result)
             end
           end
         end
