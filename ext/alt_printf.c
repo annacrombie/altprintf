@@ -13,6 +13,8 @@
 #define FS_A_HASHSTART '{'
 #define FS_A_HASHEND   '}'
 
+rb_encoding *enc;
+
 wchar_t *rbstowcs(VALUE str) {
   const char *cstr;
   wchar_t *wstr;
@@ -34,7 +36,6 @@ VALUE wcstorbs(const wchar_t *wstr) {
   size_t len;
   char *cstr;
   VALUE str;
-  rb_encoding *enc;
 
   len = wcsrtombs(NULL, &wstr, 0, NULL);
   cstr = calloc(len, sizeof(wchar_t));
@@ -42,32 +43,35 @@ VALUE wcstorbs(const wchar_t *wstr) {
 
   LOG("wcs to rbs, len: %d, cstr: '%s'\n", len, cstr);
 
-  enc = rb_enc_find("UTF-8");
   str = rb_external_str_new_with_enc(cstr, len, enc);
   free(cstr);
 
   return str;
 }
 
-struct list_elem *rb_altprintf_make_list(wchar_t *fmt, VALUE *argv, VALUE *hash) {
+struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE *hash) {
   struct list_elem *le_cur;
   struct list_elem *le_start;
   struct list_elem *le_prev;
   /* create a dummy element as the head */
   le_start = le_prev = list_elem_create();
 
-  VALUE entry;
+  VALUE entry, symbol;
 
   long int *tmp_int;
   wint_t *tmp_char;
   double *tmp_double;
-  wchar_t *tmp_str;
+  const wchar_t *tmp_str;
+
+  char *cstr;
+  size_t len;
 
   int mode  = 0;
   long argc = rb_array_len(*argv);
   int arg_i = 0;
+  int use_hash = 0;
 
-  wchar_t *end = &fmt[wcslen(fmt)];
+  const wchar_t *end = &fmt[wcslen(fmt)];
 
   for (;fmt<end;fmt++) {
     LOG("checking char '%lc', lvl: '%d'\n", (wint_t)(*fmt), mode);
@@ -162,6 +166,7 @@ VALUE rb_alt_printf(size_t argc, VALUE *argv, VALUE self) {
 
 void Init_alt_printf()
 {
+  enc = rb_enc_find("UTF-8");
   VALUE mod = rb_define_module(MODNAME);
   rb_define_module_function(mod, "sprintf", rb_alt_printf, -1);
 }
