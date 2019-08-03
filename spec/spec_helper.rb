@@ -1,12 +1,9 @@
 require 'bundler/setup'
-require_relative 'backends'
+require_relative 'support/apis'
+require_relative 'support/tests'
 
 RSpec.configure do |config|
-  # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = '.rspec_status'
-
-  # Disable RSpec exposing methods globally on `Module` and
-  # `main`
 
   config.disable_monkey_patching!
 
@@ -14,9 +11,5 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.before(:all) do
-    @exec = 'target/release/altprintf'
-  end
-
-  config.include Backends
+  config.include APIs, Tests
 end
