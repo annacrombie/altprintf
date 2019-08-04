@@ -37,6 +37,7 @@ $(target_dir):
 .PHONY: clean
 clean:
 	rm -rf target
+	rm -f ext/alt_printf.o ext/alt_printf.so ext/Makefile ext/mkmf.log ext/extconf.h
 
 .PHONY: hello
 hello: ARGS = "hello world"
