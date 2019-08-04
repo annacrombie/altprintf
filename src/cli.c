@@ -7,7 +7,7 @@
 //#include <mcheck.h>
 struct lconv *locale_info;
 
-struct list_elem *argv_make_list(wchar_t *fmt, int argc, char **argv) {
+struct list_elem *argv_make_list(wchar_t *fmt, int argc, int *argi, char **argv) {
 	struct list_elem *le_cur;
 	struct list_elem *le_start;
 	struct list_elem *le_prev;
@@ -19,8 +19,7 @@ struct list_elem *argv_make_list(wchar_t *fmt, int argc, char **argv) {
 	double *tmp_double;
 	wchar_t *tmp_str;
 
-	int mode	= 0;
-	int arg_i = 0;
+	int mode = 0;
 
 	wchar_t *end = &fmt[wcslen(fmt)];
 
@@ -40,38 +39,38 @@ struct list_elem *argv_make_list(wchar_t *fmt, int argc, char **argv) {
 				while (fmt < end && *fmt != FS_A_STRINGEND) fmt++;
 				break;
 			case FS_T_STRING:
-				if (arg_i >= argc) goto no_more_args;
-				int slen = strlen(argv[arg_i]) + 1;
+				if ((*argi) >= argc) goto no_more_args;
+				int slen = strlen(argv[(*argi)]) + 1;
 				tmp_str = calloc(slen, sizeof(wchar_t));
-				mbstowcs(tmp_str, argv[arg_i], slen);
+				mbstowcs(tmp_str, argv[(*argi)], slen);
 				le_cur = list_elem_ini(tmp_str, String);
 				goto match;
 			case FS_T_MUL:
 			case FS_T_TERN:
 			case FS_T_ALIGN:
 			case FS_T_INT:
-				if (arg_i >= argc) goto no_more_args;
+				if ((*argi) >= argc) goto no_more_args;
 				tmp_int = malloc(sizeof(long int));
-				*tmp_int = atol(argv[arg_i]);
-				LOG("got int %ld, %s\n", *tmp_int, argv[arg_i]);
+				*tmp_int = atol(argv[(*argi)]);
+				LOG("got int %ld, %s\n", *tmp_int, argv[(*argi)]);
 				le_cur = list_elem_ini(tmp_int, Int);
 				goto match;
 			case FS_T_CHAR:
-				if (arg_i >= argc) goto no_more_args;
+				if ((*argi) >= argc) goto no_more_args;
 				tmp_char = malloc(sizeof(wint_t));
-				*tmp_char = btowc(*argv[arg_i]);
+				*tmp_char = btowc(*argv[(*argi)]);
 				le_cur = list_elem_ini(tmp_char, Char);
 				goto match;
 			case FS_T_DOUBLE:
-				if (arg_i >= argc) goto no_more_args;
+				if ((*argi) >= argc) goto no_more_args;
 				tmp_double = malloc(sizeof(double));
-				*tmp_double = strtod(argv[arg_i], NULL);
+				*tmp_double = strtod(argv[(*argi)], NULL);
 				le_cur = list_elem_ini(tmp_double, Double);
 				goto match;
 			match: le_prev->next = le_cur;
 				le_prev = le_cur;
 				mode = 0;
-				arg_i++;
+				(*argi)++;
 				break;
 			case FS_START:
 				mode = 0;
@@ -96,7 +95,6 @@ void abortfunc(enum mcheck_status ms) {
 	//printf();
 }
 */
-
 int main(int argc, char **argv) {
 	setlocale(LC_ALL, "");
 	locale_info = localeconv();
@@ -108,27 +106,41 @@ int main(int argc, char **argv) {
 	}
 
 	wchar_t *fmt = calloc(strlen(argv[1]) + 1, sizeof(wchar_t));
+	wchar_t *str;
 	mbstowcs(fmt, argv[1], strlen(argv[1]));
 
-	if (argc > 2) {
-		ap = argv_make_list(fmt, argc - 2, &argv[2]);
-	} else {
-		ap = list_elem_create();
-	}
+	int argi = 2;
+	int oargi = 0;
+	while (argi <= argc) {
 
-	LOG("list element contents:\n");
+		if (argi == oargi) {
+			break;
+		} else {
+			oargi = argi;
+		}
+		LOG("argi: %d, argc: %d\n", argi, argc);
+
+		if (argc > 2) {
+			ap = argv_make_list(fmt, argc, &argi, argv);
+		} else {
+			ap = list_elem_create();
+		}
+
+		LOG("list element contents:\n");
 #ifdef DEBUG
-	list_elem_inspect_all(ap);
+		list_elem_inspect_all(ap);
 #endif
 
-	wchar_t *str = altsprintf(fmt, ap);
+		str = altsprintf(fmt, ap);
+		list_elem_destroy(ap);
+
+		free(fmt);
+		fmt = str;
+	}
 
 	LOG("final output: '%ls'\n", str);
 	printf("%ls", str);
-
-	free(fmt);
 	free(str);
 
-	list_elem_destroy(ap);
 	return 0;
 }
