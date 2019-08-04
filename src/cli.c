@@ -112,8 +112,8 @@ int main(int argc, char **argv) {
 	int argi = 2;
 	int oargi = 0;
 	while (argi <= argc) {
-
 		if (argi == oargi) {
+			LOG("failed to use up all the arguments\n");
 			break;
 		} else {
 			oargi = argi;
@@ -134,6 +134,7 @@ int main(int argc, char **argv) {
 		str = altsprintf(fmt, ap);
 		list_elem_destroy(ap);
 
+		LOG("pass result: '%ls'\n", str);
 		free(fmt);
 		fmt = str;
 	}
