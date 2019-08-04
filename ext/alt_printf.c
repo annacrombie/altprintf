@@ -52,7 +52,7 @@ VALUE wcstorbs(const wchar_t *wstr) {
 	return str;
 }
 
-struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE *hash) {
+struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, long *argi, VALUE *hash) {
 	struct list_elem *le_cur;
 	struct list_elem *le_start;
 	struct list_elem *le_prev;
@@ -71,7 +71,6 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE 
 
 	int mode	= 0;
 	long argc = rb_array_len(*argv);
-	int arg_i = 0;
 	int use_hash = 0;
 
 	const wchar_t *end = &fmt[wcslen(fmt)];
@@ -146,7 +145,7 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE 
 			match: le_prev->next = le_cur;
 				le_prev = le_cur;
 				mode = 0;
-				arg_i++;
+				(*argi)++;
 				break;
 			case FS_START:
 				mode = 0;
@@ -166,7 +165,7 @@ no_more_args:
 	return le_cur;
 }
 
-VALUE rb_alt_printf(size_t argc, VALUE *argv, VALUE self) {
+VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 	VALUE fmt, args, hash, final;
 	wchar_t *wfmt;
 	wchar_t *formatted;
@@ -174,15 +173,23 @@ VALUE rb_alt_printf(size_t argc, VALUE *argv, VALUE self) {
 
 	rb_scan_args(argc, argv, "1*:", &fmt, &args, &hash);
 
+	if (passes == 0) return fmt;
+
 	wfmt = rbstowcs(fmt);
 
-	ap = rb_altprintf_make_list(wfmt, &args, &hash);
+	long argi = 0;
+	while (passes > 0) {
+		ap = rb_altprintf_make_list(wfmt, &args, &argi, &hash);
 
-	formatted = altsprintf(wfmt, ap);
-	LOG("formatted result: '%ls'\n", formatted);
+		formatted = altsprintf(wfmt, ap);
+		LOG("formatted result: '%ls'\n", formatted);
 
-	free(wfmt);
-	list_elem_destroy(ap);
+		free(wfmt);
+		list_elem_destroy(ap);
+
+		wfmt = formatted;
+		passes--;
+	}
 
 	final = wcstorbs(formatted);
 
@@ -191,9 +198,33 @@ VALUE rb_alt_printf(size_t argc, VALUE *argv, VALUE self) {
 	return final;
 }
 
+VALUE rb_alt_printf_single_pass(size_t argc, VALUE *argv, VALUE self) {
+	VALUE fmt, args, hash, final;
+
+	return rb_alt_printf(1, argc, argv, self);
+}
+
+VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self) {
+	VALUE args, hash, symbol, entry;
+	long passes;
+	rb_scan_args(argc, argv, "*:", &args, &hash);
+
+	symbol = rb_check_symbol_cstr("passes", 6, enc);
+	entry = rb_hash_lookup2(hash, symbol, Qnil);
+	if (entry == Qnil) {
+		passes = 1;
+	} else {
+		passes = FIX2LONG(entry);
+	}
+
+	LOG("passes: %ld\n", passes);
+	return rb_alt_printf(passes, argc, argv, self);
+}
+
 void Init_alt_printf()
 {
 	enc = rb_enc_find("UTF-8");
 	VALUE mod = rb_define_module(MODNAME);
-	rb_define_module_function(mod, "sprintf", rb_alt_printf, -1);
+	rb_define_module_function(mod, "fmt", rb_alt_printf_single_pass, -1);
+	rb_define_module_function(mod, "fmtm", rb_alt_printf_multi_pass, -1);
 }
