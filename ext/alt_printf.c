@@ -8,6 +8,12 @@
 #include "../src/altprintf.h"
 #include "../src/log.h"
 
+#define CHECKARG                              \
+if (!use_hash) {                              \
+	if (*argi >= argc) goto no_more_args; \
+	entry = rb_ary_entry(*argv, *argi);   \
+}
+
 #define MODNAME "AltPrintf"
 
 rb_encoding *enc;
@@ -106,10 +112,7 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE 
 				while (fmt < end && *fmt != FS_A_STRINGEND) fmt++;
 				break;
 			case FS_T_STRING:
-				if (!use_hash) {
-					if (arg_i >= argc) goto no_more_args;
-					entry = rb_ary_entry(*argv, arg_i);
-				}
+				CHECKARG;
 
 				tmp_str = rbstowcs(entry);
 				le_cur = list_elem_ini(tmp_str, String);
@@ -118,10 +121,7 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE 
 			case FS_T_TERN:
 			case FS_T_ALIGN:
 			case FS_T_INT:
-				if (!use_hash) {
-					if (arg_i >= argc) goto no_more_args;
-					entry = rb_ary_entry(*argv, arg_i);
-				}
+				CHECKARG;
 
 				tmp_int = malloc(sizeof(long int));
 				*tmp_int = FIX2LONG(entry);
@@ -129,10 +129,7 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE 
 				le_cur = list_elem_ini(tmp_int, Int);
 				goto match;
 			case FS_T_CHAR:
-				if (!use_hash) {
-					if (arg_i >= argc) goto no_more_args;
-					entry = rb_ary_entry(*argv, arg_i);
-				}
+				CHECKARG;
 
 				tmp_char = malloc(sizeof(wint_t));
 				tmp_str = rbstowcs(entry);
@@ -140,10 +137,7 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, VALUE 
 				le_cur = list_elem_ini(tmp_char, Char);
 				goto match;
 			case FS_T_DOUBLE:
-				if (!use_hash) {
-					if (arg_i >= argc) goto no_more_args;
-					entry = rb_ary_entry(*argv, arg_i);
-				}
+				CHECKARG;
 
 				tmp_double = malloc(sizeof(double));
 				*tmp_double = RFLOAT_VALUE(entry);
