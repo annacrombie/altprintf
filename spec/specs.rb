@@ -12,9 +12,9 @@ group APIs::Generic, {
 
 group APIs::RubyExtension, {
   [:fmt, '%<age>d years old', { age: 25 }] => '25 years old',
-  [:fmtm, "%%(%%%s:%%%s)?", 'd', '~**', 1, 15, { passes: 3 }] => '15',
-  [:fmtm, "%%(%%%s:%%%s)?", 'd', '~**', 0, 15, { passes: 3 }] => '*' * 15,
-  [:fmtm, "%%", { passes: 0 }] => '%%',
+  [:fmtm, 3, "%%(%%%s:%%%s)?", 'd', '~**', 1, 15] => '15',
+  [:fmtm, 3, "%%(%%%s:%%%s)?", 'd', '~**', 0, 15] => '*' * 15,
+  [:fmtm, 0, "%%"] => '%%',
 }
 
 group APIs::Cli, {

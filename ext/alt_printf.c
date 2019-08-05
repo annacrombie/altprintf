@@ -205,20 +205,12 @@ VALUE rb_alt_printf_single_pass(size_t argc, VALUE *argv, VALUE self) {
 }
 
 VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self) {
-	VALUE args, hash, symbol, entry;
 	long passes;
-	rb_scan_args(argc, argv, "*:", &args, &hash);
 
-	symbol = rb_check_symbol_cstr("passes", 6, enc);
-	entry = rb_hash_lookup2(hash, symbol, Qnil);
-	if (entry == Qnil) {
-		passes = 1;
-	} else {
-		passes = FIX2LONG(entry);
-	}
+	passes = FIX2LONG(argv[0]);
 
 	LOG("passes: %ld\n", passes);
-	return rb_alt_printf(passes, argc, argv, self);
+	return rb_alt_printf(passes, argc - 1, &argv[1], self);
 }
 
 void Init_alt_printf()
