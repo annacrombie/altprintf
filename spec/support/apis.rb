@@ -14,7 +14,10 @@ module APIs
       `#{EXEC} #{args.map(&:to_s).map(&:shellescape).join(' ')}`
     end
 
-    alias fmtm fmt
+    def fmtm(args)
+      args.shift
+      fmt(args)
+    end
   end
 
   class RubyExtension < Generic
@@ -22,22 +25,16 @@ module APIs
       require_relative '../../gem/alt_printf'
     end
 
-    def parse_args(args)
-      fmt = args.shift
-      hash = args.last.is_a?(Hash) ? args.pop : {}
-      [fmt, hash]
-    end
-
     def fmt(args)
-      fmt, hash = *parse_args(args)
+      hash = args.last.is_a?(Hash) ? args.pop : {}
 
-      AltPrintf.fmt(fmt, *args, **hash)
+      AltPrintf.fmt(*args, **hash)
     end
 
     def fmtm(args)
-      fmt, hash = *parse_args(args)
+      hash = args.last.is_a?(Hash) ? args.pop : {}
 
-      AltPrintf.fmtm(fmt, args[0], *args[1..], **hash)
+      AltPrintf.fmtm(*args, **hash)
     end
   end
 end
