@@ -22,7 +22,7 @@ module APIs
 
   class RubyExtension < Generic
     def initialize
-      require_relative '../../gem/alt_printf'
+      require 'alt_printf'
     end
 
     def fmt(args)

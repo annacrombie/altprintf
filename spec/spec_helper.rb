@@ -2,6 +2,7 @@ require 'bundler/setup'
 require_relative 'support/apis'
 require_relative 'support/tests'
 
+$LOAD_PATH.unshift(File.expand_path(File.join(__dir__, '../gem/lib')))
 Tests.load('spec/specs.rb')
 
 RSpec.configure do |config|

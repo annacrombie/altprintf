@@ -1,0 +1,46 @@
+require 'rake/extensiontask'
+require 'bundler/gem_tasks'
+require 'securerandom'
+require 'fileutils'
+
+SRC_DIR = File.join(__dir__, '../src')
+
+Rake::ExtensionTask.new('alt_printf') do |ext|
+  ext.lib_dir = 'lib/alt_printf'
+  ext.config_script = 'extconf_dev.rb'
+end
+
+task :setup do
+  tmp_dir = "/tmp/alt_printf_#{SecureRandom.hex(8)}"
+  puts "cloning to #{tmp_dir}"
+  FileUtils.mkdir(tmp_dir)
+
+  Dir[
+    '{ext,lib}/**/*',
+    'Rakefile',
+    'Gemfile',
+    'alt_printf.gemspec'
+  ].each do |f|
+    next if File.directory?(f)
+
+    dir = File.join(tmp_dir, File.dirname(f))
+    FileUtils.mkdir_p(dir)
+    FileUtils.cp(f, File.join(dir, File.basename(f)))
+  end
+
+  FileUtils.cp_r(
+    %w[altprintf list log strbuf syntax].map do |w|
+      %w[h c].map { |e| File.join(SRC_DIR, "#{w}.#{e}") }
+        .select { |f| File.exist?(f) }
+    end.flatten,
+    File.join(tmp_dir, 'ext/alt_printf/')
+  )
+
+  FileUtils.cd(tmp_dir)
+
+  sh "rake build"
+
+  FileUtils.cp(Dir['pkg/*'], File.join(__dir__, 'pkg'))
+  FileUtils.cd(__dir__)
+  FileUtils.rm_rf(tmp_dir)
+end

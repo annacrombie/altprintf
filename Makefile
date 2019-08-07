@@ -37,7 +37,7 @@ $(target_dir):
 .PHONY: clean
 clean:
 	rm -rf target
-	rm -f ext/alt_printf.o ext/alt_printf.so ext/Makefile ext/mkmf.log ext/extconf.h
+	make -C gem clean
 
 .PHONY: hello
 hello: ARGS = "hello world"
@@ -48,12 +48,9 @@ run: all
 	@$(target_dir)/altprintf $(ARGS)
 
 .PHONY: test
-test: all
+test: all gem
 	bundle exec rspec
 
-ext/Makefile: ext/extconf.rb
-	cd ext/ && ruby extconf.rb
-
-.PHONY: ruby
-ruby: $(objects) ext/Makefile
-	make -C ext/
+.PHONY: gem
+gem: all
+	make -C gem/

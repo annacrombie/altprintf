@@ -1,12 +1,12 @@
-#include <ruby.h>
-#include <ruby/encoding.h>
-#include "extconf.h"
 #include <stdio.h>
 #include <locale.h>
 #include <wchar.h>
-#include "../src/list.h"
-#include "../src/altprintf.h"
-#include "../src/log.h"
+#include <ruby.h>
+#include <ruby/encoding.h>
+#include "extconf.h"
+#include "list.h"
+#include "altprintf.h"
+#include "log.h"
 
 #define CHECKARG                              \
 if (!use_hash) {                              \
