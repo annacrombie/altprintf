@@ -45,3 +45,9 @@ task :build_gem do
   FileUtils.cd(__dir__)
   FileUtils.rm_rf(tmp_dir)
 end
+
+task publish: :build_gem do
+  load File.join(__dir__, 'alt_printf.gemspec')
+
+  sh "gem push pkg/#{AltPrintf::SPEC.name}-#{AltPrintf::SPEC.version}.gem"
+end
