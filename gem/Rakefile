@@ -16,10 +16,11 @@ task :setup do
   FileUtils.mkdir(tmp_dir)
 
   Dir[
-    '{ext,lib}/**/*',
-    'Rakefile',
     'Gemfile',
-    'alt_printf.gemspec'
+    'README.md',
+    'Rakefile',
+    'alt_printf.gemspec',
+    '{ext,lib}/**/*'
   ].each do |f|
     next if File.directory?(f)
 
