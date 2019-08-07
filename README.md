@@ -1,15 +1,24 @@
-# AltPrintf
+# altprintf
 
-AltPrintf is a alternative printf
+altprintf is a powerful printf-like template language.  The syntax is similar to
+printf, but the formatters are more powerful, especially for console display.
+
+For instance, the `%s` string formatter, when given a precision, will only trim
+its input the the specified display width.  This means that `altprintf "%.4s"
+"かかかか"` will output `かか` instead of `かかかか`.
+
+AltPrintf is not a replacement for printf however, binary and hex formatters
+probably won't get implemented for instance.
 
 ## Format Spec
 
 ## General Formatter
 
 ### Arguments
-- [ ] `<val>` - access the value of the given hash with key `:val` and store it as `value`
 - [x] `(arg)` - the string within `()` is taken as a `string_argument`
-- [x] `~`     - the following character is taken as a `character_argument`.  There can only be one character argument so the last one parsed is the one that is used.
+- [x] `~`     - the following character is taken as a `character_argument`.
+  There can only be one character argument so the last one parsed is the one
+  that is used.
 - [x] `-`     - left-align output within given width
 - [x] ` `     - pad output with spaces (this is the default for strings)
 - [x] `0`     - pad output with zeroes (this is the default for numeric types)
@@ -36,7 +45,8 @@ AltPrintf is a alternative printf
 - [ ] ` `     - pad output with spaces (this is the default for strings)
 - [ ] `0`     - pad output with zeroes (this is the default for numeric types)
 - [ ] `0-9`   - starting with a `1-9` the integer is read as `field_width`
-- [ ] `?`     - if the unit is greater than the total duration, omit it from the output
+- [ ] `?`     - if the unit is greater than the total duration, omit it from the
+  output
 - [ ] `:`     - suffix the output with `:`
 
 ### Specifiers
