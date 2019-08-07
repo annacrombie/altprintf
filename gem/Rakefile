@@ -10,7 +10,7 @@ Rake::ExtensionTask.new('alt_printf') do |ext|
   ext.config_script = 'extconf_dev.rb'
 end
 
-task :setup do
+task :build_gem do
   tmp_dir = "/tmp/alt_printf_#{SecureRandom.hex(8)}"
   puts "cloning to #{tmp_dir}"
   FileUtils.mkdir(tmp_dir)
