@@ -207,7 +207,13 @@ VALUE rb_alt_printf_single_pass(size_t argc, VALUE *argv, VALUE self) {
 VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self) {
 	long passes;
 
-	passes = FIX2LONG(argv[0]);
+
+	if (RB_TYPE_P(argv[0], T_FIXNUM)) {
+		passes = FIX2LONG(argv[0]);
+	} else {
+		rb_raise(rb_eArgError, "integer expected");
+		return Qnil;
+	}
 
 	LOG("passes: %ld\n", passes);
 	return rb_alt_printf(passes, argc - 1, &argv[1], self);
