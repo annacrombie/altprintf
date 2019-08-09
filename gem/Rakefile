@@ -10,6 +10,7 @@ Rake::ExtensionTask.new('alt_printf') do |ext|
   ext.config_script = 'extconf_dev.rb'
 end
 
+desc 'copy necessary C files from ../src and build the resulting gem'
 task :build_gem do
   tmp_dir = "/tmp/alt_printf_#{SecureRandom.hex(8)}"
   puts "cloning to #{tmp_dir}"
@@ -46,6 +47,7 @@ task :build_gem do
   FileUtils.rm_rf(tmp_dir)
 end
 
+desc 'uses build_gem and pushes the resulting gem'
 task publish: :build_gem do
   load File.join(__dir__, 'alt_printf.gemspec')
 
