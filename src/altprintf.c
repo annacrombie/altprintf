@@ -117,6 +117,9 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 		case 1:
 			switch(*fmt) {
 			/* special arguments */
+			case FS_A_RBHASHSTART:
+				while (fmt < end && *fmt != FS_A_RBHASHEND) fmt++;
+				break;
 			case FS_A_STRINGSTART:
 				f.stringarg_start = fmt + 1;
 				lvl = 2;
