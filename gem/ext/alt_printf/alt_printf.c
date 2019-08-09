@@ -96,14 +96,26 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, long *
 					use_hash++;
 				}
 
-				len = wcsnrtombs(NULL, &fmt, use_hash, 0, NULL);
+				LOG("use_hash: %d\n", use_hash);
+				len = wcsnrtombs(NULL, &tmp_str, use_hash, 0, NULL);
+
 				cstr = calloc(len + 1, sizeof(char));
 				wcsnrtombs(cstr, &tmp_str, use_hash, len, NULL);
-				LOG("cstr: '%s'\n", cstr);
+
+				LOG("symbol | cstr: '%s', len %d\n", cstr, len);
 
 				symbol = rb_check_symbol_cstr(cstr, len, enc);
 				entry = rb_hash_lookup2(*hash, symbol, Qnil);
-				free(cstr);
+
+				if (entry == Qnil) {
+					rb_raise(
+						rb_eKeyError,
+						"no such key :%s",
+						cstr
+					);
+					free(cstr);
+				}
+
 				use_hash = 1;
 
 				break;
@@ -173,6 +185,11 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 
 	rb_scan_args(argc, argv, "1*:", &fmt, &args, &hash);
 
+	if (hash == Qnil && RB_TYPE_P(argv[argc - 1], T_HASH)) {
+		hash = argv[argc - 1];
+		argc--;
+	}
+
 	if (passes == 0) return fmt;
 
 	wfmt = rbstowcs(fmt);
@@ -180,6 +197,9 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 	long argi = 0;
 	while (passes > 0) {
 		ap = rb_altprintf_make_list(wfmt, &args, &argi, &hash);
+
+		//list_elem_inspect_all(ap);
+		LOG("wfmt: %ls\n", wfmt);
 
 		formatted = altsprintf(wfmt, ap);
 		LOG("formatted result: '%ls'\n", formatted);
