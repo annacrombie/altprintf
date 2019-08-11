@@ -194,6 +194,9 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 				strbuf_append(sb, FS_START);
 				lvl = 0;
 				break;
+			default:
+				lvl = 0;
+				break;
 			}; break;
 		case 2:
 			if (*fmt == FS_A_STRINGEND) {
