@@ -128,8 +128,19 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, long *
 				tmp_str = rbstowcs(entry);
 				le_cur = list_elem_ini(tmp_str, String);
 				goto match;
-			case FS_T_MUL:
 			case FS_T_TERN:
+				CHECKARG;
+				tmp_int = malloc(sizeof(long int));
+				if (entry == Qfalse || entry == Qnil) {
+					*tmp_int = 0;
+				} else {
+					*tmp_int = 1;
+				}
+				LOG("got bool %ld\n", *tmp_int);
+				le_cur = list_elem_ini(tmp_int, Int);
+
+				goto match;
+			case FS_T_MUL:
 			case FS_T_ALIGN:
 			case FS_T_INT:
 				CHECKARG;
