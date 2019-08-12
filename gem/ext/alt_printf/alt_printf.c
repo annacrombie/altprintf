@@ -1,9 +1,9 @@
+#include "extconf.h"
 #include <stdio.h>
 #include <locale.h>
 #include <wchar.h>
 #include <ruby.h>
 #include <ruby/encoding.h>
-#include "extconf.h"
 #include "list.h"
 #include "altprintf.h"
 #include "log.h"
