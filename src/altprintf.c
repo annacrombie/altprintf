@@ -20,6 +20,8 @@ void format_mul(struct strbuf *sb, struct format *f)
 }
 void format_tern(struct strbuf *sb, struct format *f)
 {
+	if (f->stringarg_start == NULL) return;
+
 	long int *b = f->le->data;
 	int first_half = 1;
 	wchar_t sep = f->chararg;
