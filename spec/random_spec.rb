@@ -9,8 +9,14 @@ RSpec.describe 'random formats' do
     tests = 100
 
     tests.times do |i|
-      print("\rrunning test #{i}/#{tests}, #{cnt}\e[K")
       fmt, args = Generator.fmt_with_args
+      printf(
+        "\r%14.14s %d/%d, [%s]\e[K",
+        fmt,
+        i + 1,
+        tests,
+        cnt.map { |k, v| "#{k}:#{v}" }.join('|')
+      )
 
       pid =
         fork do
