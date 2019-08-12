@@ -47,6 +47,9 @@ RSpec.describe 'random formats' do
           end
         ] += 1
       end
+
+      break if ENV['FAIL_FAST'] &&
+        %i[crash err timeout].map { |k| cnt[k] }.reduce(0, &:+).positive?
     end
 
     expect(cnt[:ok]).to eq(tests)
