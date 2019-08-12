@@ -13,13 +13,12 @@ void default_format(struct format *f) {
 	f->le = NULL;
 }
 
-void format_mul(struct strbuf *sb, struct format *f)
-{
+void format_mul(struct strbuf *sb, struct format *f) {
 	long int *i = f->le->data;
 	strbuf_pad(sb, f->chararg, *i);
 }
-void format_tern(struct strbuf *sb, struct format *f)
-{
+
+void format_tern(struct strbuf *sb, struct format *f) {
 	if (f->stringarg_start == NULL) return;
 
 	long int *b = f->le->data;
@@ -34,31 +33,32 @@ void format_tern(struct strbuf *sb, struct format *f)
 	}
 }
 
-void format_string(struct strbuf *sb, struct format *f)
-{
+void format_string(struct strbuf *sb, struct format *f) {
 	int prec = f->width.prec == -1 ? 100000000 : f->width.prec;
 	strbuf_append_str(sb, f->le->data, prec);
 }
-void format_char(struct strbuf *sb, struct format *f)
-{
+
+void format_char(struct strbuf *sb, struct format *f) {
 	strbuf_append_char(sb, f->le->data);
 }
-void format_int(struct strbuf *sb, struct format *f)
-{
+
+void format_int(struct strbuf *sb, struct format *f) {
 	strbuf_append_int(sb, f->le->data);
 }
-void format_double(struct strbuf *sb, struct format *f)
-{
+
+void format_double(struct strbuf *sb, struct format *f) {
 	int prec = f->width.prec == -1 ? 3 : f->width.prec;
 	strbuf_append_double(sb, f->le->data, prec);
 }
 
-void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, struct format *))
-{
+void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, struct format *)) {
 	struct strbuf *tmp = strbuf_new();
 	to_s(tmp, f);
 
-	if (tmp->len == 0) return;
+	if (tmp->len == 0) {
+		strbuf_destroy(tmp);
+		return;
+	};
 
 	int pad = f->width.pad - tmp->width;
 
