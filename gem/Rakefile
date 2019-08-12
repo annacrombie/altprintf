@@ -7,7 +7,13 @@ SRC_DIR = File.join(__dir__, '../src')
 
 Rake::ExtensionTask.new('alt_printf') do |ext|
   ext.lib_dir = 'lib/alt_printf'
-  ext.config_script = 'extconf_dev.rb'
+  ext.config_script =
+    case ENV['GEM_DEBUG']
+    when nil
+      'extconf_dev.rb'
+    else
+      'extconf_debug.rb'
+    end
 end
 
 desc 'copy necessary C files from ../src and build the resulting gem'
