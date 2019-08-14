@@ -44,7 +44,7 @@ VALUE wcstorbs(const wchar_t *wstr) {
 	cstr = calloc(len, sizeof(wchar_t));
 	wcsrtombs(cstr, &wstr, len, NULL);
 
-	LOG("wcs to rbs, len: %d, cstr: '%s'\n", len, cstr);
+	LOG("wcs to rbs, len: %d, wcs: %ls, mbs: '%s'\n", len, wstr, cstr);
 
 	str = rb_external_str_new_with_enc(cstr, len, enc);
 	free(cstr);
@@ -124,6 +124,7 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, long *
 				break;
 			case FS_T_STRING:
 				CHECKARG;
+				Check_Type(entry, T_STRING);
 
 				tmp_str = rbstowcs(entry);
 				le_cur = list_elem_ini(tmp_str, String);
@@ -144,6 +145,7 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, long *
 			case FS_T_ALIGN:
 			case FS_T_INT:
 				CHECKARG;
+				Check_Type(entry, T_FIXNUM);
 
 				tmp_int = malloc(sizeof(long int));
 				*tmp_int = FIX2LONG(entry);
@@ -152,6 +154,7 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, long *
 				goto match;
 			case FS_T_CHAR:
 				CHECKARG;
+				Check_Type(entry, T_STRING);
 
 				tmp_char = malloc(sizeof(wint_t));
 				tmp_str = rbstowcs(entry);
@@ -160,6 +163,7 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, long *
 				goto match;
 			case FS_T_DOUBLE:
 				CHECKARG;
+				Check_Type(entry, T_FLOAT);
 
 				tmp_double = malloc(sizeof(double));
 				*tmp_double = RFLOAT_VALUE(entry);
