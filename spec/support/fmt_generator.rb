@@ -1,4 +1,4 @@
-module Generator
+module FmtGenerator
   CHARS = %w[a A].map { |s| (s..).take(26) }.flatten +
     ('0'..).take(10) +
     %w[{ $ % ! & # @ = ` ~ ^ < * + - } " | : _ > ; ' \\ / . , \ ]

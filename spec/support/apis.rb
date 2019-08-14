@@ -21,10 +21,6 @@ module APIs
   end
 
   class RubyExtension < Generic
-    def initialize
-      require 'alt_printf'
-    end
-
     def fmt(args)
       hash = args.last.is_a?(Hash) ? args.pop : {}
 

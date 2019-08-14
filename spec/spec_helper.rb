@@ -1,10 +1,8 @@
-require 'bundler/setup'
-require_relative 'support/apis'
-require_relative 'support/generator'
-require_relative 'support/tests'
-
 $LOAD_PATH.unshift(File.expand_path(File.join(__dir__, '../gem/lib')))
-Tests.load('spec/specs.rb')
+
+require 'bundler/setup'
+require 'alt_printf'
+Dir[File.join(__dir__, 'support/*.rb')].each { |f| require(f) }
 
 RSpec.configure do |config|
   config.example_status_persistence_file_path = '.rspec_status'
@@ -15,5 +13,5 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.include APIs, Tests
+  config.include APIs
 end

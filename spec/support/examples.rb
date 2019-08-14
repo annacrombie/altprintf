@@ -1,4 +1,4 @@
-module Tests
+module Examples
   class << self
     attr_accessor :tests
 

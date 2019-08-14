@@ -1,11 +1,10 @@
 require_relative 'spec_helper'
-require 'alt_printf'
 
-RSpec.describe 'ruby extension' do
+RSpec.describe APIs::RubyExtension do
   context 'fmtm' do
     context 'invalid passes arg' do
       it 'raises an argument error' do
-        expect { AltPrintf.fmtm('nan', '%%') }.to raise_exception(ArgumentError)
+        expect { subject.fmtm(['nan', '%%']) }.to raise_exception(ArgumentError)
       end
     end
   end
@@ -22,7 +21,7 @@ RSpec.describe 'ruby extension' do
   context 'an invalid key is used' do
     it 'should raise a key error' do
       expect do
-        AltPrintf.fmtm(2, '%<wrong>s', right: 'right')
+        subject.fmtm([2, '%<wrong>s', right: 'right'])
       end.to raise_exception(KeyError)
     end
   end
