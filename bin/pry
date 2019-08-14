@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift(File.join(__dir__, '../gem/lib'))
+require 'pry'
+require 'alt_printf'
+
+include AltPrintf
+
+Pry.start
