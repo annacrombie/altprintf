@@ -32,6 +32,7 @@ struct width {
 struct format {
   wchar_t *stringarg_start;
   wchar_t *stringarg_end;
+  size_t stringarg_len;
   wint_t chararg;
   wint_t padchar;
   enum align align;

@@ -6,6 +6,7 @@ void default_format(struct format *f) {
 	struct width width = {.prec = -1, .pad = 0};
 	f->stringarg_start = NULL;
 	f->stringarg_end = NULL;
+	f->stringarg_len = 0;
 	f->chararg = L':';
 	f->padchar = L' ';
 	f->align = Right;
@@ -204,6 +205,8 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 			if (*fmt == FS_A_STRINGEND) {
 				f.stringarg_end = fmt - 1;
 				lvl = 1;
+			} else {
+				f.stringarg_len++;
 			}; break;
 		case 3:
 			switch(*fmt) {
