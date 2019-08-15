@@ -16,7 +16,13 @@ void default_format(struct format *f) {
 
 void format_mul(struct strbuf *sb, struct format *f) {
 	long int *i = f->le->data;
-	strbuf_pad(sb, f->chararg, *i);
+	if (f->stringarg_start == NULL) {
+		strbuf_pad(sb, f->chararg, *i);
+	} else {
+		for (int j=0; j<*i; j++) {
+			strbuf_append_str(sb, f->stringarg_start, -f->stringarg_len);
+		}
+	}
 }
 
 void format_tern(struct strbuf *sb, struct format *f) {
