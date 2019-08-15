@@ -10,13 +10,3 @@ group APIs::Generic, {
   [:fmt, '片%s', '仮名'] => '片仮名',
   [:fmtm, 3, "%%(%%%s:%%%s)?", 'd', '~**', 1, 15] => '15',
 }
-
-group APIs::RubyExtension, {
-  [:fmtm, 3, "%%(%%%s:%%%s)?", 'd', '~**', false, 15] => '*' * 15,
-  [:fmt, '%<age>d years old', { age: 25 }] => '25 years old',
-  [:fmtm, 0, "%%"] => '%%',
-}
-
-group APIs::Cli, {
-  [:fmtm, 3, "%%(%%%s:%%%s)?", 'd', '~**', 0, 15] => '*' * 15,
-}

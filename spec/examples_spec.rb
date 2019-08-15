@@ -1,11 +1,11 @@
 require_relative 'spec_helper'
 
-Examples.load(File.join(__dir__, 'examples/basic.rb'))
+Dir[File.join(__dir__, 'examples/*.rb')].each { |f| Examples.load(f) }
 
-RSpec.describe('altprintf') do
+RSpec.describe 'altprintf' do
   APIs.each do |api|
     context api.class do
-      Examples.for(api) do |group, tests|
+      Examples.for api do |group, tests|
         context group do
           tests.each do |args, result|
             pretty = args[1..].map(&:inspect).join(', ')

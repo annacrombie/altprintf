@@ -3,12 +3,12 @@ module Examples
     attr_accessor :tests
 
     def load(file)
-      self.tests = {}
+      self.tests ||= {}
       eval(File.read(file))
     end
 
     def group(g, ts)
-      tests.merge!(g => ts)
+      tests.merge!(g => ts) { |_, o, n| o.merge(n) }
     end
 
     def for(kind, &block)
