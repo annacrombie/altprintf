@@ -100,10 +100,21 @@ void strbuf_append_str(struct strbuf *sb, void *str, int maxwidth)
 	wchar_t *s = str;
 	wchar_t *end = &s[wcslen(s)];
 	int width = 0;
+	int maxlen = -1;
+
+	if (maxwidth < 0) {
+		maxlen = maxwidth * -1;
+	}
 
 	for (;s<end;s++) {
-		width += wcwidth(*s);
-		if (width > maxwidth) return;
+		if (maxlen >= 0) {
+			width++;
+			if (width > maxlen) return;
+		} else {
+			width += wcwidth(*s);
+			if (width > maxwidth) return;
+		}
+
 		strbuf_append(sb, *s);
 	}
 }
