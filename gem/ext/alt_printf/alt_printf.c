@@ -40,11 +40,18 @@ VALUE wcstorbs(const wchar_t *wstr) {
 	char *cstr;
 	VALUE str;
 
+	LOG("converting wcs to rbs\n");
+	LOG("wcs: '%ls'\n\n", wstr);
+
 	len = wcsrtombs(NULL, &wstr, 0, NULL);
+	LOG("len: %d\n", len);
 	cstr = calloc(len, sizeof(wchar_t));
 	wcsrtombs(cstr, &wstr, len, NULL);
+	LOG("cstr: '%s'\n", cstr);
 
 	LOG("wcs to rbs, len: %d, wcs: %ls, mbs: '%s'\n", len, wstr, cstr);
+
+	if (len < 0) return Qnil;
 
 	str = rb_external_str_new_with_enc(cstr, len, enc);
 	free(cstr);
@@ -69,115 +76,100 @@ struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, long *
 	char *cstr;
 	size_t len;
 
-	int mode	= 0;
+	int mode = 0;
 	long argc = rb_array_len(*argv);
 	int use_hash = 0;
 
-	const wchar_t *end = &fmt[wcslen(fmt)];
+	enum ArgType type = FNone;
 
-	for (;fmt<end;fmt++) {
-		LOG("checking char '%lc', lvl: '%d'\n", (wint_t)(*fmt), mode);
-		if (mode == 0) {
-			switch(*fmt) {
-			case FS_START: mode = 1;
-				break;
-			}
-		} else {
-			switch (*fmt) {
-			case FS_A_CHARARG:
+	while (type != FEnd) {
+		type = scan_next_arg(&fmt);
+
+		switch (type) {
+		case FS_A_RBHASHSTART:
+			tmp_str = fmt + 1;
+
+			use_hash = -1;
+			while (fmt < end && *fmt != FS_A_RBHASHEND) {
 				fmt++;
-				break;
-			case FS_A_RBHASHSTART:
-				tmp_str = fmt + 1;
-
-				use_hash = -1;
-				while (fmt < end && *fmt != FS_A_RBHASHEND) {
-					fmt++;
-					use_hash++;
-				}
-
-				LOG("use_hash: %d\n", use_hash);
-				len = wcsnrtombs(NULL, &tmp_str, use_hash, 0, NULL);
-
-				cstr = calloc(len + 1, sizeof(char));
-				wcsnrtombs(cstr, &tmp_str, use_hash, len, NULL);
-
-				LOG("symbol | cstr: '%s', len %d\n", cstr, len);
-
-				symbol = rb_check_symbol_cstr(cstr, len, enc);
-				entry = rb_hash_lookup2(*hash, symbol, Qnil);
-
-				if (entry == Qnil) {
-					rb_raise(
-						rb_eKeyError,
-						"no such key :%s",
-						cstr
-					);
-					free(cstr);
-				}
-
-				use_hash = 1;
-
-				break;
-			case FS_A_STRINGSTART:
-				while (fmt < end && *fmt != FS_A_STRINGEND) fmt++;
-				break;
-			case FS_T_STRING:
-				CHECKARG;
-				Check_Type(entry, T_STRING);
-
-				tmp_str = rbstowcs(entry);
-				le_cur = list_elem_ini(tmp_str, String);
-				goto match;
-			case FS_T_TERN:
-				CHECKARG;
-				tmp_int = malloc(sizeof(long int));
-				if (entry == Qfalse || entry == Qnil) {
-					*tmp_int = 0;
-				} else {
-					*tmp_int = 1;
-				}
-				LOG("got bool %ld\n", *tmp_int);
-				le_cur = list_elem_ini(tmp_int, Int);
-
-				goto match;
-			case FS_T_MUL:
-			case FS_T_ALIGN:
-			case FS_T_INT:
-				CHECKARG;
-				Check_Type(entry, T_FIXNUM);
-
-				tmp_int = malloc(sizeof(long int));
-				*tmp_int = FIX2LONG(entry);
-				LOG("got int %ld\n", *tmp_int);
-				le_cur = list_elem_ini(tmp_int, Int);
-				goto match;
-			case FS_T_CHAR:
-				CHECKARG;
-				Check_Type(entry, T_STRING);
-
-				tmp_char = malloc(sizeof(wint_t));
-				tmp_str = rbstowcs(entry);
-				*tmp_char = btowc(tmp_str[0]);
-				le_cur = list_elem_ini(tmp_char, Char);
-				goto match;
-			case FS_T_DOUBLE:
-				CHECKARG;
-				Check_Type(entry, T_FLOAT);
-
-				tmp_double = malloc(sizeof(double));
-				*tmp_double = RFLOAT_VALUE(entry);
-				le_cur = list_elem_ini(tmp_double, Double);
-				goto match;
-			match: le_prev->next = le_cur;
-				le_prev = le_cur;
-				mode = 0;
-				(*argi)++;
-				break;
-			case FS_START:
-				mode = 0;
-				break;
+				use_hash++;
 			}
+
+			LOG("use_hash: %d\n", use_hash);
+			len = wcsnrtombs(NULL, &tmp_str, use_hash, 0, NULL);
+
+			cstr = calloc(len + 1, sizeof(char));
+			wcsnrtombs(cstr, &tmp_str, use_hash, len, NULL);
+
+			LOG("symbol | cstr: '%s', len %d\n", cstr, len);
+
+			symbol = rb_check_symbol_cstr(cstr, len, enc);
+			entry = rb_hash_lookup2(*hash, symbol, Qnil);
+
+			if (entry == Qnil) {
+				rb_raise(
+					rb_eKeyError,
+					"no such key :%s",
+					cstr
+				);
+				free(cstr);
+			}
+
+			use_hash = 1;
+
+			break;
+		case FString:
+			CHECKARG;
+			Check_Type(entry, T_STRING);
+
+			tmp_str = rbstowcs(entry);
+			le_cur = list_elem_ini(tmp_str, String);
+			goto match;
+		case FTern:
+			CHECKARG;
+			tmp_int = malloc(sizeof(long int));
+			if (entry == Qfalse || entry == Qnil) {
+				*tmp_int = 0;
+			} else {
+				*tmp_int = 1;
+			}
+			LOG("got bool %ld\n", *tmp_int);
+			le_cur = list_elem_ini(tmp_int, Int);
+
+			goto match;
+		case FMul:
+		case FAlign:
+		case FInt:
+			CHECKARG;
+			Check_Type(entry, T_FIXNUM);
+
+			tmp_int = malloc(sizeof(long int));
+			*tmp_int = FIX2LONG(entry);
+			LOG("got int %ld\n", *tmp_int);
+			le_cur = list_elem_ini(tmp_int, Int);
+			goto match;
+		case FChar:
+			CHECKARG;
+			Check_Type(entry, T_STRING);
+
+			tmp_char = malloc(sizeof(wint_t));
+			tmp_str = rbstowcs(entry);
+			*tmp_char = btowc(tmp_str[0]);
+			le_cur = list_elem_ini(tmp_char, Char);
+			goto match;
+		case FDouble:
+			CHECKARG;
+			Check_Type(entry, T_FLOAT);
+
+			tmp_double = malloc(sizeof(double));
+			*tmp_double = RFLOAT_VALUE(entry);
+			le_cur = list_elem_ini(tmp_double, Double);
+			goto match;
+		match: le_prev->next = le_cur;
+			le_prev = le_cur;
+			mode = 0;
+			(*argi)++;
+			break;
 		}
 	}
 
@@ -213,10 +205,14 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 	while (passes > 0) {
 		ap = rb_altprintf_make_list(wfmt, &args, &argi, &hash);
 
-		//list_elem_inspect_all(ap);
+#ifdef DEBUG
+		list_elem_inspect_all(ap);
+#endif
+
 		LOG("wfmt: %ls\n", wfmt);
 
 		formatted = altsprintf(wfmt, ap);
+
 		LOG("formatted result: '%ls'\n", formatted);
 
 		free(wfmt);
@@ -226,6 +222,8 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 		passes--;
 	}
 
+
+	LOG("final: '%ls'\n", formatted);
 	final = wcstorbs(formatted);
 
 	free(formatted);
