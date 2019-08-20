@@ -1,11 +1,4 @@
-#define _XOPEN_SOURCE
-#include <locale.h>
-#include <limits.h>
 #include "strbuf.h"
-#include "log.h"
-
-#define STRBUF_INI_SIZE 5
-#define STRBUF_GROW_STEP 100
 
 extern struct lconv *locale_info;
 
@@ -13,14 +6,14 @@ struct strbuf *strbuf_new() {
 	struct strbuf *sb = malloc(sizeof(struct strbuf));
 
 	if (NULL == sb) {
-		LOG("can't alloc memory for new strbuf", NULL);
+		LOG("can't alloc memory for new strbuf\n");
 		exit(1);
 	}
 
 	sb->start = sb->end = calloc(STRBUF_INI_SIZE, sizeof(wchar_t));
 
 	if (NULL == sb->start) {
-		LOG("can't alloc memory for new strbuf string", NULL);
+		LOG("can't alloc memory for new strbuf string\n");
 		exit(1);
 	}
 
@@ -122,20 +115,37 @@ void strbuf_append_str(struct strbuf *sb, void *str, int maxwidth)
 void strbuf_append_int(struct strbuf *sb, void *in)
 {
 	long int *i = in;
-	wchar_t wcs[50];
-	swprintf(wcs, 50, L"%ld", *i);
-	strbuf_append_str(sb, wcs, 50);
+	wchar_t wcs[TMPLEN];
+	long len = swprintf(wcs, TMPLEN - 1, L"%ld", *i);
+	if (len < 0) {
+		strbuf_append_str(sb, L"error adding int", 16);
+	} else {
+		strbuf_append_str(sb, wcs, -1 * len);
+	}
 }
 
 void strbuf_append_double(struct strbuf *sb, void *dub, int prec)
 {
 	double *d = dub;
-	wchar_t wcs[50];
-	wchar_t format[30];
-	swprintf(format, 30, L"%%.%ldf", prec);
+	wchar_t wcs[TMPLEN];
+	wchar_t format[TMPLEN];
+	int rprec = prec;
+
+	if (rprec > MAXPREC) rprec = MAXPREC;
+
+	swprintf(format, TMPLEN - 1, L"%%.%ldf", rprec);
+
 	LOG("format: %ls\n", format);
-	swprintf(wcs, 50, format, *d);
-	strbuf_append_str(sb, wcs, 50);
+
+	long len = swprintf(wcs, TMPLEN - 1, format, *d);
+	if (len < 0) {
+		strbuf_append_str(sb, L"error adding float", 18);
+	} else {
+		LOG("inserting double: len: %ld\n", len);
+		strbuf_append_str(sb, wcs, len);
+
+		if (rprec < prec) strbuf_pad(sb, L'0', rprec - prec);
+	}
 }
 
 void strbuf_pad(struct strbuf *sb, wchar_t pc, int amnt)

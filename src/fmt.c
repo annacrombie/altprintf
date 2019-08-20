@@ -1,38 +1,24 @@
-#include "syntax.h"
-#include "altprintf.h"
-#include "log.h"
+#include "fmt.h"
 
-void default_format(struct format *f) {
-	struct width width = {.prec = -1, .pad = 0};
-	f->stringarg_start = NULL;
-	f->stringarg_end = NULL;
-	f->stringarg_len = 0;
-	f->chararg = L':';
-	f->padchar = L' ';
-	f->align = Right;
-	f->width = width;
-	f->le = NULL;
-}
-
-void format_mul(struct strbuf *sb, struct format *f) {
-	long int *i = f->le->data;
-	if (f->stringarg_start == NULL) {
+void fmt_mul(struct strbuf *sb, struct fmte *f) {
+	long int *i = f->value;
+	if (f->parenarg_start == NULL) {
 		strbuf_pad(sb, f->chararg, *i);
 	} else {
 		for (int j=0; j<*i; j++) {
-			strbuf_append_str(sb, f->stringarg_start, -f->stringarg_len);
+			strbuf_append_str(sb, f->parenarg_start, -f->parenarg_len);
 		}
 	}
 }
 
-void format_tern(struct strbuf *sb, struct format *f) {
-	if (f->stringarg_start == NULL) return;
+void fmt_tern(struct strbuf *sb, struct fmte *f) {
+	if (f->parenarg_start == NULL) return;
 
-	long int *b = f->le->data;
+	long int *b = f->value;
 	int first_half = 1;
 	wchar_t sep = f->chararg;
-	wchar_t *p = f->stringarg_start;
-	for (;p<=f->stringarg_end;p++) {
+	wchar_t *p = f->parenarg_start;
+	for (;p<=f->parenarg_end;p++) {
 		LOG("*p: %lc, first half? %d, bool: %ld, sep: %lc\n", (wint_t)*p, first_half, *b, (wint_t)sep);
 		if (*p == sep) first_half = 0;
 		else if (*b && first_half) strbuf_append_char(sb, p);
@@ -40,34 +26,34 @@ void format_tern(struct strbuf *sb, struct format *f) {
 	}
 }
 
-void format_string(struct strbuf *sb, struct format *f) {
-	int prec = f->width.prec == -1 ? 100000000 : f->width.prec;
-	strbuf_append_str(sb, f->le->data, prec);
+void fmt_string(struct strbuf *sb, struct fmte *f) {
+	int prec = f->prec == -1 ? 100000000 : f->prec;
+	strbuf_append_str(sb, f->value, prec);
 }
 
-void format_char(struct strbuf *sb, struct format *f) {
-	strbuf_append_char(sb, f->le->data);
+void fmt_char(struct strbuf *sb, struct fmte *f) {
+	strbuf_append_char(sb, f->value);
 }
 
-void format_int(struct strbuf *sb, struct format *f) {
-	strbuf_append_int(sb, f->le->data);
+void fmt_int(struct strbuf *sb, struct fmte *f) {
+	strbuf_append_int(sb, f->value);
 }
 
-void format_double(struct strbuf *sb, struct format *f) {
-	int prec = f->width.prec == -1 ? 3 : f->width.prec;
-	strbuf_append_double(sb, f->le->data, prec);
+void fmt_double(struct strbuf *sb, struct fmte *f) {
+	int prec = f->prec == -1 ? 3 : f->prec;
+	strbuf_append_double(sb, f->value, prec);
 }
 
-void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, struct format *)) {
+void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct fmte *)) {
 	struct strbuf *tmp = strbuf_new();
-	to_s(tmp, f);
+	fmtr(tmp, f);
 
 	if (tmp->len == 0) {
 		strbuf_destroy(tmp);
 		return;
 	};
 
-	int pad = f->width.pad - tmp->width;
+	int pad = f->pad - tmp->width;
 
 	if (pad > 0) {
 		LOG("padding: %d\n", pad);
@@ -93,6 +79,7 @@ void format(struct strbuf *sb, struct format *f, void (*to_s)(struct strbuf *, s
 	strbuf_destroy(tmp);
 }
 
+/*
 wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 	int lvl = 0;
 	int split = 0;
@@ -101,8 +88,8 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 	wchar_t *end = &fmt[wcslen(fmt)];
 	wchar_t *jump;
 
-	void (*append_func)(struct strbuf *, struct format *);
-	struct format f;
+	void (*append_func)(struct strbuf *, struct fmte *);
+	struct fmte f;
 	long int *number_p = NULL;
 	long int *width;
 	wint_t split_pad = L' ';
@@ -113,7 +100,7 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 		case 0:
 			switch(*fmt) {
 			case FS_START:
-				default_format(&f);
+				ini_fmte(&f);
 				lvl = 1;
 				break;
 			case FS_ESC:
@@ -122,15 +109,16 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 			default:
 				strbuf_append(sb, *fmt);
 				break;
-			}; break;
+			};
+			break;
 		case 1:
 			switch(*fmt) {
-			/* special arguments */
+			// special arguments
 			case FS_A_RBHASHSTART:
 				while (fmt < end && *fmt != FS_A_RBHASHEND) fmt++;
 				break;
 			case FS_A_STRINGSTART:
-				f.stringarg_start = fmt + 1;
+				f.parenarg_start = fmt + 1;
 				lvl = 2;
 				break;
 			case FS_A_CHARARG:
@@ -138,27 +126,27 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 				fmt += 1;
 				break;
 
-			/* standard arguments */
+			// standard arguments
 			case FS_A_LALIGN:
 				f.align = Left;
 				break;
 			case FS_A_SPAD:
 				f.padchar = FS_A_SPAD;
 				break;
-			case 0:
+			case '0':
 				f.padchar = '0';
 				break;
 			case '.':
-				number_p = &f.width.prec;
+				number_p = &f.prec;
 				fmt++;
 			case '1': case '2': case '3': case '4': case '5':
 			case '6': case '7': case '8': case '9':
-				if (number_p == NULL) number_p = &f.width.pad;
+				if (number_p == NULL) number_p = &f.pad;
 				*number_p = wcstol(fmt, &jump, 10);
 				fmt = (jump-1);
 				break;
 
-			/* align operator */
+			// align operator
 			case FS_T_ALIGN:
 				if (le != NULL && le->type != Null) {
 					width = le->data;
@@ -173,28 +161,28 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 				lvl = 0;
 				break;
 
-			/* types */
+			// types
 			case FS_T_STRING:
-				append_func = format_string;
+				append_func = fmte_string;
 				goto match;
 			case FS_T_TERN:
-				append_func = format_tern;
+				append_func = fmte_tern;
 				goto match;
 			case FS_T_INT:
-				append_func = format_int;
+				append_func = fmte_int;
 				goto match;
 			case FS_T_MUL:
-				append_func = format_mul;
+				append_func = fmte_mul;
 				goto match;
 			case FS_T_CHAR:
-				append_func = format_char;
+				append_func = fmte_char;
 				goto match;
 			case FS_T_DOUBLE:
-				append_func = format_double;
+				append_func = fmte_double;
 			match:
 				if (le != NULL && le->type != Null) {
-					f.le = le;
-					format(sb, &f, append_func);
+					f.value = le->data;
+					fmte(sb, &f, append_func);
 					le = le->next;
 				}
 				lvl = 0;
@@ -209,10 +197,10 @@ wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
 			}; break;
 		case 2:
 			if (*fmt == FS_A_STRINGEND) {
-				f.stringarg_end = fmt - 1;
+				f.parenarg_end = fmt - 1;
 				lvl = 1;
 			} else {
-				f.stringarg_len++;
+				f.parenarg_len++;
 			}; break;
 		case 3:
 			switch(*fmt) {
@@ -259,3 +247,4 @@ no_more_args:
 
 	return str;
 }
+*/
