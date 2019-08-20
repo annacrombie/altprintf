@@ -18,7 +18,7 @@ objects := \
 
 debug_cflags := -g -D DEBUG
 release_cflags := -O2
-CFLAGS += $($(TARGET)_cflags)
+CFLAGS += -Wextra -Wall $($(TARGET)_cflags)
 
 .PHONY: all debug release
 all debug release: $(objects) $(target_dir)/altprintf
