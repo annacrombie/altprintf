@@ -1,0 +1,8 @@
+
+			// Add use but dont consume char
+			//
+			// cli only?
+			//
+			// e.g. %%(%&*)*d 5
+			// would print 25 times since the number 5 would be used
+			// for both *
