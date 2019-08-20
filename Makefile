@@ -54,3 +54,8 @@ test: all gem
 .PHONY: gem
 gem: all
 	make -C gem/
+
+.PHONY: gemd
+gemd: debug
+	make -C gem/ clean
+	make -C gem/ debug
