@@ -30,8 +30,6 @@ void fmt_tern(struct strbuf *sb, struct fmte *f) {
 
 wchar_t process_escape_seq(wchar_t seq) {
 	switch (seq) {
-	case FS_ESC:
-		return FS_ESC;
 	case FS_ESC_NL:
 		return L'\n';
 	case FS_ESC_ESC:
@@ -49,11 +47,13 @@ void fmt_raw(struct strbuf *sb, struct fmte *f) {
 	p = f->parenarg_start;
 	i = f->parenarg_len;
 
-	for (; i > 1; i--) {
-		c = (*p == FS_ESC) ? process_escape_seq(*++p) : *p;
+	for (; i > 0; i--) {
+		LOG("p is '%lc' (%ld)\n", (wint_t)*p, (long)*p);
+		c = (i > 1 && *p == FS_ESC) ? process_escape_seq(*++p) : *p;
 
 		strbuf_append(sb, c);
 		p++;
+		if (*p == EOS) break;
 	}
 }
 
