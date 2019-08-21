@@ -34,6 +34,18 @@ wchar_t process_escape_seq(wchar_t seq) {
 		return L'\n';
 	case FS_ESC_ESC:
 		return L'\e';
+	case 'a':
+		return L'\a';
+	case 'b':
+		return L'\b';
+	case 'f':
+		return L'\f';
+	case 'r':
+		return L'\r';
+	case 't':
+		return L'\t';
+	case 'v':
+		return L'\v';
 	default:
 		return seq;
 	}
