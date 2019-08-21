@@ -1,6 +1,6 @@
 require_relative 'spec_helper'
 
-RSpec.describe 'random formats' do
+RSpec.describe 'fuzz test' do
   it do
     r = Runner.new('benign_formats')
     api = APIs::RubyExtension.new
