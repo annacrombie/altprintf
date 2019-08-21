@@ -7,12 +7,14 @@ sources:
   - https://github.com/annacrombie/altprintf
 tasks:
   - setup: |
-      gem install bundler
+      sudo gem install bundler
       cd altprintf
+      bundle install
+      cd gem
       bundle install
   - build: |
       cd altprintf
-      make
+      CFLAGS="-fPIC" make
       make gem
   - test: |
       cd altprintf
