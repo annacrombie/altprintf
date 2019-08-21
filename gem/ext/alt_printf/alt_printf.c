@@ -61,7 +61,7 @@ VALUE get_entry(struct fmte *f, VALUE *argv, long *argi, VALUE *hash) {
 	LOG("getting entry\n");
 
 	if (f->anglearg_len == 0) {
-		LOG("getting from argv\n");
+		LOG("getting from argv[%ld]\n", *argi);
 		entry = rb_ary_entry(*argv, *argi);
 		(*argi)++;
 		return entry;
@@ -83,7 +83,7 @@ VALUE get_entry(struct fmte *f, VALUE *argv, long *argi, VALUE *hash) {
 
 	sym = rb_check_symbol_cstr(cstr, len, enc);
 	entry = rb_hash_lookup2(*hash, sym, Qnil);
-	if (entry == Qnil) rb_raise(rb_eKeyError, "key missing %s", cstr);
+	if (entry == Qnil) rb_raise(rb_eKeyError, "missing key :%s", cstr);
 	free(cstr);
 
 	return entry;
@@ -105,7 +105,11 @@ wchar_t *rb_apformat(wchar_t *fmt, VALUE *argv, long *argi, VALUE *hash) {
 	while (loop) {
 		LOG("scanned type: %d\n", f->type);
 
-		entry = get_entry(f, argv, argi, hash);
+		if (f->type != FEnd && f->type != FRaw) {
+			entry = get_entry(f, argv, argi, hash);
+		} else {
+			entry = Qnil;
+		}
 
 		switch (f->type) {
 		case FString:
@@ -119,6 +123,7 @@ wchar_t *rb_apformat(wchar_t *fmt, VALUE *argv, long *argi, VALUE *hash) {
 			*tmpi = (entry == Qfalse || entry == Qnil) ? 0 : 1;
 
 			tmp = tmpi;
+			goto match;
 		case FMul:
 		case FAlign:
 		case FInt:
