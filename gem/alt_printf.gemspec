@@ -17,7 +17,7 @@ AltPrintf::SPEC = Gem::Specification.new do |s|
   s.extensions = Dir["ext/**/extconf.rb"]
   s.require_paths = ['lib']
 
-  s.required_ruby_version = '>= 2.6.3'
+  s.required_ruby_version = '>= 2.5.5'
 
   s.add_development_dependency 'rake-compiler', '~> 1.0'
   s.add_development_dependency 'rake', '~> 12.3'
