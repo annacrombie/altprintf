@@ -8,7 +8,7 @@ AltPrintf::SPEC = Gem::Specification.new do |s|
   s.summary       = 'A powerful printf-like template language'
   s.authors       = ['Stone Tickle']
   s.email         = 'lattis@mochiro.moe'
-  s.homepage      = 'https://github.com/annacrombie/altprintf/gem'
+  s.homepage      = 'https://github.com/annacrombie/altprintf/tree/master/gem'
   s.license       = 'MIT'
 
   s.files         = Dir['{**/*}']
