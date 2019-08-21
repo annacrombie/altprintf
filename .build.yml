@@ -1,0 +1,18 @@
+image: alpine/edge
+packages:
+  - ruby
+  - ruby-devel
+sources:
+  - https://github.com/annacrombie/altprintf
+tasks:
+  - setup: |
+      gem install bundler
+      cd altprintf
+      bundle install
+  - build: |
+      cd altprintf
+      make
+      make gem
+  - test: |
+      cd altprintf
+      rspec
