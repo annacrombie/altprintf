@@ -2,17 +2,21 @@
 
 struct lconv *locale_info;
 
-void format(wchar_t *fmt, int argc, int *argi, char **argv) {
+wchar_t *format(wchar_t *fmt, int argc, int *argi, char **argv) {
 	void *tmp;
-	struct fmte *f;
+	struct fmte *f, *head;
 	size_t len;
+	int loop = 1;
+	wchar_t *final;
 
-	while (1) {
-		f = parsef(&fmt);
+	head = f = parsef(&fmt);
+
+	while (loop) {
 		LOG("scanned type: %d\n", f->type);
 
 		if (!(f->type == FRaw || f->type == FEnd) && (*argi) >= argc) {
 			LOG("out of values\n");
+			goto process_next_fmt;
 		}
 
 		switch (f->type) {
@@ -28,7 +32,7 @@ void format(wchar_t *fmt, int argc, int *argi, char **argv) {
 			tmp = malloc(sizeof(long int));
 			long *tmpl = tmp;
 			*tmpl = atol(argv[(*argi)]);
-			LOG("got int %ld, %s\n", *tmpl, argv[(*argi)]);
+			LOG("got int %ld, from string \"%s\"\n", *tmpl, argv[(*argi)]);
 			goto match;
 		case FChar:
 			tmp = malloc(sizeof(wint_t));
@@ -44,24 +48,38 @@ void format(wchar_t *fmt, int argc, int *argi, char **argv) {
 			f->value = tmp;
 			(*argi)++;
 			break;
+		case FRaw:
+			break;
 		case FEnd:
 			LOG("EOS (end of string)\n");
-			free(f);
-			return;
-		case FRaw:
+			loop = 0;
 			break;
 		case FNone:
 			LOG("error! shouldn' t be none\n");
 			break;
 		}
 
-		inspect_format(f);
-		free(f->value);
-		free(f);
+process_next_fmt:
+		LOG("pushing fmt\n");
+#ifdef DEBUG
+		fmte_inspect(f);
+#endif
+		fmte_push(head, f);
+		if (loop) f = parsef(&fmt);
 	}
+
+	LOG("got all fmt elements\n");
+	final = assemble_fmt(head);
+	fmte_destroy(head);
+	return final;
 }
 
 int main(int argc, char **argv) {
+	const char *mbfmt;
+	wchar_t *fmt, *str;
+	size_t len;
+	int argi, oargi;
+
 	setlocale(LC_ALL, "");
 	locale_info = localeconv();
 
@@ -70,48 +88,17 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	const char *mbfmt = argv[1];
-
-	size_t len = mbsrtowcs(NULL, &mbfmt, 0, NULL);
-	wchar_t *fmt = calloc(len + 1, sizeof(wchar_t));
+	mbfmt = argv[1];
+	len = mbsrtowcs(NULL, &mbfmt, 0, NULL);
+	fmt = calloc(len + 1, sizeof(wchar_t));
 	mbsrtowcs(fmt, &mbfmt, len, NULL);
 
-	int argi = 2;
-	format(fmt, argc, &argi, argv);
-	free(fmt);
-	//struct fmte *f = parsef(&fmt);
-	//inspect_format(f);
+	argi = 2;
+	oargi = 0;
+	while ((argc == 2 || argi < argc) && argi != oargi) {
+		oargi = argi;
 
-	//wchar_t *str;
-
-	/*
-	int argi = 2;
-	int oargi = 0;
-
-	while (argc == 2 || argi < argc) {
-		if (argi == oargi) {
-			LOG("failed to use up all the arguments\n");
-			break;
-		} else {
-			oargi = argi;
-		}
-		LOG("argi: %d, argc: %d\n", argi, argc);
-
-		if (argc > 2) {
-			ap = argv_make_list(fmt, argc, &argi, argv);
-		} else {
-			ap = list_elem_create();
-		}
-
-		LOG("list element contents:\n");
-#ifdef DEBUG
-		list_elem_inspect_all(ap);
-#endif
-
-		str = altsprintf(fmt, ap);
-		list_elem_destroy(ap);
-
-		LOG("pass result: '%ls'\n", str);
+		str = format(fmt, argc, &argi, argv);
 		free(fmt);
 		fmt = str;
 
@@ -121,7 +108,6 @@ int main(int argc, char **argv) {
 	LOG("final output: '%ls'\n", str);
 	printf("%ls", str);
 	free(str);
-	*/
 
 	return 0;
 }

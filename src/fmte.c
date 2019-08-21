@@ -1,6 +1,6 @@
 #include "fmte.h"
 
-struct fmte *ini_format() {
+struct fmte *fmte_ini() {
 	struct fmte *f = malloc(sizeof(struct fmte));
 
 	f->parenarg_start = NULL;
@@ -11,7 +11,7 @@ struct fmte *ini_format() {
 	f->anglearg_end = NULL;
 	f->anglearg_len = 0;
 
-	f->chararg = L':';
+	f->chararg = L' ';
 	f->padchar = L' ';
 	f->type = FNone;
 	f->align = Right;
@@ -24,7 +24,25 @@ struct fmte *ini_format() {
 	return f;
 }
 
-void inspect_format(struct fmte *f) {
+void fmte_push(struct fmte *a, struct fmte *b) {
+	if (a == b) return; // refuse to create an infinite loop
+
+	while (a->next != NULL) a = a->next;
+
+	a->next = b;
+}
+
+void fmte_destroy(struct fmte *f) {
+	struct fmte *j;
+	while (f != NULL) {
+		j = f->next;
+		free(f->value);
+		free(f);
+		f = j;
+	}
+}
+
+void fmte_inspect(struct fmte *f) {
 	wchar_t *parenarg = calloc(f->parenarg_len + 1, sizeof(wchar_t));
 	wchar_t *anglearg = calloc(f->anglearg_len + 1, sizeof(wchar_t));
 	size_t i;

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "enums.h"
+#include "log.h"
 
 struct fmte {
   wchar_t *parenarg_start;
@@ -26,10 +27,11 @@ struct fmte {
 
   void *value;
 
-  struct format *next;
+  struct fmte *next;
 };
 
-struct fmte *ini_format();
-void inspect_format(struct fmte *);
-
+struct fmte *fmte_ini();
+void fmte_inspect(struct fmte *);
+void fmte_push(struct fmte *, struct fmte *);
+void fmte_destroy(struct fmte *);
 #endif

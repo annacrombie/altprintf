@@ -16,21 +16,17 @@
 #define FS_T_TERN   '?'
 #define FS_T_ALIGN  '='
 
-#define FS_A_STRINGSTART '('
-#define FS_A_STRINGEND   ')'
-
 #define FS_A_PARENARG_S '('
 #define FS_A_PARENARG_E ')'
+#define FS_A_ANGLEARG_S '<'
+#define FS_A_ANGLEARG_E '>'
 
 #define FS_A_CHARARG     '~'
 #define FS_A_LALIGN      '-'
+#define FS_A_CALIGN      '^'
 #define FS_A_SPAD        ' '
-
-#define FS_A_RBHASHSTART '<'
-#define FS_A_RBHASHEND   '>'
-
-#define FS_A_ANGLEARG_S '<'
-#define FS_A_ANGLEARG_E   '>'
+#define FS_A_ZPAD        '0'
+#define FS_A_PREC        '.'
 
 #define FS_D_PREC   100
 

@@ -67,14 +67,13 @@ void strbuf_append_strbuf(struct strbuf *sb, void *sbuf)
 	}
 }
 
-void strbuf_appendw_strbuf(struct strbuf *sb, void *sbuf, long w)
-{
+void strbuf_appendw_strbuf(struct strbuf *sb, void *sbuf, long w) {
 	wchar_t *pos;
 	long ws = 0;
 	struct strbuf *frm = sbuf;
 	LOG("frm->start: %p | frm->end: %p\n", frm->start, frm->end);
 
-	for (pos = frm->start;pos<=frm->end;pos++) {
+	for (pos = frm->start; pos<=frm->end; pos++) {
 		ws += wcwidth(*pos);
 		LOG("new width would be: %ld, requested width: %ld\n", ws, w);
 		if (ws > w) break;
@@ -82,14 +81,12 @@ void strbuf_appendw_strbuf(struct strbuf *sb, void *sbuf, long w)
 	}
 }
 
-void strbuf_append_char(struct strbuf *sb, void *chr)
-{
+void strbuf_append_char(struct strbuf *sb, void *chr) {
 	wint_t *c = chr;
 	strbuf_append(sb, *c);
 }
 
-void strbuf_append_str(struct strbuf *sb, void *str, int maxwidth)
-{
+void strbuf_append_str(struct strbuf *sb, void *str, int maxwidth) {
 	wchar_t *s = str;
 	wchar_t *end = &s[wcslen(s)];
 	int width = 0;

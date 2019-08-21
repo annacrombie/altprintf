@@ -1,5 +1,7 @@
 #include "fmt.h"
 
+#define BUFNUM 25
+
 void fmt_mul(struct strbuf *sb, struct fmte *f) {
 	long int *i = f->value;
 	if (f->parenarg_start == NULL) {
@@ -24,6 +26,10 @@ void fmt_tern(struct strbuf *sb, struct fmte *f) {
 		else if (*b && first_half) strbuf_append_char(sb, p);
 		else if (!*b && !first_half) strbuf_append_char(sb, p);
 	}
+}
+
+void fmt_raw(struct strbuf *sb, struct fmte *f) {
+	strbuf_append_str(sb, f->parenarg_start, -1 * f->parenarg_len);
 }
 
 void fmt_string(struct strbuf *sb, struct fmte *f) {
@@ -79,172 +85,90 @@ void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct
 	strbuf_destroy(tmp);
 }
 
-/*
-wchar_t *altsprintf(wchar_t *fmt, struct list_elem *le) {
-	int lvl = 0;
-	int split = 0;
-	struct strbuf *sbs[] = {strbuf_new(), strbuf_new()};
-	struct strbuf *sb = sbs[0];
-	wchar_t *end = &fmt[wcslen(fmt)];
-	wchar_t *jump;
+wchar_t *assemble_fmt(struct fmte *head) {
+	struct fmte *f = head;
+	struct strbuf *bufs[BUFNUM];
+	struct fmte *splits[BUFNUM];
+	size_t buf = 0, i;
+	size_t w, tw, rw;
+	wchar_t *final;
+	void (*fmtr)(struct strbuf *, struct fmte *) = NULL;
+	int loop = 1;
 
-	void (*append_func)(struct strbuf *, struct fmte *);
-	struct fmte f;
-	long int *number_p = NULL;
-	long int *width;
-	wint_t split_pad = L' ';
+	bufs[buf] = strbuf_new();
 
-	for (;fmt<end;fmt++) {
-		LOG("checking char '%lc', lvl: '%d'\n", (wint_t)(*fmt), lvl);
-		switch (lvl) {
-		case 0:
-			switch(*fmt) {
-			case FS_START:
-				ini_fmte(&f);
-				lvl = 1;
-				break;
-			case FS_ESC:
-				lvl = 3;
-				break;
-			default:
-				strbuf_append(sb, *fmt);
-				break;
-			};
+	LOG("assembling elements\n");
+	while (loop) {
+		switch (f->type) {
+		case FMul:
+			fmtr = fmt_mul;
 			break;
-		case 1:
-			switch(*fmt) {
-			// special arguments
-			case FS_A_RBHASHSTART:
-				while (fmt < end && *fmt != FS_A_RBHASHEND) fmt++;
-				break;
-			case FS_A_STRINGSTART:
-				f.parenarg_start = fmt + 1;
-				lvl = 2;
-				break;
-			case FS_A_CHARARG:
-				f.chararg = *(fmt+1);
-				fmt += 1;
-				break;
+		case FTern:
+			fmtr = fmt_tern;
+			break;
+		case FInt:
+			fmtr = fmt_int;
+			break;
+		case FChar:
+			fmtr = fmt_char;
+			break;
+		case FDouble:
+			fmtr = fmt_double;
+			break;
+		case FString:
+			fmtr = fmt_string;
+			break;
+		case FRaw:
+			fmtr = fmt_raw;
+			break;
 
-			// standard arguments
-			case FS_A_LALIGN:
-				f.align = Left;
-				break;
-			case FS_A_SPAD:
-				f.padchar = FS_A_SPAD;
-				break;
-			case '0':
-				f.padchar = '0';
-				break;
-			case '.':
-				number_p = &f.prec;
-				fmt++;
-			case '1': case '2': case '3': case '4': case '5':
-			case '6': case '7': case '8': case '9':
-				if (number_p == NULL) number_p = &f.pad;
-				*number_p = wcstol(fmt, &jump, 10);
-				fmt = (jump-1);
-				break;
-
-			// align operator
-			case FS_T_ALIGN:
-				if (le != NULL && le->type != Null) {
-					width = le->data;
-					le = le->next;
-				} else {
-					goto no_more_args;
-				}
-
-				split = 1;
-				split_pad = f.chararg;
-				sb = sbs[1];
-				lvl = 0;
-				break;
-
-			// types
-			case FS_T_STRING:
-				append_func = fmte_string;
-				goto match;
-			case FS_T_TERN:
-				append_func = fmte_tern;
-				goto match;
-			case FS_T_INT:
-				append_func = fmte_int;
-				goto match;
-			case FS_T_MUL:
-				append_func = fmte_mul;
-				goto match;
-			case FS_T_CHAR:
-				append_func = fmte_char;
-				goto match;
-			case FS_T_DOUBLE:
-				append_func = fmte_double;
-			match:
-				if (le != NULL && le->type != Null) {
-					f.value = le->data;
-					fmte(sb, &f, append_func);
-					le = le->next;
-				}
-				lvl = 0;
-				break;
-			case FS_START:
-				strbuf_append(sb, FS_START);
-				lvl = 0;
-				break;
-			default:
-				lvl = 0;
-				break;
-			}; break;
-		case 2:
-			if (*fmt == FS_A_STRINGEND) {
-				f.parenarg_end = fmt - 1;
-				lvl = 1;
-			} else {
-				f.parenarg_len++;
-			}; break;
-		case 3:
-			switch(*fmt) {
-			case FS_ESC_NL:
-				strbuf_append(sb, '\n');
-				break;
-			case FS_ESC_ESC:
-				strbuf_append(sb, '\e');
-				break;
-			default:
-				strbuf_append(sb, *fmt);
-				break;
-			};
-			lvl = 0;
+		case FAlign:
+			buf++;
+			splits[buf] = f;
+			bufs[buf] = strbuf_new();
+			fmtr = NULL;
+			break;
+		case FEnd:
+			loop = 0;
+			fmtr = NULL;
+			break;
+		case FNone:
+			fmtr = NULL;
 			break;
 		}
+
+		if (fmtr != NULL) fmt(bufs[buf], f, fmtr);
+		f = f->next;
 	}
 
-	wchar_t *str;
-no_more_args:
-	if (split) {
-		LOG("splitting string\n");
-		lvl = *width - (sbs[0]->width + sbs[1]->width);
-		if (lvl >= 0) {
-			LOG("padding center\n");
-			strbuf_pad(sbs[0], split_pad, lvl);
-			strbuf_append_strbuf(sbs[0], sbs[1]);
-		} else if (sbs[0]->width > *width) {
-			LOG("the first half is longer than the requested with\n");
-			strbuf_destroy(sbs[1]);
-			sbs[1] = sbs[0];
-			sbs[0] = strbuf_new();
-			strbuf_appendw_strbuf(sbs[0], sbs[1], *width);
+	// Assemble splits
+	LOG("assembling %d splits\n", buf);
+	tw = bufs[0]->width;
+	for (i = 1; i <= buf; i++) {
+		rw = *(long *)splits[i]->value;
+
+		if (tw > rw) {
+			LOG("trimming first half to width\n");
+			strbuf_destroy(bufs[i]);
+			bufs[i] = bufs[0];
+			bufs[0] = strbuf_new();
+			strbuf_appendw_strbuf(bufs[0], bufs[i], rw);
 		} else {
-			LOG("just shave some off the last half\n");
-			strbuf_appendw_strbuf(sbs[0], sbs[1], *width - sbs[0]->width);
+			if (rw > bufs[i]->width + tw) {
+				w = rw - (bufs[i]->width + tw);
+				LOG("padding %d\n", w);
+				strbuf_pad(bufs[0], splits[i]->chararg, w);
+				strbuf_append_strbuf(bufs[0], bufs[i]);
+			} else {
+				LOG("%d %d %d\n", w, rw, tw);
+				strbuf_appendw_strbuf(bufs[0], bufs[i], rw - tw);
+			}
 		}
+
+		tw = rw;
 	}
 
-	str = strbuf_cstr(sbs[0]);
-
-	strbuf_destroy(sbs[0]);
-	strbuf_destroy(sbs[1]);
-
-	return str;
+	final = strbuf_cstr(bufs[0]);
+	for (i = 0; i <= buf; i++) strbuf_destroy(bufs[i]);
+	return final;
 }
-*/

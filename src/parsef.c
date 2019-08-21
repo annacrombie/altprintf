@@ -5,7 +5,7 @@
 struct fmte *parsef(wchar_t **fmt) {
 	wchar_t *w_c;
 	wchar_t **w_a = &w_c;
-	struct fmte *f = ini_format();
+	struct fmte *f = fmte_ini();
 	long *l_a = &f->pad;
 	wchar_t raw[1] = { FS_START };
 
@@ -52,13 +52,16 @@ struct fmte *parsef(wchar_t **fmt) {
 		case FS_A_LALIGN:
 			f->align = Left;
 			break;
+		case FS_A_CALIGN:
+			f->align = Center;
+			break;
 		case FS_A_SPAD:
 			f->padchar = FS_A_SPAD;
 			break;
-		case '0':
+		case FS_A_ZPAD:
 			f->padchar = '0';
 			break;
-		case '.':
+		case FS_A_PREC:
 			l_a = &f->prec;
 			break;
 		case '1': case '2': case '3': case '4': case '5':
