@@ -13,6 +13,6 @@ RSpec.describe 'random formats' do
       end
 
       api.fmt([fmt] + args)
-    end.then { |res| expect(res[:ok]).to eq(100) }
+    end.yield_self { |res| expect(res[:ok]).to eq(100) }
   end
 end

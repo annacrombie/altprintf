@@ -4,7 +4,7 @@ class Runner
   def initialize(name, fail_fast: nil)
     @fail_fast = fail_fast || !!ENV['FAIL_FAST']
     @fd =
-      File.join(__dir__, '../../log/').then do |d|
+      File.join(__dir__, '../../log/').yield_self do |d|
         { out: "#{name}.log", err: "#{name}_err.log" }
           .map { |k, v| [k, File.join(d, v)] }
           .each { |(_, f)| File.write(f, '') }

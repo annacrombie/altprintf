@@ -1,6 +1,6 @@
 module FmtGenerator
-  CHARS = %w[a A].map { |s| (s..).take(26) }.flatten +
-    ('0'..).take(10) +
+  CHARS = [%w[a z], %w[A Z]].map { |(a, z)| (a..z).take(26) }.flatten +
+    ('0'..'10').to_a +
     %w[{ $ % ! & # @ = ` ~ ^ < * + - } " | : _ > ; ' \\ / . , \ ]
 
   module_function
@@ -25,9 +25,9 @@ module FmtGenerator
       -> { '0' },
       -> { ' ' },
       -> { "(#{random_chars})" },
-      -> { random_int.then { |i| ["#{i}.#{i}", ".#{i}"].sample } },
+      -> { random_int.yield_self { |i| ["#{i}.#{i}", ".#{i}"].sample } },
       #-> { random_chars },
-    ].then { |e| e.sample(rand(e.length - 1) + 1) }.map(&:call).join
+    ].yield_self { |e| e.sample(rand(e.length - 1) + 1) }.map(&:call).join
   end
 
   def random_spec
@@ -38,7 +38,7 @@ module FmtGenerator
       'd' => -> { random_int },
       '?' => -> { [true, false].sample },
       '=' => -> { random_int }
-    }.to_a.sample.then { |(s, p)| [s, p.call] }
+    }.to_a.sample.yield_self { |(s, p)| [s, p.call] }
   end
 
   def random_char
