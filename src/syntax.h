@@ -30,4 +30,6 @@
 
 #define FS_D_PREC   100
 
+#define EOS L'\0'
+
 #endif

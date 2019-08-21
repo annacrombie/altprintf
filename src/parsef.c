@@ -1,7 +1,5 @@
 #include "parsef.h"
 
-#define EOS L'\0'
-
 wchar_t *altprintf_pct = L"%";
 
 struct fmte *parsef(wchar_t **fmt) {
