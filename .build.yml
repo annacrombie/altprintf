@@ -7,7 +7,7 @@ sources:
   - https://github.com/annacrombie/altprintf
 tasks:
   - setup: |
-      sudo gem install bundler
+      sudo gem install bundler -N
       cd altprintf
       bundle install
       cd gem
