@@ -2,7 +2,7 @@ image: alpine/edge
 shell: true
 packages:
   - ruby
-  - ruby-devel
+  - ruby-dev
 sources:
   - https://github.com/annacrombie/altprintf
 tasks:
