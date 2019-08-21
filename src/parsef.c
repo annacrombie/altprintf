@@ -2,12 +2,13 @@
 
 #define EOS L'\0'
 
+wchar_t *altprintf_pct = L"%";
+
 struct fmte *parsef(wchar_t **fmt) {
 	wchar_t *w_c;
 	wchar_t **w_a = &w_c;
 	struct fmte *f = fmte_ini();
 	long *l_a = &f->pad;
-	wchar_t raw[1] = { FS_START };
 
 	LOG("processing %ld (%lc)\n", **fmt, (wint_t)**fmt);
 
@@ -73,7 +74,8 @@ struct fmte *parsef(wchar_t **fmt) {
 		// Psuedo-type
 		case FS_START:
 			f->type = FRaw;
-			f->parenarg_start = f->parenarg_end = raw;
+			f->parenarg_start = &altprintf_pct[0];
+			f->parenarg_end = &altprintf_pct[1];
 			f->parenarg_len = 1;
 			goto return_format;
 		// Types
