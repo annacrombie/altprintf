@@ -28,8 +28,33 @@ void fmt_tern(struct strbuf *sb, struct fmte *f) {
 	}
 }
 
+wchar_t process_escape_seq(wchar_t seq) {
+	switch (seq) {
+	case FS_ESC:
+		return FS_ESC;
+	case FS_ESC_NL:
+		return L'\n';
+	case FS_ESC_ESC:
+		return L'\e';
+	default:
+		return seq;
+	}
+}
+
 void fmt_raw(struct strbuf *sb, struct fmte *f) {
-	strbuf_append_str(sb, f->parenarg_start, -1 * f->parenarg_len);
+	wchar_t *p;
+	wchar_t c;
+	long i;
+
+	p = f->parenarg_start;
+	i = f->parenarg_len;
+
+	for (; i > 1; i--) {
+		c = (*p == FS_ESC) ? process_escape_seq(*++p) : *p;
+
+		strbuf_append(sb, c);
+		p++;
+	}
 }
 
 void fmt_string(struct strbuf *sb, struct fmte *f) {
