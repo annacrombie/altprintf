@@ -37,7 +37,7 @@ task :build_gem do
   end
 
   FileUtils.cp_r(
-    %w[altprintf list log strbuf syntax].map do |w|
+    %w[altprintf fmt fmte parsef strbuf enums log syntax].map do |w|
       %w[h c].map { |e| File.join(SRC_DIR, "#{w}.#{e}") }
         .select { |f| File.exist?(f) }
     end.flatten,
