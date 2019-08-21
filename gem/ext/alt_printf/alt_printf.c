@@ -4,15 +4,8 @@
 #include <wchar.h>
 #include <ruby.h>
 #include <ruby/encoding.h>
-#include "list.h"
 #include "altprintf.h"
 #include "log.h"
-
-#define CHECKARG                              \
-if (!use_hash) {                              \
-	if (*argi >= argc) goto no_more_args; \
-	entry = rb_ary_entry(*argv, *argi);   \
-}
 
 #define MODNAME "AltPrintf"
 
@@ -51,7 +44,7 @@ VALUE wcstorbs(const wchar_t *wstr) {
 
 	LOG("wcs to rbs, len: %d, wcs: %ls, mbs: '%s'\n", len, wstr, cstr);
 
-	if (len < 0) return Qnil;
+	if (len == (size_t)-1) return Qnil;
 
 	str = rb_external_str_new_with_enc(cstr, len, enc);
 	free(cstr);
@@ -59,136 +52,129 @@ VALUE wcstorbs(const wchar_t *wstr) {
 	return str;
 }
 
-struct list_elem *rb_altprintf_make_list(const wchar_t *fmt, VALUE *argv, long *argi, VALUE *hash) {
-	struct list_elem *le_cur;
-	struct list_elem *le_start;
-	struct list_elem *le_prev;
-	/* create a dummy element as the head */
-	le_start = le_prev = list_elem_create();
-
-	VALUE entry, symbol;
-
-	long int *tmp_int;
-	wint_t *tmp_char;
-	double *tmp_double;
-	const wchar_t *tmp_str;
-
-	char *cstr;
+VALUE get_entry(struct fmte *f, VALUE *argv, long *argi, VALUE *hash) {
+	VALUE sym, entry;
 	size_t len;
+	const wchar_t *tmpw;
+	char *cstr;
 
-	int mode = 0;
-	long argc = rb_array_len(*argv);
-	int use_hash = 0;
+	LOG("getting entry\n");
 
-	enum ArgType type = FNone;
+	if (f->anglearg_len == 0) {
+		LOG("getting from argv\n");
+		entry = rb_ary_entry(*argv, *argi);
+		(*argi)++;
+		return entry;
+	}
 
-	while (type != FEnd) {
-		type = scan_next_arg(&fmt);
+	LOG("getting from hash\n");
 
-		switch (type) {
-		case FS_A_RBHASHSTART:
-			tmp_str = fmt + 1;
+	//fmte_inspect(f);
 
-			use_hash = -1;
-			while (fmt < end && *fmt != FS_A_RBHASHEND) {
-				fmt++;
-				use_hash++;
-			}
+	tmpw = f->anglearg_start;
+	len = wcsnrtombs(NULL, &tmpw, f->anglearg_len, 0, NULL);
+	LOG("allocating %d, maxlen %d\n", len, f->anglearg_len);
 
-			LOG("use_hash: %d\n", use_hash);
-			len = wcsnrtombs(NULL, &tmp_str, use_hash, 0, NULL);
+	cstr = calloc(len + 1, sizeof(char));
+	wcsnrtombs(cstr, &tmpw, f->anglearg_len, len, NULL);
+	LOG("wrote cstr %s\n", cstr);
 
-			cstr = calloc(len + 1, sizeof(char));
-			wcsnrtombs(cstr, &tmp_str, use_hash, len, NULL);
+	LOG("symbol | cstr: '%s', len %d\n", cstr, len);
 
-			LOG("symbol | cstr: '%s', len %d\n", cstr, len);
+	sym = rb_check_symbol_cstr(cstr, len, enc);
+	entry = rb_hash_lookup2(*hash, sym, Qnil);
+	if (entry == Qnil) rb_raise(rb_eKeyError, "key missing %s", cstr);
+	free(cstr);
 
-			symbol = rb_check_symbol_cstr(cstr, len, enc);
-			entry = rb_hash_lookup2(*hash, symbol, Qnil);
+	return entry;
+}
 
-			if (entry == Qnil) {
-				rb_raise(
-					rb_eKeyError,
-					"no such key :%s",
-					cstr
-				);
-				free(cstr);
-			}
+wchar_t *rb_apformat(wchar_t *fmt, VALUE *argv, long *argi, VALUE *hash) {
+	struct fmte *f, *head;
+	wchar_t *final;
+	int loop = 1;
+	long *tmpi;
+	wint_t *tmpc;
+	wchar_t *tmps;
+	double *tmpd;
+	void *tmp;
+	VALUE entry;
 
-			use_hash = 1;
+	head = f = parsef(&fmt);
 
-			break;
+	while (loop) {
+		LOG("scanned type: %d\n", f->type);
+
+		entry = get_entry(f, argv, argi, hash);
+
+		switch (f->type) {
 		case FString:
-			CHECKARG;
 			Check_Type(entry, T_STRING);
 
-			tmp_str = rbstowcs(entry);
-			le_cur = list_elem_ini(tmp_str, String);
+			tmp = rbstowcs(entry);
 			goto match;
 		case FTern:
-			CHECKARG;
-			tmp_int = malloc(sizeof(long int));
-			if (entry == Qfalse || entry == Qnil) {
-				*tmp_int = 0;
-			} else {
-				*tmp_int = 1;
-			}
-			LOG("got bool %ld\n", *tmp_int);
-			le_cur = list_elem_ini(tmp_int, Int);
+			tmpi = malloc(sizeof(long));
 
-			goto match;
+			*tmpi = (entry == Qfalse || entry == Qnil) ? 0 : 1;
+
+			tmp = tmpi;
 		case FMul:
 		case FAlign:
 		case FInt:
-			CHECKARG;
 			Check_Type(entry, T_FIXNUM);
 
-			tmp_int = malloc(sizeof(long int));
-			*tmp_int = FIX2LONG(entry);
-			LOG("got int %ld\n", *tmp_int);
-			le_cur = list_elem_ini(tmp_int, Int);
+			tmpi = malloc(sizeof(long int));
+			*tmpi = FIX2LONG(entry);
+			tmp = tmpi;
 			goto match;
 		case FChar:
-			CHECKARG;
 			Check_Type(entry, T_STRING);
 
-			tmp_char = malloc(sizeof(wint_t));
-			tmp_str = rbstowcs(entry);
-			*tmp_char = btowc(tmp_str[0]);
-			le_cur = list_elem_ini(tmp_char, Char);
+			tmpc = malloc(sizeof(wint_t));
+			tmps = rbstowcs(entry);
+			*tmpc = btowc(tmps[0]);
+			tmp = tmpc;
 			goto match;
 		case FDouble:
-			CHECKARG;
 			Check_Type(entry, T_FLOAT);
 
-			tmp_double = malloc(sizeof(double));
-			*tmp_double = RFLOAT_VALUE(entry);
-			le_cur = list_elem_ini(tmp_double, Double);
-			goto match;
-		match: le_prev->next = le_cur;
-			le_prev = le_cur;
-			mode = 0;
-			(*argi)++;
+			tmpd = malloc(sizeof(double));
+			*tmpd = RFLOAT_VALUE(entry);
+			tmp = tmpd;
+		match:
+			f->value = tmp;
+			break;
+		case FRaw:
+			break;
+		case FEnd:
+			LOG("EOS (end of string)\n");
+			loop = 0;
+			break;
+		case FNone:
+			LOG("error! shouldn' t be none\n");
 			break;
 		}
+
+		LOG("pushing fmt\n");
+#ifdef DEBUG
+		fmte_inspect(f);
+#endif
+		fmte_push(head, f);
+		if (loop) f = parsef(&fmt);
 	}
 
-no_more_args:
-	if (le_start->next == NULL) return le_start;
-
-	/* set cur to the 2nd element and destroy the first one */
-	le_cur = le_start->next;
-	le_start->next = NULL;
-	list_elem_destroy(le_start);
-
-	return le_cur;
+	LOG("got all fmt elements\n");
+	final = assemble_fmt(head);
+	fmte_destroy(head);
+	return final;
 }
 
 VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 	VALUE fmt, args, hash, final;
 	wchar_t *wfmt;
 	wchar_t *formatted;
-	struct list_elem *ap;
+	long argi;
 
 	rb_scan_args(argc, argv, "1*:", &fmt, &args, &hash);
 
@@ -200,26 +186,18 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 	if (passes == 0) return fmt;
 
 	wfmt = rbstowcs(fmt);
+	formatted = NULL;
 
-	long argi = 0;
-	while (passes > 0) {
-		ap = rb_altprintf_make_list(wfmt, &args, &argi, &hash);
-
-#ifdef DEBUG
-		list_elem_inspect_all(ap);
-#endif
-
+	argi = 0;
+	for (; passes > 0; passes--) {
 		LOG("wfmt: %ls\n", wfmt);
 
-		formatted = altsprintf(wfmt, ap);
+		formatted = rb_apformat(wfmt, &args, &argi, &hash);
 
 		LOG("formatted result: '%ls'\n", formatted);
 
 		free(wfmt);
-		list_elem_destroy(ap);
-
 		wfmt = formatted;
-		passes--;
 	}
 
 
@@ -232,8 +210,6 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 }
 
 VALUE rb_alt_printf_single_pass(size_t argc, VALUE *argv, VALUE self) {
-	VALUE fmt, args, hash, final;
-
 	return rb_alt_printf(1, argc, argv, self);
 }
 
@@ -252,10 +228,11 @@ VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self) {
 	return rb_alt_printf(passes, argc - 1, &argv[1], self);
 }
 
-void Init_alt_printf()
-{
+void Init_alt_printf() {
+	VALUE mod;
+
 	enc = rb_enc_find("UTF-8");
-	VALUE mod = rb_define_module(MODNAME);
+	mod = rb_define_module(MODNAME);
 	rb_define_module_function(mod, "fmt", rb_alt_printf_single_pass, -1);
 	rb_define_module_function(mod, "fmtm", rb_alt_printf_multi_pass, -1);
 }
