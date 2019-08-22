@@ -33,6 +33,7 @@ class Runner
       @res[result] += 1
     end
 
+    print(status(times.count - 1, total))
     puts
 
     @res.tap { reset_res }
@@ -42,10 +43,10 @@ class Runner
 
   def status(i, total)
     sprintf(
-      "\r%d/%d, [%s]\e[K",
+      "\rfuzzing %3d/%3d | %s\e[K",
       i + 1,
       total,
-      @res.map { |k, v| "#{k}:#{v}" }.join('|')
+      @res.map { |k, v| sprintf("%s: %3d", k, v) }.join(', ')
     )
   end
 
