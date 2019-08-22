@@ -12,5 +12,5 @@ It exposes the following module functions
 In addition to the syntax of vanilla altprintf, the following additional
 argument is accepted:
 
-+ `<val>` - access the value of the given hash with key `:"#{val}"` rather than
++ `<val>` - access the value of the given hash with key `val` rather than
   try to read the next argument.
