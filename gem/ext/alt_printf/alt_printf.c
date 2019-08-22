@@ -238,10 +238,16 @@ VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self) {
 }
 
 void Init_alt_printf() {
-	VALUE mod;
+	VALUE mod, ver;
+	size_t len;
 
 	enc = rb_enc_find("UTF-8");
 	mod = rb_define_module(MODNAME);
+
+	len = strlen(ALTPRINTF_VERSION);
+	ver = rb_external_str_new_with_enc(ALTPRINTF_VERSION, len, enc);
+	rb_define_const(mod, "LIB_VERSION", ver);
+
 	rb_define_module_function(mod, "fmt", rb_alt_printf_single_pass, -1);
 	rb_define_module_function(mod, "fmtm", rb_alt_printf_multi_pass, -1);
 }
