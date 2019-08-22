@@ -84,7 +84,11 @@ int main(int argc, char **argv) {
 	locale_info = localeconv();
 
 	if (argc < 2) {
-		printf("usage: %s format [arg1 [arg2 [...]]]\n", argv[0]);
+		printf(
+			"altprintf v%s\nusage: %s format [arg1 [arg2 [...]]]\n",
+			ALTPRINTF_VERSION,
+			argv[0]
+		);
 		return 1;
 	}
 
