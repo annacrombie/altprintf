@@ -1,1 +1,1 @@
-AltPrintf::VERSION = [0, 2, 1]
+AltPrintf::VERSION = [0, 2, 2]
