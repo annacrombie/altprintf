@@ -23,11 +23,12 @@ task :build_gem do
   FileUtils.mkdir(tmp_dir)
 
   Dir[
-    'Gemfile',
-    'README.md',
-    'Rakefile',
+    'readme.md',
     'alt_printf.gemspec',
-    '{ext,lib}/**/*'
+    'Rakefile',
+    'lib/**/*',
+    'ext/**/*.{c,h}',
+    'ext/alt_printf/extconf{_helper}.rb'
   ].each do |f|
     next if File.directory?(f)
 

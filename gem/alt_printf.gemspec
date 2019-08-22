@@ -11,7 +11,7 @@ AltPrintf::SPEC = Gem::Specification.new do |s|
   s.homepage      = 'https://github.com/annacrombie/altprintf/tree/master/gem'
   s.license       = 'MIT'
 
-  s.files         = Dir['{**/*}']
+  s.files         = Dir['{**/*}'] - ['Rakefile']
 
   s.platform = Gem::Platform::RUBY
   s.extensions = Dir["ext/**/extconf.rb"]
