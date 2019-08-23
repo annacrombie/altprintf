@@ -97,6 +97,7 @@ int main(int argc, char **argv) {
 	len = mbsrtowcs(NULL, &mbfmt, 0, NULL);
 	fmt = calloc(len + 1, sizeof(wchar_t));
 	mbsrtowcs(fmt, &mbfmt, len, NULL);
+	str = NULL;
 
 	argi = 2;
 	oargi = 0;
