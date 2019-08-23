@@ -18,4 +18,4 @@ tasks:
       make gem
   - test: |
       cd altprintf
-      FUZZ_COUNT=1000 QUIET_RUNNER=1 rspec
+      FUZZ_COUNT=2000 QUIET_RUNNER=1 FAIL_FAST=1 rspec
