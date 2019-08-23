@@ -7,7 +7,7 @@ sources:
   - https://github.com/annacrombie/altprintf
 tasks:
   - setup: |
-      sudo gem install bundler -N
+      sudo gem install bundler --no-document --quiet
       cd altprintf
       bundle install
       cd gem
@@ -18,4 +18,4 @@ tasks:
       make gem
   - test: |
       cd altprintf
-      rspec
+      FUZZ_COUNT=1000 QUIET_RUNNER=1 rspec
