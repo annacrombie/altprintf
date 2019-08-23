@@ -1,6 +1,7 @@
 #include "cli.h"
 
 struct lconv *locale_info;
+int format_error;
 
 wchar_t *format(wchar_t *fmt, int argc, int *argi, char **argv) {
 	void *tmp;
@@ -113,5 +114,5 @@ int main(int argc, char **argv) {
 	printf("%ls", str);
 	free(str);
 
-	return 0;
+	return format_error;
 }
