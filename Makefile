@@ -51,11 +51,14 @@ run: all
 test: all gem
 	bundle exec rspec
 
+.PHONY: touchgem
+touchgem:
+	touch gem/ext/alt_printf/alt_printf.c
+
 .PHONY: gem
-gem: all
+gem: release
 	make -C gem/
 
 .PHONY: gemd
 gemd: debug
-	make -C gem/ clean
 	make -C gem/ debug
