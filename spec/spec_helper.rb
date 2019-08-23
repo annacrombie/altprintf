@@ -1,7 +1,4 @@
-$LOAD_PATH.unshift(File.expand_path(File.join(__dir__, '../gem/lib')))
-
 require 'bundler/setup'
-require 'alt_printf'
 Dir[File.join(__dir__, 'support/*.rb')].each { |f| require(f) }
 
 RSpec.configure do |config|
