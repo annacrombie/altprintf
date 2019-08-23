@@ -56,7 +56,7 @@ VALUE wcstorbs(const wchar_t *wstr) {
 	return str;
 }
 
-VALUE get_entry(struct fmte *f, VALUE *argv, long *argi, VALUE *hash) {
+VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *hash) {
 	VALUE sym, entry;
 	size_t len;
 	const wchar_t *tmpw;
@@ -65,7 +65,8 @@ VALUE get_entry(struct fmte *f, VALUE *argv, long *argi, VALUE *hash) {
 	LOG("getting entry\n");
 
 	if (f->anglearg_len == 0) {
-		LOG("getting from argv[%ld]\n", *argi);
+		LOG("getting from argv[%d] (argc: %d)\n", *argi, argc);
+		if (*argi >= argc) rb_raise(rb_eArgError, "too few arguments");
 		entry = rb_ary_entry(*argv, *argi);
 		(*argi)++;
 		return entry;
@@ -93,7 +94,7 @@ VALUE get_entry(struct fmte *f, VALUE *argv, long *argi, VALUE *hash) {
 	return entry;
 }
 
-wchar_t *rb_apformat(wchar_t *fmt, VALUE *argv, long *argi, VALUE *hash) {
+wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE *hash) {
 	struct fmte *f, *head;
 	wchar_t *final;
 	int loop = 1;
@@ -110,7 +111,7 @@ wchar_t *rb_apformat(wchar_t *fmt, VALUE *argv, long *argi, VALUE *hash) {
 		LOG("scanned type: %d\n", f->type);
 
 		if (f->type != FEnd && f->type != FRaw) {
-			entry = get_entry(f, argv, argi, hash);
+			entry = get_entry(f, argc, argi, argv, hash);
 		} else {
 			entry = Qnil;
 		}
@@ -133,7 +134,7 @@ wchar_t *rb_apformat(wchar_t *fmt, VALUE *argv, long *argi, VALUE *hash) {
 		case FInt:
 			Check_Type(entry, T_FIXNUM);
 
-			tmpi = malloc(sizeof(long int));
+			tmpi = malloc(sizeof(long));
 			*tmpi = FIX2LONG(entry);
 			tmp = tmpi;
 			goto match;
@@ -183,9 +184,10 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 	VALUE fmt, args, hash, final;
 	wchar_t *wfmt;
 	wchar_t *formatted;
-	long argi;
+	size_t argi;
 
 	rb_scan_args(argc, argv, "1*:", &fmt, &args, &hash);
+	argc--;
 
 	if (hash == Qnil && RB_TYPE_P(argv[argc - 1], T_HASH)) {
 		hash = argv[argc - 1];
@@ -201,7 +203,7 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 	for (; passes > 0; passes--) {
 		LOG("wfmt: %ls\n", wfmt);
 
-		formatted = rb_apformat(wfmt, &args, &argi, &hash);
+		formatted = rb_apformat(wfmt, argc, &argi, &args, &hash);
 
 		LOG("formatted result: '%ls'\n", formatted);
 
