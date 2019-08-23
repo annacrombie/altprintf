@@ -54,11 +54,11 @@ void fmte_inspect(struct fmte *f) {
 "Format@%p {\n\
 	parenarg_start: %p,\n\
 	parenarg_end: %p,\n\
-	parenarg_len: %d,\n\
+	parenarg_len: %ld,\n\
 	(parenarg): %ls,\n\
 	anglearg_start: %p,\n\
 	anglearg_end: %p,\n\
-	anglearg_len: %d,\n\
+	anglearg_len: %ld,\n\
 	(anglearg): %ls,\n\
 	chararg: %lc,\n\
 	padchar: %lc,\n\
@@ -72,11 +72,11 @@ void fmte_inspect(struct fmte *f) {
 	f,
 	f->parenarg_start,
 	f->parenarg_end,
-	f->parenarg_len,
+	(unsigned long)f->parenarg_len,
 	parenarg,
 	f->anglearg_start,
 	f->anglearg_end,
-	f->anglearg_len,
+	(unsigned long)f->anglearg_len,
 	anglearg,
 	f->chararg,
 	f->padchar,
