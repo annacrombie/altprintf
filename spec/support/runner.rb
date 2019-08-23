@@ -1,8 +1,9 @@
 class Runner
   TIMEOUT = 100
 
-  def initialize(name, fail_fast: nil)
+  def initialize(name, fail_fast: nil, quiet: nil)
     @fail_fast = fail_fast || !!ENV['FAIL_FAST']
+    @quiet = quiet || !!ENV['QUIET_RUNNER']
     @fd =
       File.join(__dir__, '../../log/').yield_self do |d|
         { out: "#{name}.log", err: "#{name}_err.log" }
@@ -22,7 +23,7 @@ class Runner
     total = times.count
 
     times.each do |i|
-      print(status(i, total))
+      print(status(i, total)) unless @quiet
       result = forkblock(i, &block)
 
       if @fail_fast && result != :ok
