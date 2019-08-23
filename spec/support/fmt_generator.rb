@@ -26,7 +26,6 @@ module FmtGenerator
       -> { ' ' },
       -> { "(#{random_chars})" },
       -> { random_int.yield_self { |i| ["#{i}.#{i}", ".#{i}"].sample } },
-      #-> { random_chars },
     ].yield_self { |e| e.sample(rand(e.length - 1) + 1) }.map(&:call).join
   end
 

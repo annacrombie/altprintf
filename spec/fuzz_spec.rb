@@ -1,11 +1,13 @@
 require_relative 'spec_helper'
 
 RSpec.describe 'fuzz test' do
-  it do
-    r = Runner.new('benign_formats')
+  let(:times) { (ENV['FUZZ_COUNT'] || 100).to_i.times }
+
+  it 'valid formats' do
+    r = Runner.new('valid_formats')
     api = APIs::RubyExtension.new
 
-    r.run(100.times) do |id|
+    r.run(times) do |id|
       fmt, args = FmtGenerator.fmt_with_args
 
       [$stdout, $stderr].each do |o|
