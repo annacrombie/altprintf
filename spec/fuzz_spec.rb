@@ -32,7 +32,7 @@ RSpec.describe 'fuzz test' do
 
       begin
         api.fmt([fmt] + args)
-      rescue ArgumentError, TypeError => e
+      rescue ArgumentError, TypeError, KeyError => e
         puts "rescued #{e}"
       end
     end.yield_self { |res| expect(res[:ok]).to eq(times.count) }
