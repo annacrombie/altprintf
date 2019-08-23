@@ -2,8 +2,16 @@
 
 #define BUFNUM 25
 
+#define CHECKNULL(p) if (p == NULL) { format_error = 1; return; }
+
+extern int format_error;
+
 void fmt_mul(struct strbuf *sb, struct fmte *f) {
-	long int *i = f->value;
+	CHECKNULL(f->value);
+
+	long *i;
+
+	i = f->value;
 	if (f->parenarg_start == NULL) {
 		strbuf_pad(sb, f->chararg, *i);
 	} else {
@@ -14,7 +22,8 @@ void fmt_mul(struct strbuf *sb, struct fmte *f) {
 }
 
 void fmt_tern(struct strbuf *sb, struct fmte *f) {
-	if (f->parenarg_start == NULL) return;
+	CHECKNULL(f->parenarg_start);
+	CHECKNULL(f->value);
 
 	long int *b = f->value;
 	int first_half = 1;
@@ -52,6 +61,8 @@ wchar_t process_escape_seq(wchar_t seq) {
 }
 
 void fmt_raw(struct strbuf *sb, struct fmte *f) {
+	CHECKNULL(f->parenarg_start);
+
 	wchar_t *p;
 	wchar_t c;
 	long i;
@@ -70,19 +81,24 @@ void fmt_raw(struct strbuf *sb, struct fmte *f) {
 }
 
 void fmt_string(struct strbuf *sb, struct fmte *f) {
+	CHECKNULL(f->value);
+
 	int prec = f->prec == -1 ? 100000000 : f->prec;
 	strbuf_append_str(sb, f->value, prec);
 }
 
 void fmt_char(struct strbuf *sb, struct fmte *f) {
+	CHECKNULL(f->value);
 	strbuf_append_char(sb, f->value);
 }
 
 void fmt_int(struct strbuf *sb, struct fmte *f) {
+	CHECKNULL(f->value);
 	strbuf_append_int(sb, f->value);
 }
 
 void fmt_double(struct strbuf *sb, struct fmte *f) {
+	CHECKNULL(f->value);
 	int prec = f->prec == -1 ? 3 : f->prec;
 	strbuf_append_double(sb, f->value, prec);
 }
