@@ -35,6 +35,6 @@ RSpec.describe 'fuzz test' do
       rescue ArgumentError, TypeError, KeyError => e
         puts "rescued #{e}"
       end
-    end.yield_self { |res| expect(res[:ok]).to eq(times.count) }
+    end.yield_self { |res| expect(res[:ok] + res[:timeout]).to eq(times.count) }
   end
 end
