@@ -1,7 +1,7 @@
 #include "cli.h"
 
 struct lconv *locale_info;
-int format_error;
+enum altprintf_err apf_err;
 
 wchar_t *format(wchar_t *fmt, int argc, int *argi, char **argv) {
 	void *tmp;
@@ -115,5 +115,5 @@ int main(int argc, char **argv) {
 	printf("%ls", str);
 	free(str);
 
-	return format_error;
+	return apf_err;
 }

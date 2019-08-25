@@ -2,9 +2,9 @@
 
 #define BUFNUM 25
 
-#define CHECKNULL(p) if (p == NULL) { format_error = 1; return; }
+#define CHECKNULL(p) if (p == NULL) { apf_err = apfe_missing_argument; return; }
 
-extern int format_error;
+enum altprintf_err apf_err;
 
 void fmt_mul(struct strbuf *sb, struct fmte *f) {
 	CHECKNULL(f->value);

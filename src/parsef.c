@@ -99,6 +99,7 @@ struct fmte *parsef(wchar_t **fmt) {
 			f->type = FDouble;
 			goto return_format;
 		default:
+			apf_err = apfe_invalid_token;
 			f->type = FRaw;
 		}
 	}
