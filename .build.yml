@@ -1,5 +1,4 @@
 image: alpine/edge
-shell: true
 packages:
   - ruby
   - ruby-dev
