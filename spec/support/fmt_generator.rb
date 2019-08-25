@@ -13,10 +13,10 @@ module FmtGenerator
         spec, arg = random_spec
         args << arg
 
-        "%#{random_fmt_args}#{spec} "
+        "%#{random_fmt_args}#{spec} #{random_unicode}"
       end.join
 
-    [fmt, args]
+    [fmt, args.compact]
   end
 
   def random_fmt_args
@@ -25,7 +25,10 @@ module FmtGenerator
       -> { '0' },
       -> { ' ' },
       -> { "(#{random_chars})" },
-      -> { random_int.yield_self { |i| ["#{i}.#{i}", ".#{i}"].sample } },
+      -> { '-' },
+      -> { '^' },
+      -> { '.' },
+      -> { random_int },
     ].yield_self { |e| e.sample(rand(e.length - 1) + 1) }.map(&:call).join
   end
 
@@ -36,7 +39,8 @@ module FmtGenerator
       'f' => -> { random_float },
       'd' => -> { random_int },
       '?' => -> { [true, false].sample },
-      '=' => -> { random_int }
+      '=' => -> { random_int },
+      '%' => -> { nil }
     }.to_a.sample.yield_self { |(s, p)| [s, p.call] }
   end
 
@@ -46,6 +50,10 @@ module FmtGenerator
 
   def random_chars
     (rand(12) + 1).times.map { random_char }.join
+  end
+
+  def random_unicode
+    (rand(12) + 1).times.map { [rand(0x7f..0xffff)].pack('U') }.join
   end
 
   def random_float
