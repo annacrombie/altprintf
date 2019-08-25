@@ -108,6 +108,8 @@ wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 	head = f = parsef(&fmt);
 
 	while (loop) {
+		if (apf_err != apfe_none) rb_raise(rb_eArgError, "malformed format string");
+
 		LOG("scanned type: %d\n", f->type);
 
 		if (f->type != FEnd && f->type != FRaw) {
@@ -186,6 +188,7 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 	wchar_t *formatted;
 	size_t argi;
 
+	apf_err = apfe_none;
 	rb_scan_args(argc, argv, "1*:", &fmt, &args, &hash);
 	argc--;
 
