@@ -15,7 +15,7 @@ RSpec.describe APIs::RubyExtension do
 
     s = '〒%<mail>s メ%<weechat_messages>s 入%<input_method>s'
 
-    AltPrintf.fmtm(2, s, d)
+    Altprintf.fmtm(2, s, d)
   end
 
   context 'an invalid key is used' do

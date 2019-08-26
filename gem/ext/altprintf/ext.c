@@ -11,7 +11,7 @@
 #include "altprintf.h"
 #include "log.h"
 
-#define MODNAME "AltPrintf"
+#define MODNAME "Altprintf"
 
 rb_encoding *enc;
 
@@ -76,8 +76,6 @@ VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *h
 	}
 
 	LOG("getting from hash\n");
-
-	//fmte_inspect(f);
 
 	tmpw = f->anglearg_start;
 	len = wcsnrtombs(NULL, &tmpw, f->anglearg_len, 0, NULL);

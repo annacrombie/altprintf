@@ -10,8 +10,8 @@ kwargs = { meaning: 42, pi: Math::PI, name: 'Enots Elkcit' }
 
 Benchmark.ips do |bm|
   bm.report('sprintf') { sprintf(fmt_string, *args) }
-  bm.report('altprintf') { AltPrintf.fmt(fmt_string, *args) }
+  bm.report('altprintf') { Altprintf.fmt(fmt_string, *args) }
   bm.report('sprintf - kwargs') { sprintf(kwfmt_string, **kwargs) }
-  bm.report('altprintf - kwargs') { AltPrintf.fmt(kwfmt_string, **kwargs) }
+  bm.report('altprintf - kwargs') { Altprintf.fmt(kwfmt_string, **kwargs) }
   bm.compare!
 end

@@ -59,7 +59,7 @@ namespace :gem do
   desc 'pushes the latest gem'
   task :publish do
     load File.join(__dir__, 'altprintf.gemspec')
-    pkg = "pkg/#{AltPrintf::SPEC.name}-#{AltPrintf::SPEC.version}.gem"
+    pkg = "pkg/#{Altprintf::SPEC.name}-#{Altprintf::SPEC.version}.gem"
 
     sh "rake gem:build" unless File.exist?(pkg)
     sh "gem push #{pkg}"

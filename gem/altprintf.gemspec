@@ -1,9 +1,9 @@
 require 'date'
 require_relative 'lib/altprintf/version'
 
-AltPrintf::SPEC = Gem::Specification.new do |s|
+Altprintf::SPEC = Gem::Specification.new do |s|
   s.name          = 'altprintf'
-  s.version       = AltPrintf::VERSION.join('.')
+  s.version       = Altprintf::VERSION.join('.')
   s.date          = Date.today.strftime('%Y-%m-%d')
   s.summary       = 'A powerful printf-like template language'
   s.authors       = ['Stone Tickle']
@@ -21,4 +21,4 @@ AltPrintf::SPEC = Gem::Specification.new do |s|
 
   s.add_development_dependency 'rake-compiler', '~> 1.0'
   s.add_development_dependency 'rake', '~> 12.3'
-end unless AltPrintf.const_defined?(:'SPEC')
+end unless Altprintf.const_defined?(:'SPEC')

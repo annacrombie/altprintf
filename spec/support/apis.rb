@@ -24,13 +24,13 @@ module APIs
     def fmt(args)
       hash = args.last.is_a?(Hash) ? args.pop : {}
 
-      AltPrintf.fmt(*args, **hash)
+      Altprintf.fmt(*args, **hash)
     end
 
     def fmtm(args)
       hash = args.last.is_a?(Hash) ? args.pop : {}
 
-      AltPrintf.fmtm(*args, **hash)
+      Altprintf.fmtm(*args, **hash)
     end
   end
 end
