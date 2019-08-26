@@ -122,5 +122,6 @@ void get_longarg(wchar_t **s, wchar_t **e, wchar_t stop, size_t *size)
 	}
 
 	(*size)--;
-	if (*size > 0) *e = *s - 1;
+	if (*size > 0)
+		*e = *s - 1;
 }

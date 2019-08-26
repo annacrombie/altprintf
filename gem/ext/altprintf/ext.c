@@ -50,7 +50,8 @@ VALUE wcstorbs(const wchar_t *wstr)
 
 	LOG("wcs to rbs, len: %d, wcs: %ls, mbs: '%s'\n", len, wstr, cstr);
 
-	if (len == (size_t)-1) return Qnil;
+	if (len == (size_t)-1)
+		return Qnil;
 
 	str = rb_external_str_new_with_enc(cstr, len, enc);
 	free(cstr);
@@ -69,7 +70,8 @@ VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *h
 
 	if (f->anglearg_len == 0) {
 		LOG("getting from argv[%d] (argc: %d)\n", *argi, argc);
-		if (*argi >= argc) rb_raise(rb_eArgError, "too few arguments");
+		if (*argi >= argc)
+			rb_raise(rb_eArgError, "too few arguments");
 		entry = rb_ary_entry(*argv, *argi);
 		(*argi)++;
 		return entry;
@@ -89,7 +91,8 @@ VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *h
 
 	sym = rb_check_symbol_cstr(cstr, len, enc);
 	entry = rb_hash_lookup2(*hash, sym, Qnil);
-	if (entry == Qnil) rb_raise(rb_eKeyError, "missing key :%s", cstr);
+	if (entry == Qnil)
+		rb_raise(rb_eKeyError, "missing key :%s", cstr);
 	free(cstr);
 
 	return entry;
@@ -110,7 +113,8 @@ wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 	head = f = parsef(&fmt);
 
 	while (loop) {
-		if (apf_err != apfe_none) rb_raise(rb_eArgError, "malformed format string");
+		if (apf_err != apfe_none)
+			rb_raise(rb_eArgError, "malformed format string");
 
 		LOG("scanned type: %d\n", f->type);
 
@@ -174,7 +178,8 @@ match:
 		fmte_inspect(f);
 #endif
 		fmte_push(head, f);
-		if (loop) f = parsef(&fmt);
+		if (loop)
+			f = parsef(&fmt);
 	}
 
 	LOG("got all fmt elements\n");
@@ -199,7 +204,8 @@ VALUE rb_altprintf(long passes, size_t argc, VALUE *argv, VALUE self)
 		argc--;
 	}
 
-	if (passes == 0) return fmt;
+	if (passes == 0)
+		return fmt;
 
 	wfmt = rbstowcs(fmt);
 	formatted = NULL;

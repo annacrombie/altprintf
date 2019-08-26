@@ -67,7 +67,8 @@ process_next_fmt:
 		fmte_inspect(f);
 #endif
 		fmte_push(head, f);
-		if (loop) f = parsef(&fmt);
+		if (loop)
+			f = parsef(&fmt);
 	}
 
 	LOG("got all fmt elements\n");
@@ -110,7 +111,8 @@ int main(int argc, char **argv)
 		free(fmt);
 		fmt = str;
 
-		if (argc == 2) break;
+		if (argc == 2)
+			break;
 	}
 
 	LOG("final output: '%ls'\n", str);

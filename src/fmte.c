@@ -27,7 +27,8 @@ struct fmte *fmte_ini()
 
 void fmte_push(struct fmte *a, struct fmte *b)
 {
-	if (a == b) return; // refuse to create an infinite loop
+	if (a == b)
+		return;     // refuse to create an infinite loop
 
 	while (a->next != NULL) a = a->next;
 

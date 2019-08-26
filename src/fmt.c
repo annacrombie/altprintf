@@ -31,9 +31,12 @@ void fmt_tern(struct strbuf *sb, struct fmte *f)
 	wchar_t *p = f->parenarg_start;
 	for (; p <= f->parenarg_end; p++) {
 		LOG("*p: %lc, first half? %d, bool: %ld, sep: %lc\n", (wint_t)*p, first_half, *b, (wint_t)sep);
-		if (*p == sep) first_half = 0;
-		else if (*b && first_half) strbuf_append_char(sb, p);
-		else if (!*b && !first_half) strbuf_append_char(sb, p);
+		if (*p == sep)
+			first_half = 0;
+		else if (*b && first_half)
+			strbuf_append_char(sb, p);
+		else if (!*b && !first_half)
+			strbuf_append_char(sb, p);
 	}
 }
 
@@ -78,7 +81,8 @@ void fmt_raw(struct strbuf *sb, struct fmte *f)
 
 		strbuf_append(sb, c);
 		p++;
-		if (*p == EOS) break;
+		if (*p == EOS)
+			break;
 	}
 }
 
@@ -200,13 +204,15 @@ wchar_t *assemble_fmt(struct fmte *head)
 			break;
 		}
 
-		if (fmtr != NULL) fmt(bufs[buf], f, fmtr);
+		if (fmtr != NULL)
+			fmt(bufs[buf], f, fmtr);
 		f = f->next;
 	}
 
 	// Assemble splits
 	LOG("assembling %d splits\n", buf);
-	if (buf > 0) tw = strbuf_width(bufs[0]);
+	if (buf > 0)
+		tw = strbuf_width(bufs[0]);
 	for (i = 1; i <= buf; i++) {
 		rw = *(long*)splits[i]->value;
 

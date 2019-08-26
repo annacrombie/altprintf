@@ -26,7 +26,8 @@ struct strbuf *strbuf_new()
 
 size_t strbuf_width(struct strbuf *sb)
 {
-	if (sb->width == 0) sb->width = wcswidth(sb->start, sb->len);
+	if (sb->width == 0)
+		sb->width = wcswidth(sb->start, sb->len);
 
 	return sb->width;
 }
@@ -85,7 +86,8 @@ void strbuf_appendw_strbuf(struct strbuf *sb, void *sbuf, long w)
 	for (pos = frm->start; pos <= frm->end; pos++) {
 		ws += wcwidth(*pos);
 		LOG("new width would be: %ld, requested width: %ld\n", ws, w);
-		if (ws > w) break;
+		if (ws > w)
+			break;
 		strbuf_append(sb, *pos);
 	}
 }
@@ -110,10 +112,12 @@ void strbuf_append_str(struct strbuf *sb, void *str, int maxwidth)
 	for (; s < end; s++) {
 		if (maxlen >= 0) {
 			width++;
-			if (width > maxlen) return;
+			if (width > maxlen)
+				return;
 		} else {
 			width += wcwidth(*s);
-			if (width > maxwidth) return;
+			if (width > maxwidth)
+				return;
 		}
 
 		strbuf_append(sb, *s);
@@ -139,7 +143,8 @@ void strbuf_append_double(struct strbuf *sb, void *dub, int prec)
 	wchar_t format[TMPLEN];
 	int rprec = prec;
 
-	if (rprec > MAXPREC) rprec = MAXPREC;
+	if (rprec > MAXPREC)
+		rprec = MAXPREC;
 
 	swprintf(format, TMPLEN - 1, L"%%.%ldf", rprec);
 
@@ -152,7 +157,8 @@ void strbuf_append_double(struct strbuf *sb, void *dub, int prec)
 		LOG("inserting double: len: %ld\n", len);
 		strbuf_append_str(sb, wcs, len);
 
-		if (rprec < prec) strbuf_pad(sb, L'0', rprec - prec);
+		if (rprec < prec)
+			strbuf_pad(sb, L'0', rprec - prec);
 	}
 }
 
