@@ -53,7 +53,9 @@ module FmtGenerator
   end
 
   def random_unicode
-    (rand(12) + 1).times.map { [rand(0x7f..0xffff)].pack('U') }.join
+    12.times
+      .map { begin; rand(0xffff).chr('UTF-8'); rescue RangeError; end }
+      .select { |e| /[[:print:]]/.match?(e) }.join
   end
 
   def random_float
@@ -64,3 +66,5 @@ module FmtGenerator
     rand(100)
   end
 end
+
+p FmtGenerator.random_unicode
