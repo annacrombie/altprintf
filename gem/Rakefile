@@ -1,7 +1,8 @@
 require 'rake/extensiontask'
-require 'bundler/gem_tasks'
 require 'securerandom'
 require 'fileutils'
+
+require 'bundler/gem_tasks' if ENV['GEM_BUILD']
 
 SRC_DIR = File.join(__dir__, '../src')
 
@@ -16,47 +17,51 @@ Rake::ExtensionTask.new('alt_printf') do |ext|
     end
 end
 
-desc 'copy necessary C files from ../src and build the resulting gem'
-task :build_gem do
-  tmp_dir = "/tmp/alt_printf_#{SecureRandom.hex(8)}"
-  puts "cloning to #{tmp_dir}"
-  FileUtils.mkdir(tmp_dir)
+namespace :gem do
+  desc 'copy necessary C files from ../src and build the resulting gem'
+  task :build do
+    tmp_dir = "/tmp/alt_printf_#{SecureRandom.hex(8)}"
+    puts "cloning to #{tmp_dir}"
+    FileUtils.mkdir(tmp_dir)
 
-  Dir[
-    'readme.md',
-    'alt_printf.gemspec',
-    'Rakefile',
-    'lib/**/*',
-    'ext/**/*.{c,h}',
-    'ext/alt_printf/extconf{_helper}.rb'
-  ].each do |f|
-    next if File.directory?(f)
+    Dir[
+      'readme.md',
+      'alt_printf.gemspec',
+      'Rakefile',
+      'lib/**/*',
+      'ext/**/*.{c,h}',
+      'ext/alt_printf/extconf{_helper}.rb'
+    ].each do |f|
+      next if File.directory?(f)
 
-    dir = File.join(tmp_dir, File.dirname(f))
-    FileUtils.mkdir_p(dir)
-    FileUtils.cp(f, File.join(dir, File.basename(f)))
+      dir = File.join(tmp_dir, File.dirname(f))
+      FileUtils.mkdir_p(dir)
+      FileUtils.cp(f, File.join(dir, File.basename(f)))
+    end
+
+    FileUtils.cp_r(
+      %w[altprintf fmt fmte parsef strbuf enums log syntax].map do |w|
+        %w[h c].map { |e| File.join(SRC_DIR, "#{w}.#{e}") }
+          .select { |f| File.exist?(f) }
+      end.flatten,
+      File.join(tmp_dir, 'ext/alt_printf/')
+    )
+
+    FileUtils.cd(tmp_dir)
+
+    sh "GEM_BUILD=1 rake build"
+
+    FileUtils.cp(Dir['pkg/*'], File.join(__dir__, 'pkg'))
+    FileUtils.cd(__dir__)
+    FileUtils.rm_rf(tmp_dir)
   end
 
-  FileUtils.cp_r(
-    %w[altprintf fmt fmte parsef strbuf enums log syntax].map do |w|
-      %w[h c].map { |e| File.join(SRC_DIR, "#{w}.#{e}") }
-        .select { |f| File.exist?(f) }
-    end.flatten,
-    File.join(tmp_dir, 'ext/alt_printf/')
-  )
+  desc 'pushes the latest gem'
+  task :publish do
+    load File.join(__dir__, 'alt_printf.gemspec')
+    pkg = "pkg/#{AltPrintf::SPEC.name}-#{AltPrintf::SPEC.version}.gem"
 
-  FileUtils.cd(tmp_dir)
-
-  sh "rake build"
-
-  FileUtils.cp(Dir['pkg/*'], File.join(__dir__, 'pkg'))
-  FileUtils.cd(__dir__)
-  FileUtils.rm_rf(tmp_dir)
-end
-
-desc 'uses build_gem and pushes the resulting gem'
-task publish: :build_gem do
-  load File.join(__dir__, 'alt_printf.gemspec')
-
-  sh "gem push pkg/#{AltPrintf::SPEC.name}-#{AltPrintf::SPEC.version}.gem"
+    sh "rake gem:build" unless File.exist?(pkg)
+    sh "gem push #{pkg}"
+  end
 end
