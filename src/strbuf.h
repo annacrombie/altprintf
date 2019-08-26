@@ -26,6 +26,7 @@ void strbuf_append_strbuf(struct strbuf *, void *);
 void strbuf_appendw_strbuf(struct strbuf *, void *, long);
 void strbuf_pad(struct strbuf *, wchar_t, int);
 wchar_t *strbuf_cstr(struct strbuf *);
+size_t strbuf_width(struct strbuf *);
 
 struct strbuf {
   wchar_t *start;

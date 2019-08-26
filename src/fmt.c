@@ -112,7 +112,7 @@ void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct
 		return;
 	};
 
-	int pad = f->pad - tmp->width;
+	int pad = f->pad > 0 ? f->pad - strbuf_width(tmp) : 0;
 
 	if (pad > 0) {
 		LOG("padding: %d\n", pad);
@@ -196,7 +196,7 @@ wchar_t *assemble_fmt(struct fmte *head) {
 
 	// Assemble splits
 	LOG("assembling %d splits\n", buf);
-	tw = bufs[0]->width;
+	if (buf > 0) tw = strbuf_width(bufs[0]);
 	for (i = 1; i <= buf; i++) {
 		rw = *(long *)splits[i]->value;
 
@@ -207,8 +207,8 @@ wchar_t *assemble_fmt(struct fmte *head) {
 			bufs[0] = strbuf_new();
 			strbuf_appendw_strbuf(bufs[0], bufs[i], rw);
 		} else {
-			if (rw > bufs[i]->width + tw) {
-				w = rw - (bufs[i]->width + tw);
+			if (rw > strbuf_width(bufs[i]) + tw) {
+				w = rw - (strbuf_width(bufs[i]) + tw);
 				LOG("padding %d\n", w);
 				strbuf_pad(bufs[0], splits[i]->chararg, w);
 				strbuf_append_strbuf(bufs[0], bufs[i]);

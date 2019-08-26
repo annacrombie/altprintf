@@ -23,6 +23,12 @@ struct strbuf *strbuf_new() {
 	return sb;
 }
 
+size_t strbuf_width(struct strbuf *sb) {
+	if (sb->width == 0) sb->width = wcswidth(sb->start, sb->len);
+
+	return sb->width;
+}
+
 void strbuf_destroy(struct strbuf *sb) {
 	free(sb->start);
 	free(sb);
@@ -52,8 +58,6 @@ void strbuf_append(struct strbuf *sb, wchar_t c)
 	LOG("string so far: %ls\n", sb->start);
 	sb->end = &sb->start[sb->len];
 	sb->len++;
-	int w = wcwidth(c);
-	if (w >= 0) sb->width += w;
 }
 
 void strbuf_append_strbuf(struct strbuf *sb, void *sbuf)
