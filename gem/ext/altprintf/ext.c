@@ -2,6 +2,10 @@
 #undef _FORTIFY_SOURCE
 #endif
 
+#ifdef RUBY_EXTCONF_H
+#undef RUBY_EXTCONF_H
+#endif
+
 #include "extconf.h"
 #include <stdio.h>
 #include <locale.h>
