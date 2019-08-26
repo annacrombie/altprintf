@@ -66,5 +66,3 @@ module FmtGenerator
     rand(100)
   end
 end
-
-p FmtGenerator.random_unicode

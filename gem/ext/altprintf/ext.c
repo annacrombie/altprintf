@@ -240,13 +240,8 @@ VALUE rb_altprintf_multi_pass(size_t argc, VALUE *argv, VALUE self)
 {
 	long passes;
 
-
-	if (RB_TYPE_P(argv[0], T_FIXNUM)) {
-		passes = FIX2LONG(argv[0]);
-	} else {
-		rb_raise(rb_eArgError, "integer expected");
-		return Qnil;
-	}
+	Check_Type(argv[0], T_FIXNUM);
+	passes = FIX2LONG(argv[0]);
 
 	LOG("passes: %ld\n", passes);
 	return rb_altprintf(passes, argc - 1, &argv[1], self);

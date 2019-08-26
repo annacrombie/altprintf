@@ -3,8 +3,8 @@ require_relative 'spec_helper'
 RSpec.describe APIs::RubyExtension do
   context 'fmtm' do
     context 'invalid passes arg' do
-      it 'raises an argument error' do
-        expect { subject.fmtm(['nan', '%%']) }.to raise_exception(ArgumentError)
+      it 'raises an type error' do
+        expect { subject.fmtm(['nan', '%%']) }.to raise_exception(TypeError)
       end
     end
   end
