@@ -242,6 +242,8 @@ VALUE rb_altprintf_multi_pass(size_t argc, VALUE *argv, VALUE self)
 
 	Check_Type(argv[0], T_FIXNUM);
 	passes = FIX2LONG(argv[0]);
+	if (passes < 0)
+		rb_raise(rb_eArgError, "expected positive number of passes");
 
 	LOG("passes: %ld\n", passes);
 	return rb_altprintf(passes, argc - 1, &argv[1], self);
