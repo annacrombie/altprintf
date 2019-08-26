@@ -185,7 +185,7 @@ match:
 	return final;
 }
 
-VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self)
+VALUE rb_altprintf(long passes, size_t argc, VALUE *argv, VALUE self)
 {
 	VALUE fmt, args, hash, final;
 	wchar_t *wfmt;
@@ -227,12 +227,12 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self)
 	return final;
 }
 
-VALUE rb_alt_printf_single_pass(size_t argc, VALUE *argv, VALUE self)
+VALUE rb_altprintf_single_pass(size_t argc, VALUE *argv, VALUE self)
 {
-	return rb_alt_printf(1, argc, argv, self);
+	return rb_altprintf(1, argc, argv, self);
 }
 
-VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self)
+VALUE rb_altprintf_multi_pass(size_t argc, VALUE *argv, VALUE self)
 {
 	long passes;
 
@@ -245,10 +245,10 @@ VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self)
 	}
 
 	LOG("passes: %ld\n", passes);
-	return rb_alt_printf(passes, argc - 1, &argv[1], self);
+	return rb_altprintf(passes, argc - 1, &argv[1], self);
 }
 
-void Init_alt_printf()
+void Init_altprintf()
 {
 	VALUE mod, ver;
 	size_t len;
@@ -260,6 +260,6 @@ void Init_alt_printf()
 	ver = rb_external_str_new_with_enc(ALTPRINTF_VERSION, len, enc);
 	rb_define_const(mod, "LIB_VERSION", ver);
 
-	rb_define_module_function(mod, "fmt", rb_alt_printf_single_pass, -1);
-	rb_define_module_function(mod, "fmtm", rb_alt_printf_multi_pass, -1);
+	rb_define_module_function(mod, "fmt", rb_altprintf_single_pass, -1);
+	rb_define_module_function(mod, "fmtm", rb_altprintf_multi_pass, -1);
 }

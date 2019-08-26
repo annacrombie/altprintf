@@ -10,7 +10,7 @@ module ExtconfHelper
   end
 
   def dev_objs(folder = 'release')
-    $objs = Dir[File.join(BASE_DIR, "target/#{folder}/*.o")] + ['alt_printf.o']
+    $objs = Dir[File.join(BASE_DIR, "target/#{folder}/*.o")] + ['ext.o']
   end
 
   def setup(mode = 'release')
@@ -30,6 +30,6 @@ module ExtconfHelper
     end
 
     create_header
-    create_makefile('alt_printf')
+    create_makefile('altprintf')
   end
 end

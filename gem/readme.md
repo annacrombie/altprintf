@@ -1,8 +1,8 @@
 # AltPrintf
 
-[rubygems.org/gems/alt_printf](https://rubygems.org/gems/alt_printf)
+[rubygems.org/gems/altprintf](https://rubygems.org/gems/altprintf)
 
-AltPrintf is a gem that wraps `altprintf`.
+altprintf is a gem that wraps `../altprintf`.
 
 It exposes the following module functions
 

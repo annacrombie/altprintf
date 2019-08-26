@@ -1,8 +1,8 @@
 require 'date'
-require_relative 'lib/alt_printf/version'
+require_relative 'lib/altprintf/version'
 
 AltPrintf::SPEC = Gem::Specification.new do |s|
-  s.name          = 'alt_printf'
+  s.name          = 'altprintf'
   s.version       = AltPrintf::VERSION.join('.')
   s.date          = Date.today.strftime('%Y-%m-%d')
   s.summary       = 'A powerful printf-like template language'

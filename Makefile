@@ -53,7 +53,7 @@ test: all gem
 
 .PHONY: touchgem
 touchgem:
-	touch gem/ext/alt_printf/alt_printf.c
+	touch gem/ext/altprintf/altprintf.c
 
 .PHONY: gem
 gem: release

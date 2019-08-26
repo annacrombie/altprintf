@@ -6,8 +6,8 @@ require 'bundler/gem_tasks' if ENV['GEM_BUILD']
 
 SRC_DIR = File.join(__dir__, '../src')
 
-Rake::ExtensionTask.new('alt_printf') do |ext|
-  ext.lib_dir = 'lib/alt_printf'
+Rake::ExtensionTask.new('altprintf') do |ext|
+  ext.lib_dir = 'lib/altprintf'
   ext.config_script =
     case ENV['GEM_DEBUG']
     when nil
@@ -20,17 +20,17 @@ end
 namespace :gem do
   desc 'copy necessary C files from ../src and build the resulting gem'
   task :build do
-    tmp_dir = "/tmp/alt_printf_#{SecureRandom.hex(8)}"
+    tmp_dir = "/tmp/altprintf_#{SecureRandom.hex(8)}"
     puts "cloning to #{tmp_dir}"
     FileUtils.mkdir(tmp_dir)
 
     Dir[
       'readme.md',
-      'alt_printf.gemspec',
+      'altprintf.gemspec',
       'Rakefile',
       'lib/**/*',
       'ext/**/*.{c,h}',
-      'ext/alt_printf/extconf{_helper}.rb'
+      'ext/altprintf/extconf{_helper}.rb'
     ].each do |f|
       next if File.directory?(f)
 
@@ -44,7 +44,7 @@ namespace :gem do
         %w[h c].map { |e| File.join(SRC_DIR, "#{w}.#{e}") }
           .select { |f| File.exist?(f) }
       end.flatten,
-      File.join(tmp_dir, 'ext/alt_printf/')
+      File.join(tmp_dir, 'ext/altprintf/')
     )
 
     FileUtils.cd(tmp_dir)
@@ -58,7 +58,7 @@ namespace :gem do
 
   desc 'pushes the latest gem'
   task :publish do
-    load File.join(__dir__, 'alt_printf.gemspec')
+    load File.join(__dir__, 'altprintf.gemspec')
     pkg = "pkg/#{AltPrintf::SPEC.name}-#{AltPrintf::SPEC.version}.gem"
 
     sh "rake gem:build" unless File.exist?(pkg)

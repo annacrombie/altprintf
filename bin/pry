@@ -2,7 +2,7 @@
 
 $LOAD_PATH.unshift(File.join(__dir__, '../gem/lib'))
 require 'pry'
-require 'alt_printf'
+require 'altprintf'
 
 include AltPrintf
 puts "AltPrintf version #{AltPrintf::VERSION.join('.')} loaded"

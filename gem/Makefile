@@ -9,9 +9,9 @@ debug:
 # touch the source to force rake compile to compile everytime
 .PHONY: touch
 touch:
-	touch ext/alt_printf/alt_printf.c
+	touch ext/altprintf/altprintf.c
 
 .PHONY: clean
 clean:
 	rm -rf tmp
-	rm -f lib/alt_printf/alt_printf.so
+	rm -f lib/altprintf/altprintf.so
