@@ -3,7 +3,8 @@
 struct lconv *locale_info;
 enum altprintf_err apf_err;
 
-wchar_t *format(wchar_t *fmt, int argc, int *argi, char **argv) {
+wchar_t *format(wchar_t *fmt, int argc, int *argi, char **argv)
+{
 	void *tmp;
 	struct fmte *f, *head;
 	size_t len;
@@ -45,7 +46,7 @@ wchar_t *format(wchar_t *fmt, int argc, int *argi, char **argv) {
 			double *tmpd = tmp;
 			*tmpd = strtod(argv[(*argi)], NULL);
 			goto match;
-		match:
+match:
 			f->value = tmp;
 			(*argi)++;
 			break;
@@ -75,7 +76,8 @@ process_next_fmt:
 	return final;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 	const char *mbfmt;
 	wchar_t *fmt, *str;
 	size_t len;
@@ -89,7 +91,7 @@ int main(int argc, char **argv) {
 			"altprintf v%s\nusage: %s format [arg1 [arg2 [...]]]\n",
 			ALTPRINTF_VERSION,
 			argv[0]
-		);
+			);
 		return 1;
 	}
 

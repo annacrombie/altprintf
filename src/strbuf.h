@@ -29,10 +29,10 @@ wchar_t *strbuf_cstr(struct strbuf *);
 size_t strbuf_width(struct strbuf *);
 
 struct strbuf {
-  wchar_t *start;
-  wchar_t *end;
-  size_t len;
-  size_t width;
-  size_t cap;
+	wchar_t *start;
+	wchar_t *end;
+	size_t len;
+	size_t width;
+	size_t cap;
 };
 #endif

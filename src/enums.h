@@ -1,7 +1,7 @@
 #ifndef ARGTYPE_H_
 #define ARGTYPE_H_
 enum arg_type { FMul, FTern, FAlign, FInt, FChar, FDouble, FString, FRaw, FNone,
-	FEnd };
+		FEnd };
 enum align { Left, Right, Center };
 
 enum altprintf_err {

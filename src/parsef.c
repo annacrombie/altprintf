@@ -2,7 +2,8 @@
 
 wchar_t *altprintf_pct = L"%";
 
-struct fmte *parsef(wchar_t **fmt) {
+struct fmte *parsef(wchar_t **fmt)
+{
 	wchar_t *w_c;
 	wchar_t **w_a = &w_c;
 	struct fmte *f = fmte_ini();
@@ -33,7 +34,7 @@ struct fmte *parsef(wchar_t **fmt) {
 		(*fmt)++;
 	}
 
-	for (;**fmt != L'\0';(*fmt)++) {
+	for (; **fmt != L'\0'; (*fmt)++) {
 		LOG("scanned char '%lc'\n", (wint_t)(**fmt));
 		switch (**fmt) {
 		case FS_A_CHARARG:
@@ -110,7 +111,8 @@ return_format:
 	return f;
 }
 
-void get_longarg(wchar_t **s, wchar_t **e, wchar_t stop, size_t *size) {
+void get_longarg(wchar_t **s, wchar_t **e, wchar_t stop, size_t *size)
+{
 	*size = 0;
 
 	while (**s != EOS && **s != stop) {

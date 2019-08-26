@@ -15,7 +15,8 @@
 
 rb_encoding *enc;
 
-wchar_t *rbstowcs(VALUE str) {
+wchar_t *rbstowcs(VALUE str)
+{
 	const char *cstr;
 	wchar_t *wstr;
 	size_t len;
@@ -32,7 +33,8 @@ wchar_t *rbstowcs(VALUE str) {
 	return wstr;
 }
 
-VALUE wcstorbs(const wchar_t *wstr) {
+VALUE wcstorbs(const wchar_t *wstr)
+{
 	size_t len;
 	char *cstr;
 	VALUE str;
@@ -56,7 +58,8 @@ VALUE wcstorbs(const wchar_t *wstr) {
 	return str;
 }
 
-VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *hash) {
+VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *hash)
+{
 	VALUE sym, entry;
 	size_t len;
 	const wchar_t *tmpw;
@@ -94,7 +97,8 @@ VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *h
 	return entry;
 }
 
-wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE *hash) {
+wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE *hash)
+{
 	struct fmte *f, *head;
 	wchar_t *final;
 	int loop = 1;
@@ -112,11 +116,10 @@ wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 
 		LOG("scanned type: %d\n", f->type);
 
-		if (f->type != FEnd && f->type != FRaw) {
+		if (f->type != FEnd && f->type != FRaw)
 			entry = get_entry(f, argc, argi, argv, hash);
-		} else {
+		else
 			entry = Qnil;
-		}
 
 		switch (f->type) {
 		case FString:
@@ -154,7 +157,7 @@ wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 			tmpd = malloc(sizeof(double));
 			*tmpd = RFLOAT_VALUE(entry);
 			tmp = tmpd;
-		match:
+match:
 			f->value = tmp;
 			break;
 		case FRaw:
@@ -182,7 +185,8 @@ wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 	return final;
 }
 
-VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
+VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self)
+{
 	VALUE fmt, args, hash, final;
 	wchar_t *wfmt;
 	wchar_t *formatted;
@@ -223,11 +227,13 @@ VALUE rb_alt_printf(long passes, size_t argc, VALUE *argv, VALUE self) {
 	return final;
 }
 
-VALUE rb_alt_printf_single_pass(size_t argc, VALUE *argv, VALUE self) {
+VALUE rb_alt_printf_single_pass(size_t argc, VALUE *argv, VALUE self)
+{
 	return rb_alt_printf(1, argc, argv, self);
 }
 
-VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self) {
+VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self)
+{
 	long passes;
 
 
@@ -242,7 +248,8 @@ VALUE rb_alt_printf_multi_pass(size_t argc, VALUE *argv, VALUE self) {
 	return rb_alt_printf(passes, argc - 1, &argv[1], self);
 }
 
-void Init_alt_printf() {
+void Init_alt_printf()
+{
 	VALUE mod, ver;
 	size_t len;
 

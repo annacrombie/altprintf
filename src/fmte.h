@@ -7,27 +7,27 @@
 #include "log.h"
 
 struct fmte {
-  wchar_t *parenarg_start;
-  wchar_t *parenarg_end;
-  size_t parenarg_len;
+	wchar_t *parenarg_start;
+	wchar_t *parenarg_end;
+	size_t parenarg_len;
 
-  wchar_t *anglearg_start;
-  wchar_t *anglearg_end;
-  size_t anglearg_len;
+	wchar_t *anglearg_start;
+	wchar_t *anglearg_end;
+	size_t anglearg_len;
 
-  wint_t chararg;
+	wint_t chararg;
 
-  wint_t padchar;
+	wint_t padchar;
 
-  enum arg_type type;
-  enum align align;
+	enum arg_type type;
+	enum align align;
 
-  long prec;
-  long pad;
+	long prec;
+	long pad;
 
-  void *value;
+	void *value;
 
-  struct fmte *next;
+	struct fmte *next;
 };
 
 struct fmte *fmte_ini();

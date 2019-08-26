@@ -6,22 +6,22 @@
 
 enum altprintf_err apf_err;
 
-void fmt_mul(struct strbuf *sb, struct fmte *f) {
+void fmt_mul(struct strbuf *sb, struct fmte *f)
+{
 	CHECKNULL(f->value);
 
 	long *i;
 
 	i = f->value;
-	if (f->parenarg_start == NULL) {
+	if (f->parenarg_start == NULL)
 		strbuf_pad(sb, f->chararg, *i);
-	} else {
-		for (int j=0; j<*i; j++) {
+	else
+		for (int j = 0; j < *i; j++)
 			strbuf_append_str(sb, f->parenarg_start, -f->parenarg_len);
-		}
-	}
 }
 
-void fmt_tern(struct strbuf *sb, struct fmte *f) {
+void fmt_tern(struct strbuf *sb, struct fmte *f)
+{
 	CHECKNULL(f->parenarg_start);
 	CHECKNULL(f->value);
 
@@ -29,7 +29,7 @@ void fmt_tern(struct strbuf *sb, struct fmte *f) {
 	int first_half = 1;
 	wchar_t sep = f->chararg;
 	wchar_t *p = f->parenarg_start;
-	for (;p<=f->parenarg_end;p++) {
+	for (; p <= f->parenarg_end; p++) {
 		LOG("*p: %lc, first half? %d, bool: %ld, sep: %lc\n", (wint_t)*p, first_half, *b, (wint_t)sep);
 		if (*p == sep) first_half = 0;
 		else if (*b && first_half) strbuf_append_char(sb, p);
@@ -37,7 +37,8 @@ void fmt_tern(struct strbuf *sb, struct fmte *f) {
 	}
 }
 
-wchar_t process_escape_seq(wchar_t seq) {
+wchar_t process_escape_seq(wchar_t seq)
+{
 	switch (seq) {
 	case FS_ESC_NL:
 		return L'\n';
@@ -60,7 +61,8 @@ wchar_t process_escape_seq(wchar_t seq) {
 	}
 }
 
-void fmt_raw(struct strbuf *sb, struct fmte *f) {
+void fmt_raw(struct strbuf *sb, struct fmte *f)
+{
 	CHECKNULL(f->parenarg_start);
 
 	wchar_t *p;
@@ -80,43 +82,49 @@ void fmt_raw(struct strbuf *sb, struct fmte *f) {
 	}
 }
 
-void fmt_string(struct strbuf *sb, struct fmte *f) {
+void fmt_string(struct strbuf *sb, struct fmte *f)
+{
 	CHECKNULL(f->value);
 
 	int prec = f->prec == -1 ? 100000000 : f->prec;
 	strbuf_append_str(sb, f->value, prec);
 }
 
-void fmt_char(struct strbuf *sb, struct fmte *f) {
+void fmt_char(struct strbuf *sb, struct fmte *f)
+{
 	CHECKNULL(f->value);
 	strbuf_append_char(sb, f->value);
 }
 
-void fmt_int(struct strbuf *sb, struct fmte *f) {
+void fmt_int(struct strbuf *sb, struct fmte *f)
+{
 	CHECKNULL(f->value);
 	strbuf_append_int(sb, f->value);
 }
 
-void fmt_double(struct strbuf *sb, struct fmte *f) {
+void fmt_double(struct strbuf *sb, struct fmte *f)
+{
 	CHECKNULL(f->value);
 	int prec = f->prec == -1 ? 3 : f->prec;
 	strbuf_append_double(sb, f->value, prec);
 }
 
-void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct fmte *)) {
+void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct fmte *))
+{
 	struct strbuf *tmp = strbuf_new();
+
 	fmtr(tmp, f);
 
 	if (tmp->len == 0) {
 		strbuf_destroy(tmp);
 		return;
-	};
+	}
 
 	int pad = f->pad > 0 ? f->pad - strbuf_width(tmp) : 0;
 
 	if (pad > 0) {
 		LOG("padding: %d\n", pad);
-		switch(f->align) {
+		switch (f->align) {
 		case Right:
 			strbuf_append_strbuf(sb, tmp);
 			strbuf_pad(sb, f->padchar, pad);
@@ -126,9 +134,9 @@ void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct
 			strbuf_append_strbuf(sb, tmp);
 			break;
 		case Center:
-			strbuf_pad(sb, f->padchar, pad/2);
+			strbuf_pad(sb, f->padchar, pad / 2);
 			strbuf_append_strbuf(sb, tmp);
-			strbuf_pad(sb, f->padchar, pad/2 + pad%2);
+			strbuf_pad(sb, f->padchar, pad / 2 + pad % 2);
 			break;
 		}
 	} else {
@@ -138,13 +146,15 @@ void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct
 	strbuf_destroy(tmp);
 }
 
-wchar_t *assemble_fmt(struct fmte *head) {
+wchar_t *assemble_fmt(struct fmte *head)
+{
 	struct fmte *f = head;
 	struct strbuf *bufs[BUFNUM];
 	struct fmte *splits[BUFNUM];
 	size_t buf = 0, i;
 	size_t w, tw, rw;
 	wchar_t *final;
+
 	void (*fmtr)(struct strbuf *, struct fmte *) = NULL;
 	int loop = 1;
 
@@ -198,7 +208,7 @@ wchar_t *assemble_fmt(struct fmte *head) {
 	LOG("assembling %d splits\n", buf);
 	if (buf > 0) tw = strbuf_width(bufs[0]);
 	for (i = 1; i <= buf; i++) {
-		rw = *(long *)splits[i]->value;
+		rw = *(long*)splits[i]->value;
 
 		if (tw > rw) {
 			LOG("trimming first half to width\n");
