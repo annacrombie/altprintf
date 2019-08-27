@@ -21,26 +21,26 @@ module FmtGenerator
 
   def random_fmt_args
     [
-      -> { '~' + random_char },
-      -> { '0' },
-      -> { ' ' },
+      -> { ?~ + random_char },
+      -> { ?0 },
+      -> { ?\s },
       -> { "(#{random_chars})" },
-      -> { '-' },
-      -> { '^' },
-      -> { '.' },
+      -> { ?- },
+      -> { ?^ },
+      -> { ?. },
       -> { random_int },
     ].yield_self { |e| e.sample(rand(e.length - 1) + 1) }.map(&:call).join
   end
 
   def random_spec
     {
-      's' => -> { random_chars },
-      'c' => -> { random_char },
-      'f' => -> { random_float },
-      'd' => -> { random_int },
-      '?' => -> { [true, false].sample },
-      '=' => -> { random_int },
-      '%' => -> { nil }
+      ?s => -> { random_chars },
+      ?c => -> { random_char },
+      ?f => -> { random_float },
+      ?d => -> { random_int },
+      ?? => -> { [true, false].sample },
+      ?= => -> { random_int },
+      ?% => -> { nil }
     }.to_a.sample.yield_self { |(s, p)| [s, p.call] }
   end
 
