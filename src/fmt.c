@@ -2,7 +2,12 @@
 
 #define BUFNUM 25
 
-#define CHECKNULL(p) if (p == NULL) { apf_err = apfe_missing_argument; return; }
+#define CHECKNULL(p) do {                                \
+		if (p == NULL) {                         \
+			apf_err = apfe_missing_argument; \
+			return;                          \
+		}                                        \
+} while (0)
 
 enum altprintf_err apf_err;
 
@@ -30,7 +35,8 @@ void fmt_tern(struct strbuf *sb, struct fmte *f)
 	wchar_t sep = f->chararg;
 	wchar_t *p = f->parenarg_start;
 	for (; p <= f->parenarg_end; p++) {
-		LOG("*p: %lc, first half? %d, bool: %ld, sep: %lc\n", (wint_t)*p, first_half, *b, (wint_t)sep);
+		LOG("*p: %lc, first half? %d, bool: %ld, sep: %lc\n",
+		    (wint_t)*p, first_half, *b, (wint_t)sep);
 		if (*p == sep)
 			first_half = 0;
 		else if (*b && first_half)
