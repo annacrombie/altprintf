@@ -7,6 +7,7 @@ project(
 	default_options: [
 		'c_std=c99',
 		'warning_level=2',
+		'default_library=static'
 	],
 )
 
