@@ -38,7 +38,8 @@ lib_src = files([
 	'src/parsef.c',
 	'src/strbuf.c',
 	'src/fmt.c',
-	'src/fmte.c'
+	'src/fmte.c',
+	'lib/cwidth.c'
 ])
 
 inc = include_directories(['include'])
