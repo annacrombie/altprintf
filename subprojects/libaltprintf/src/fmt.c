@@ -1,4 +1,8 @@
-#include "fmt.h"
+#include "altprintf/syntax.h"
+#include "altprintf/strbuf.h"
+#include "altprintf/fmte.h"
+#include "altprintf/log.h"
+#include "altprintf/fmt.h"
 
 #define BUFNUM 25
 

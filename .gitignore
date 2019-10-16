@@ -1,4 +1,5 @@
-target/
+build/
+subprojects/libaltprintf/build/
 
 ext/extconf.h
 ext/Makefile

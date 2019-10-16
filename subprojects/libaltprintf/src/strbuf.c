@@ -1,4 +1,16 @@
-#include "strbuf.h"
+#define STRBUF_INI_SIZE 5
+#define STRBUF_GROW_STEP 100
+#define TMPLEN 50
+#define MAXPREC 25
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE
+#endif
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <wchar.h>
+#include "altprintf/log.h"
+#include "altprintf/strbuf.h"
 
 extern struct lconv *locale_info;
 

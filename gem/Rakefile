@@ -4,7 +4,8 @@ require 'fileutils'
 
 require 'bundler/gem_tasks' if ENV['GEM_BUILD']
 
-SRC_DIR = File.join(__dir__, '../src')
+SRC_DIR = File.join(__dir__, '../subprojects/libaltprintf/src/')
+INC_DIR = File.join(__dir__, '../subprojects/libaltprintf/include/altprintf')
 
 Rake::ExtensionTask.new('altprintf') do |ext|
   ext.lib_dir = 'lib/altprintf'
@@ -40,10 +41,7 @@ namespace :gem do
     end
 
     FileUtils.cp_r(
-      %w[altprintf fmt fmte parsef strbuf enums log syntax].map do |w|
-        %w[h c].map { |e| File.join(SRC_DIR, "#{w}.#{e}") }
-          .select { |f| File.exist?(f) }
-      end.flatten,
+      [Dir["#{SRC_DIR}/*.c"], INC_DIR].flatten,
       File.join(tmp_dir, 'ext/altprintf/')
     )
 

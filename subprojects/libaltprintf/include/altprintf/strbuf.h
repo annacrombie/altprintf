@@ -1,19 +1,6 @@
 #ifndef STRBUF_H
 #define STRBUF_H
-
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
-#endif
-
-#include <wchar.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include "log.h"
-
-#define STRBUF_INI_SIZE 5
-#define STRBUF_GROW_STEP 100
-#define TMPLEN 50
-#define MAXPREC 25
 
 struct strbuf *strbuf_new();
 void strbuf_destroy(struct strbuf *sb);

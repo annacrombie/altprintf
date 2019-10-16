@@ -1,4 +1,9 @@
-#include "fmte.h"
+#include <wchar.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "altprintf/enums.h"
+#include "altprintf/log.h"
+#include "altprintf/fmte.h"
 
 struct fmte *fmte_ini()
 {

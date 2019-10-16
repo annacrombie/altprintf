@@ -1,10 +1,8 @@
 #ifndef FMTE_H_
 #define FMTE_H_
-#include <wchar.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include "enums.h"
-#include "log.h"
+#include <wchar.h>
+#include "altprintf/enums.h"
 
 struct fmte {
 	wchar_t *parenarg_start;

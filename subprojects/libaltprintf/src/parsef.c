@@ -1,4 +1,7 @@
-#include "parsef.h"
+#include "altprintf/fmte.h"
+#include "altprintf/syntax.h"
+#include "altprintf/log.h"
+#include "altprintf/parsef.h"
 
 wchar_t *altprintf_pct = L"%";
 

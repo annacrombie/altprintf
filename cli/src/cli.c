@@ -1,4 +1,9 @@
-#include "cli.h"
+#include <stdio.h>
+#include <locale.h>
+#include <wchar.h>
+#include <string.h>
+#include "altprintf/log.h"
+#include "altprintf/altprintf.h"
 
 struct lconv *locale_info;
 enum altprintf_err apf_err;
