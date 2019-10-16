@@ -2,6 +2,7 @@
 #include <locale.h>
 #include <string.h>
 #include "altprintf/log.h"
+#include "altprintf/parsef.h"
 #include "altprintf/altprintf.h"
 
 struct lconv *locale_info;
@@ -43,7 +44,7 @@ char *format(char *fmt, int argc, int *argi, char **argv)
 		case FChar:
 			tmp = malloc(sizeof(char));
 			char *tmpc = tmp;
-			*tmpc = btowc(*argv[(*argi)]);
+			*tmpc = *argv[(*argi)];
 			goto match;
 		case FDouble:
 			tmp = malloc(sizeof(double));

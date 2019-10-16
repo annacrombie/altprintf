@@ -12,7 +12,7 @@
 
 extern struct lconv *locale_info;
 
-struct strbuf *strbuf_new()
+struct strbuf *strbuf_new(void)
 {
 	struct strbuf *sb = malloc(sizeof(struct strbuf));
 

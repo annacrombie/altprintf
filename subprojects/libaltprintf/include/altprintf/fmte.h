@@ -27,7 +27,7 @@ struct fmte {
 	struct fmte *next;
 };
 
-struct fmte *fmte_ini();
+struct fmte *fmte_ini(void);
 void fmte_inspect(struct fmte *);
 void fmte_push(struct fmte *, struct fmte *);
 void fmte_destroy(struct fmte *);

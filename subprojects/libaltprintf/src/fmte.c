@@ -4,7 +4,7 @@
 #include "altprintf/log.h"
 #include "altprintf/fmte.h"
 
-struct fmte *fmte_ini()
+struct fmte *fmte_ini(void)
 {
 	struct fmte *f = malloc(sizeof(struct fmte));
 

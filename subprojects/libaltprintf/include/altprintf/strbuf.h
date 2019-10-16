@@ -2,7 +2,7 @@
 #define STRBUF_H
 #include <stdlib.h>
 
-struct strbuf *strbuf_new();
+struct strbuf *strbuf_new(void);
 void strbuf_destroy(struct strbuf *sb);
 void strbuf_append(struct strbuf *sb, char);
 void strbuf_append_char(struct strbuf *sb, void  *);
