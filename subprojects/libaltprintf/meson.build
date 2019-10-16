@@ -55,7 +55,7 @@ install_headers(
 		'include/altprintf/strbuf.h',
 		'include/altprintf/syntax.h',
 	]),
-	subdir: 'include'
+	subdir: 'altprintf'
 )
 altprintf_dep = declare_dependency(
 	include_directories: inc,
