@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <locale.h>
-#include <wchar.h>
 #include <string.h>
 #include "altprintf/log.h"
 #include "altprintf/altprintf.h"
@@ -8,13 +7,13 @@
 struct lconv *locale_info;
 enum altprintf_err apf_err;
 
-wchar_t *format(wchar_t *fmt, int argc, int *argi, char **argv)
+char *format(char *fmt, int argc, int *argi, char **argv)
 {
 	void *tmp;
 	struct fmte *f, *head;
 	size_t len;
 	int loop = 1;
-	wchar_t *final;
+	char *final;
 
 	head = f = parsef(&fmt);
 
@@ -29,8 +28,8 @@ wchar_t *format(wchar_t *fmt, int argc, int *argi, char **argv)
 		switch (f->type) {
 		case FString:
 			len = strlen(argv[(*argi)]) + 1;
-			tmp = calloc(len, sizeof(wchar_t));
-			mbstowcs(tmp, argv[(*argi)], len);
+			tmp = calloc(len, sizeof(char));
+			strcpy(tmp, argv[(*argi)]);
 			goto match;
 		case FMul:
 		case FTern:
@@ -42,8 +41,8 @@ wchar_t *format(wchar_t *fmt, int argc, int *argi, char **argv)
 			LOG("got int %ld, from string \"%s\"\n", *tmpl, argv[(*argi)]);
 			goto match;
 		case FChar:
-			tmp = malloc(sizeof(wint_t));
-			wint_t *tmpc = tmp;
+			tmp = malloc(sizeof(char));
+			char *tmpc = tmp;
 			*tmpc = btowc(*argv[(*argi)]);
 			goto match;
 		case FDouble:
@@ -84,9 +83,7 @@ process_next_fmt:
 
 int main(int argc, char **argv)
 {
-	const char *mbfmt;
-	wchar_t *fmt, *str;
-	size_t len;
+	char *fmt, *str;
 	int argi, oargi;
 
 	setlocale(LC_ALL, "");
@@ -101,10 +98,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	mbfmt = argv[1];
-	len = mbsrtowcs(NULL, &mbfmt, 0, NULL);
-	fmt = calloc(len + 1, sizeof(wchar_t));
-	mbsrtowcs(fmt, &mbfmt, len, NULL);
+	fmt = calloc(strlen(argv[1]) + 1, sizeof(char));
+	strcpy(fmt, argv[1]);
 	str = NULL;
 
 	argi = 2;
@@ -120,8 +115,8 @@ int main(int argc, char **argv)
 			break;
 	}
 
-	LOG("final output: '%ls'\n", str);
-	printf("%ls", str);
+	LOG("final output: '%s'\n", str);
+	printf("%s", str);
 	free(str);
 
 	return apf_err;

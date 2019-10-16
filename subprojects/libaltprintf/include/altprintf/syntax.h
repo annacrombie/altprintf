@@ -4,7 +4,7 @@
 #define FS_START    '%'
 #define FS_DOUBLE_SEP '.'
 
-#define FS_ESC L'\\'
+#define FS_ESC '\\'
 #define FS_ESC_NL 'n'
 #define FS_ESC_ESC 'e'
 
@@ -30,6 +30,6 @@
 
 #define FS_D_PREC   100
 
-#define EOS L'\0'
+#define EOS '\0'
 
 #endif

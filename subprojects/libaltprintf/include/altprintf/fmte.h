@@ -1,21 +1,20 @@
 #ifndef FMTE_H_
 #define FMTE_H_
 #include <stdlib.h>
-#include <wchar.h>
 #include "altprintf/enums.h"
 
 struct fmte {
-	wchar_t *parenarg_start;
-	wchar_t *parenarg_end;
+	char *parenarg_start;
+	char *parenarg_end;
 	size_t parenarg_len;
 
-	wchar_t *anglearg_start;
-	wchar_t *anglearg_end;
+	char *anglearg_start;
+	char *anglearg_end;
 	size_t anglearg_len;
 
-	wint_t chararg;
+	char chararg;
 
-	wint_t padchar;
+	char padchar;
 
 	enum arg_type type;
 	enum align align;

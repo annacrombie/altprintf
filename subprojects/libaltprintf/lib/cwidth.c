@@ -257,7 +257,7 @@ int cwidth(const char* utf8)
 	return cpwidth(cp);
 }
 
-int cswidth(const char *utf8)
+int cswidth(const char *utf8, size_t maxlen)
 {
 	int w = 0;
 	long cp;
@@ -268,6 +268,9 @@ int cswidth(const char *utf8)
 	for (i = 0; i < len;) {
 		i += codepoint(&utf8[i], &cp);
 		w += cpwidth(cp);
+
+		if (i > maxlen)
+			break;
 	}
 
 	return w;

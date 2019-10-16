@@ -36,11 +36,11 @@ void fmt_tern(struct strbuf *sb, struct fmte *f)
 
 	long int *b = f->value;
 	int first_half = 1;
-	wchar_t sep = f->chararg;
-	wchar_t *p = f->parenarg_start;
+	char sep = f->chararg;
+	char *p = f->parenarg_start;
 	for (; p <= f->parenarg_end; p++) {
 		LOG("*p: %lc, first half? %d, bool: %ld, sep: %lc\n",
-		    (wint_t)*p, first_half, *b, (wint_t)sep);
+		    (char)*p, first_half, *b, (char)sep);
 		if (*p == sep)
 			first_half = 0;
 		else if (*b && first_half)
@@ -50,25 +50,25 @@ void fmt_tern(struct strbuf *sb, struct fmte *f)
 	}
 }
 
-wchar_t process_escape_seq(wchar_t seq)
+char process_escape_seq(char seq)
 {
 	switch (seq) {
 	case FS_ESC_NL:
-		return L'\n';
+		return '\n';
 	case FS_ESC_ESC:
-		return L'\e';
+		return '\e';
 	case 'a':
-		return L'\a';
+		return '\a';
 	case 'b':
-		return L'\b';
+		return '\b';
 	case 'f':
-		return L'\f';
+		return '\f';
 	case 'r':
-		return L'\r';
+		return '\r';
 	case 't':
-		return L'\t';
+		return '\t';
 	case 'v':
-		return L'\v';
+		return '\v';
 	default:
 		return seq;
 	}
@@ -78,15 +78,15 @@ void fmt_raw(struct strbuf *sb, struct fmte *f)
 {
 	CHECKNULL(f->parenarg_start);
 
-	wchar_t *p;
-	wchar_t c;
+	char *p;
+	char c;
 	long i;
 
 	p = f->parenarg_start;
 	i = f->parenarg_len;
 
 	for (; i > 0; i--) {
-		LOG("p is '%lc' (%ld)\n", (wint_t)*p, (long)*p);
+		LOG("p is '%lc' (%ld)\n", (char)*p, (long)*p);
 		c = (i > 1 && *p == FS_ESC) ? process_escape_seq(*++p) : *p;
 
 		strbuf_append(sb, c);
@@ -160,14 +160,14 @@ void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct
 	strbuf_destroy(tmp);
 }
 
-wchar_t *assemble_fmt(struct fmte *head)
+char *assemble_fmt(struct fmte *head)
 {
 	struct fmte *f = head;
 	struct strbuf *bufs[BUFNUM];
 	struct fmte *splits[BUFNUM];
 	size_t buf = 0, i;
 	size_t w, tw, rw;
-	wchar_t *final;
+	char *final;
 
 	void (*fmtr)(struct strbuf *, struct fmte *) = NULL;
 	int loop = 1;

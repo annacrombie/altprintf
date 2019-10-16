@@ -1,4 +1,3 @@
-#include <wchar.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "altprintf/enums.h"
@@ -17,8 +16,8 @@ struct fmte *fmte_ini()
 	f->anglearg_end = NULL;
 	f->anglearg_len = 0;
 
-	f->chararg = L' ';
-	f->padchar = L' ';
+	f->chararg = ' ';
+	f->padchar = ' ';
 	f->type = FNone;
 	f->align = Right;
 	f->prec = -1;
@@ -54,8 +53,8 @@ void fmte_destroy(struct fmte *f)
 
 void fmte_inspect(struct fmte *f)
 {
-	wchar_t *parenarg = calloc(f->parenarg_len + 1, sizeof(wchar_t));
-	wchar_t *anglearg = calloc(f->anglearg_len + 1, sizeof(wchar_t));
+	char *parenarg = calloc(f->parenarg_len + 1, sizeof(char));
+	char *anglearg = calloc(f->anglearg_len + 1, sizeof(char));
 	size_t i;
 
 	for (i = 0; i < f->parenarg_len; i++) parenarg[i] = f->parenarg_start[i];
@@ -66,11 +65,11 @@ void fmte_inspect(struct fmte *f)
 	parenarg_start: %p,\n\
 	parenarg_end: %p,\n\
 	parenarg_len: %ld,\n\
-	(parenarg): %ls,\n\
+	(parenarg): %s,\n\
 	anglearg_start: %p,\n\
 	anglearg_end: %p,\n\
 	anglearg_len: %ld,\n\
-	(anglearg): %ls,\n\
+	(anglearg): %s,\n\
 	chararg: %lc,\n\
 	padchar: %lc,\n\
 	type: %d,\n\

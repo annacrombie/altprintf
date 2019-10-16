@@ -3,16 +3,31 @@
 #include "altprintf/log.h"
 #include "altprintf/parsef.h"
 
-wchar_t *altprintf_pct = L"%";
+char *altprintf_pct = "%";
 
-struct fmte *parsef(wchar_t **fmt)
+void get_longarg(char **s, char **e, char stop, size_t *size)
 {
-	wchar_t *w_c;
-	wchar_t **w_a = &w_c;
+	*size = 0;
+
+	while (**s != EOS && **s != stop) {
+		LOG("checking (%c)\n", **s);
+		(*s)++;
+		(*size)++;
+	}
+
+	(*size)--;
+	if (*size > 0)
+		*e = *s - 1;
+}
+
+struct fmte *parsef(char **fmt)
+{
+	char *w_c;
+	char **w_a = &w_c;
 	struct fmte *f = fmte_ini();
 	long *l_a = &f->pad;
 
-	LOG("processing %ld (%lc)\n", **fmt, (wint_t)**fmt);
+	LOG("processing %d (%c)\n", **fmt, **fmt);
 
 	if (**fmt != FS_START) {
 		if (**fmt == EOS) {
@@ -37,8 +52,8 @@ struct fmte *parsef(wchar_t **fmt)
 		(*fmt)++;
 	}
 
-	for (; **fmt != L'\0'; (*fmt)++) {
-		LOG("scanned char '%lc'\n", (wint_t)(**fmt));
+	for (; **fmt != '\0'; (*fmt)++) {
+		LOG("scanned char '%c'\n", **fmt);
 		switch (**fmt) {
 		case FS_A_CHARARG:
 			(*fmt)++;
@@ -70,7 +85,7 @@ struct fmte *parsef(wchar_t **fmt)
 		case '1': case '2': case '3': case '4': case '5':
 		case '6': case '7': case '8': case '9':
 			LOG("l_a: %p %ld\n", l_a, *l_a);
-			*l_a = wcstol(*fmt, w_a, 10);
+			*l_a = strtold(*fmt, w_a);
 			*fmt = *w_a - 1;
 			break;
 		// Psuedo-type
@@ -112,19 +127,4 @@ struct fmte *parsef(wchar_t **fmt)
 return_format:
 	(*fmt)++;
 	return f;
-}
-
-void get_longarg(wchar_t **s, wchar_t **e, wchar_t stop, size_t *size)
-{
-	*size = 0;
-
-	while (**s != EOS && **s != stop) {
-		LOG("checking (%lc)\n", (wint_t)**s);
-		(*s)++;
-		(*size)++;
-	}
-
-	(*size)--;
-	if (*size > 0)
-		*e = *s - 1;
 }
