@@ -24,8 +24,7 @@
 #define FS_A_CHARARG     '~'
 #define FS_A_LALIGN      '-'
 #define FS_A_CALIGN      '^'
-#define FS_A_SPAD        ' '
-#define FS_A_ZPAD        '0'
+#define FS_A_PAD         '_'
 #define FS_A_PREC        '.'
 
 #define FS_D_PREC   100

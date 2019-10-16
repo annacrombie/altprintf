@@ -73,19 +73,18 @@ struct fmte *parsef(char **fmt)
 		case FS_A_CALIGN:
 			f->align = Center;
 			break;
-		case FS_A_SPAD:
-			f->padchar = FS_A_SPAD;
-			break;
-		case FS_A_ZPAD:
-			f->padchar = '0';
+		case FS_A_PAD:
+			(*fmt)++;
+			f->padchar = **fmt;
 			break;
 		case FS_A_PREC:
 			l_a = &f->prec;
 			break;
 		case '1': case '2': case '3': case '4': case '5':
-		case '6': case '7': case '8': case '9':
+		case '6': case '7': case '8': case '9': case '0':
 			LOG("l_a: %p %ld\n", l_a, *l_a);
-			*l_a = strtold(*fmt, w_a);
+			*l_a = strtol(*fmt, w_a, 10);
+			LOG("read num: %ld\n", *l_a);
 			*fmt = *w_a - 1;
 			break;
 		// Psuedo-type
