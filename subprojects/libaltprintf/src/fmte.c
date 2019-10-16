@@ -19,7 +19,7 @@ struct fmte *fmte_ini(void)
 	f->chararg = ' ';
 	f->padchar = ' ';
 	f->type = FNone;
-	f->align = Right;
+	f->align = Left;
 	f->prec = -1;
 	f->pad = 0;
 	f->value = NULL;
