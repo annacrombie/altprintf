@@ -1,7 +1,7 @@
 src = files(['src/cli.c'])
 
 executable(
-	'plot',
+	'altprintf',
 	src,
 	dependencies: altprintf_dep,
 	install : true
