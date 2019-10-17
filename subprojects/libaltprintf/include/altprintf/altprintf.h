@@ -4,4 +4,5 @@
 
 #include "altprintf/fmt.h"
 #include "altprintf/fmte.h"
+#include "altprintf/parsef.h"
 #endif
