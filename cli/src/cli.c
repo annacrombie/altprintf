@@ -8,7 +8,7 @@
 struct lconv *locale_info;
 enum altprintf_err apf_err;
 
-char *format(char *fmt, int argc, int *argi, char **argv)
+char *format(const char *fmt, int argc, int *argi, char **argv)
 {
 	void *tmp;
 	struct fmte *f, *head;

@@ -74,10 +74,10 @@ void strbuf_append(struct strbuf *sb, char c)
 	sb->len++;
 }
 
-void strbuf_append_strbuf(struct strbuf *sb, void *sbuf)
+void strbuf_append_strbuf(struct strbuf *sb, const void *sbuf)
 {
 	char *pos;
-	struct strbuf *frm = sbuf;
+	const struct strbuf *frm = sbuf;
 
 	LOG("frm->start: %p | frm->end: %p\n", frm->start, frm->end);
 
@@ -85,11 +85,11 @@ void strbuf_append_strbuf(struct strbuf *sb, void *sbuf)
 		strbuf_append(sb, *pos);
 }
 
-void strbuf_appendw_strbuf(struct strbuf *sb, void *sbuf, long w)
+void strbuf_appendw_strbuf(struct strbuf *sb, const void *sbuf, long w)
 {
 	char *pos;
 	long ws = 0;
-	struct strbuf *frm = sbuf;
+	const struct strbuf *frm = sbuf;
 
 	LOG("frm->start: %p | frm->end: %p\n", frm->start, frm->end);
 
@@ -102,17 +102,17 @@ void strbuf_appendw_strbuf(struct strbuf *sb, void *sbuf, long w)
 	}
 }
 
-void strbuf_append_char(struct strbuf *sb, void *chr)
+void strbuf_append_char(struct strbuf *sb, const void *chr)
 {
-	char *c = chr;
+	const char *c = chr;
 
 	strbuf_append(sb, *c);
 }
 
-void strbuf_append_str(struct strbuf *sb, void *str, int maxwidth)
+void strbuf_append_str(struct strbuf *sb, const void *str, int maxwidth)
 {
-	char *s = str;
-	char *end = &s[strlen(s)];
+	const char *s = str;
+	const char *end = &s[strlen(s)];
 	int width = 0;
 	int maxlen = -1;
 
@@ -134,9 +134,9 @@ void strbuf_append_str(struct strbuf *sb, void *str, int maxwidth)
 	}
 }
 
-void strbuf_append_int(struct strbuf *sb, void *in)
+void strbuf_append_int(struct strbuf *sb, const void *in)
 {
-	long int *i = in;
+	const long *i = in;
 	char wcs[TMPLEN];
 	long len = snprintf(wcs, TMPLEN - 1, "%ld", *i);
 
@@ -146,9 +146,9 @@ void strbuf_append_int(struct strbuf *sb, void *in)
 		strbuf_append_str(sb, wcs, -1 * len);
 }
 
-void strbuf_append_double(struct strbuf *sb, void *dub, int prec)
+void strbuf_append_double(struct strbuf *sb, const void *dub, int prec)
 {
-	double *d = dub;
+	const double *d = dub;
 	char wcs[TMPLEN];
 	char format[TMPLEN];
 	int rprec = prec;

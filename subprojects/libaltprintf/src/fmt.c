@@ -37,7 +37,7 @@ void fmt_tern(struct strbuf *sb, struct fmte *f)
 	long int *b = f->value;
 	int first_half = 1;
 	char sep = f->chararg;
-	char *p = f->parenarg_start;
+	const char *p = f->parenarg_start;
 	for (; p <= f->parenarg_end; p++) {
 		LOG("*p: %lc, first half? %d, bool: %ld, sep: %lc\n",
 		    (char)*p, first_half, *b, (char)sep);
@@ -78,7 +78,7 @@ void fmt_raw(struct strbuf *sb, struct fmte *f)
 {
 	CHECKNULL(f->parenarg_start);
 
-	char *p;
+	const char *p;
 	char c;
 	long i;
 

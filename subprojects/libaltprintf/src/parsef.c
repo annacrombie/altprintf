@@ -5,7 +5,7 @@
 
 char *altprintf_pct = "%";
 
-void get_longarg(char **s, char **e, char stop, size_t *size)
+void get_longarg(const char **s, const char **e, char stop, size_t *size)
 {
 	*size = 0;
 
@@ -20,7 +20,7 @@ void get_longarg(char **s, char **e, char stop, size_t *size)
 		*e = *s - 1;
 }
 
-struct fmte *parsef(char **fmt)
+struct fmte *parsef(const char **fmt)
 {
 	char *w_c;
 	char **w_a = &w_c;

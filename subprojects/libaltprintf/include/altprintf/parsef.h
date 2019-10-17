@@ -2,5 +2,5 @@
 #define PARSEF_H_
 #include <stdlib.h>
 
-struct fmte *parsef(char **);
+struct fmte *parsef(const char **);
 #endif

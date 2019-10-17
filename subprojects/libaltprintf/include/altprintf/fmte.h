@@ -4,12 +4,12 @@
 #include "altprintf/enums.h"
 
 struct fmte {
-	char *parenarg_start;
-	char *parenarg_end;
+	const char *parenarg_start;
+	const char *parenarg_end;
 	size_t parenarg_len;
 
-	char *anglearg_start;
-	char *anglearg_end;
+	const char *anglearg_start;
+	const char *anglearg_end;
 	size_t anglearg_len;
 
 	char chararg;
