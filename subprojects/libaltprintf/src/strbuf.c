@@ -53,15 +53,12 @@ void strbuf_append(struct strbuf *sb, char c)
 	char *ns;
 
 	if (sb->cap < sb->len + 2) {
-		ns = calloc(sb->cap + STRBUF_GROW_STEP, sizeof(char));
+		ns = realloc(sb->start, (sb->cap + STRBUF_GROW_STEP) * sizeof(char));
 
 		if (ns == NULL) {
 			LOG("can't increase size of strbuf to %d\n", sb->cap + STRBUF_GROW_STEP);
 			exit(1);
 		}
-
-		strcpy(ns, sb->start);
-		free(sb->start);
 
 		sb->start = ns;
 		sb->cap += STRBUF_GROW_STEP;
