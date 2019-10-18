@@ -1,19 +1,23 @@
 image: alpine/edge
 packages:
-  #- ruby
-  #- ruby-dev
   - meson
   - ninja
+  - ruby
+  - ruby-dev
 sources:
   - https://github.com/annacrombie/altprintf
 tasks:
   - setup: |
-      #sudo gem install bundler --no-document --quiet
-      #cd altprintf
-      #bundle install
-      #cd gem
-      #bundle install
+      sudo gem install bundler --no-document --quiet
+      cd altprintf/gem
+      bundle install
+      meson build
   - build: |
       cd altprintf
-      meson build
       ninja -C build
+  - build_gem: |
+      cd gem
+      bundle exec rake compile
+  - test: |
+      cd altprintf/gem
+      FUZZ_COUNT=2000 QUIET_RUNNER=1 FAIL_FAST=1 bundle exec rspec
