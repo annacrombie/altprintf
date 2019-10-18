@@ -1,7 +1,7 @@
 #ifndef FMTE_H_
 #define FMTE_H_
 #include <stdlib.h>
-#include "altprintf/enums.h"
+#include <altprintf/enums.h>
 
 struct fmte {
 	const char *parenarg_start;

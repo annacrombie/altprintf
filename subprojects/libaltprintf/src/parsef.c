@@ -1,7 +1,7 @@
-#include "altprintf/fmte.h"
-#include "altprintf/syntax.h"
-#include "altprintf/log.h"
-#include "altprintf/parsef.h"
+#include <altprintf/fmte.h>
+#include <altprintf/syntax.h>
+#include <altprintf/log.h>
+#include <altprintf/parsef.h>
 
 char *altprintf_pct = "%";
 

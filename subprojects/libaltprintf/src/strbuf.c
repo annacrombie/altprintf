@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "altprintf/log.h"
-#include "altprintf/strbuf.h"
-#include "altprintf/cwidth.h"
+#include <altprintf/log.h>
+#include <altprintf/strbuf.h>
+#include <altprintf/cwidth.h>
 
 extern struct lconv *locale_info;
 
