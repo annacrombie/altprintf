@@ -181,7 +181,7 @@ char *strbuf_cstr(struct strbuf *sb)
 {
 	char *cstr;
 
-	cstr = calloc(sb->len, sizeof(char));
+	cstr = calloc(sb->len + 1, sizeof(char));
 
 	strncpy(cstr, sb->start, sb->len);
 
