@@ -1,10 +1,9 @@
 #!/usr/bin/env ruby
 
-$LOAD_PATH.unshift(File.join(__dir__, '../gem/lib'))
-require 'pry'
+require 'irb'
+$LOAD_PATH.unshift(File.join(__dir__, '../lib'))
 require 'altprintf'
-
 include Altprintf
 puts "Altprintf version #{Altprintf::VERSION.join('.')} loaded"
 
-Pry.start
+IRB.start
