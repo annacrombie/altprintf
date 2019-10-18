@@ -9,56 +9,40 @@
 #include "extconf.h"
 #include <stdio.h>
 #include <locale.h>
-#include <wchar.h>
 #include <ruby.h>
 #include <ruby/encoding.h>
-#include "altprintf.h"
-#include "log.h"
+#include <altprintf/altprintf.h>
+#include <altprintf/log.h>
 
 #define MODNAME "Altprintf"
 
 rb_encoding *enc;
 
-wchar_t *rbstowcs(VALUE str)
+char *rbstocs(VALUE *rbstr)
 {
-	const char *cstr;
-	wchar_t *wstr;
-	size_t len;
+	char *p, *tmp;
+	long len;
 
-	cstr = StringValueCStr(str);
+	p = StringValuePtr(*rbstr);
+	len = RSTRING_LEN(*rbstr);
+	tmp = calloc(len + 1, sizeof(char));
+	strncpy(tmp, p, len);
+	tmp[len] = '\0';
 
-	len = mbsrtowcs(NULL, &cstr, 0, NULL);
-	wstr = calloc(len + 1, sizeof(wchar_t));
-	len = mbsrtowcs(wstr, &cstr, len, NULL);
-
-	LOG("rbs to wcs, len: %d, cstr: '%s'\n", len, cstr);
-	LOG("wide string: '%ls'\n", wstr);
-
-	return wstr;
+	return tmp;
 }
 
-VALUE wcstorbs(const wchar_t *wstr)
+VALUE cstorbs(const char *cstr)
 {
 	size_t len;
-	char *cstr;
 	VALUE str;
 
-	LOG("converting wcs to rbs\n");
-	LOG("wcs: '%ls'\n\n", wstr);
-
-	len = wcsrtombs(NULL, &wstr, 0, NULL);
-	LOG("len: %d\n", len);
-	cstr = calloc(len, sizeof(wchar_t));
-	wcsrtombs(cstr, &wstr, len, NULL);
-	LOG("cstr: '%s'\n", cstr);
-
-	LOG("wcs to rbs, len: %d, wcs: %ls, mbs: '%s'\n", len, wstr, cstr);
+	len = strlen(cstr);
 
 	if (len == (size_t)-1)
 		return Qnil;
 
 	str = rb_external_str_new_with_enc(cstr, len, enc);
-	free(cstr);
 
 	return str;
 }
@@ -66,9 +50,6 @@ VALUE wcstorbs(const wchar_t *wstr)
 VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *hash)
 {
 	VALUE sym, entry;
-	size_t len;
-	const wchar_t *tmpw;
-	char *cstr;
 
 	LOG("getting entry\n");
 
@@ -81,35 +62,22 @@ VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *h
 		return entry;
 	}
 
-	LOG("getting from hash\n");
-
-	tmpw = f->anglearg_start;
-	len = wcsnrtombs(NULL, &tmpw, f->anglearg_len, 0, NULL);
-	LOG("allocating %d, maxlen %d\n", len, f->anglearg_len);
-
-	cstr = calloc(len + 1, sizeof(char));
-	wcsnrtombs(cstr, &tmpw, f->anglearg_len, len, NULL);
-	LOG("wrote cstr %s\n", cstr);
-
-	LOG("symbol | cstr: '%s', len %d\n", cstr, len);
-
-	sym = rb_check_symbol_cstr(cstr, len, enc);
+	sym = rb_check_symbol_cstr(f->anglearg_start, f->anglearg_len, enc);
 	entry = rb_hash_lookup2(*hash, sym, Qnil);
 	if (entry == Qnil)
-		rb_raise(rb_eKeyError, "missing key :%s", cstr);
-	free(cstr);
+		rb_raise(rb_eKeyError, "missing key " PRIsVALUE, sym);
 
 	return entry;
 }
 
-wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE *hash)
+char *rb_apformat(const char *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE *hash)
 {
 	struct fmte *f, *head;
-	wchar_t *final;
+	char *final;
 	int loop = 1;
 	long *tmpi;
-	wint_t *tmpc;
-	wchar_t *tmps;
+	char *tmpc;
+	char *tmps;
 	double *tmpd;
 	void *tmp;
 	VALUE entry;
@@ -131,7 +99,7 @@ wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 		case FString:
 			Check_Type(entry, T_STRING);
 
-			tmp = rbstowcs(entry);
+			tmp = rbstocs(&entry);
 			goto match;
 		case FTern:
 			tmpi = malloc(sizeof(long));
@@ -152,9 +120,9 @@ wchar_t *rb_apformat(wchar_t *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 		case FChar:
 			Check_Type(entry, T_STRING);
 
-			tmpc = malloc(sizeof(wint_t));
-			tmps = rbstowcs(entry);
-			*tmpc = btowc(tmps[0]);
+			tmpc = malloc(sizeof(char));
+			tmps = StringValueCStr(entry);
+			*tmpc = tmps[0];
 			tmp = tmpc;
 			goto match;
 		case FDouble:
@@ -188,6 +156,7 @@ match:
 
 	LOG("got all fmt elements\n");
 	final = assemble_fmt(head);
+	LOG("assembled fmt: %s", final);
 	fmte_destroy(head);
 	return final;
 }
@@ -195,9 +164,10 @@ match:
 VALUE rb_altprintf(long passes, size_t argc, VALUE *argv, VALUE self)
 {
 	VALUE fmt, args, hash, final;
-	wchar_t *wfmt;
-	wchar_t *formatted;
+	char *wfmt;
+	char *formatted;
 	size_t argi;
+	int free_wfmt;
 
 	apf_err = apfe_none;
 	rb_scan_args(argc, argv, "1*:", &fmt, &args, &hash);
@@ -211,24 +181,28 @@ VALUE rb_altprintf(long passes, size_t argc, VALUE *argv, VALUE self)
 	if (passes == 0)
 		return fmt;
 
-	wfmt = rbstowcs(fmt);
+	free_wfmt = 0;
+	wfmt = StringValueCStr(fmt);
 	formatted = NULL;
 
 	argi = 0;
 	for (; passes > 0; passes--) {
-		LOG("wfmt: %ls\n", wfmt);
+		LOG("wfmt: %s\n", wfmt);
 
 		formatted = rb_apformat(wfmt, argc, &argi, &args, &hash);
 
-		LOG("formatted result: '%ls'\n", formatted);
+		LOG("formatted result: '%s'\n", formatted);
 
-		free(wfmt);
+		if (free_wfmt)
+			free(wfmt);
+		else
+			free_wfmt = 1;
 		wfmt = formatted;
 	}
 
 
-	LOG("final: '%ls'\n", formatted);
-	final = wcstorbs(formatted);
+	LOG("final: '%s'\n", formatted);
+	final = cstorbs(formatted);
 
 	free(formatted);
 

@@ -2,15 +2,20 @@ require 'mkmf'
 
 module ExtconfHelper
   BASE_DIR = File.join(__dir__, '../../../')
+  SRC_DIR = File.join(BASE_DIR, 'subprojects/libaltprintf/src/')
+  BUILD_DIR = File.join(BASE_DIR, 'build')
+  LIB_DIR = File.join(BUILD_DIR, 'subprojects/libaltprintf/')
+  INC_DIR = File.join(BASE_DIR, 'subprojects/libaltprintf/include/altprintf')
 
   module_function
 
-  def dev_header
-    find_header('altprintf.h', File.join(BASE_DIR, 'src'))
-  end
+  def dev_setup
+    have_header(File.join(INC_DIR, 'altprintf.h'))
 
-  def dev_objs(folder = 'release')
-    $objs = Dir[File.join(BASE_DIR, "target/#{folder}/*.o")] + ['ext.o']
+    unless find_library('altprintf', 'parsef', LIB_DIR)
+      $stderr.puts("you haven't built libaltprintf yet")
+      exit(1)
+    end
   end
 
   def setup(mode = 'release')
@@ -19,12 +24,7 @@ module ExtconfHelper
     when 'release'
       # do nothing
     when 'dev'
-      dev_header
-      dev_objs('release')
-    when 'debug'
-      dev_header
-      $defs.push("-DDEBUG")
-      dev_objs('debug')
+      dev_setup
     else
       raise(ArgumentError, "invalid mode #{mode}")
     end

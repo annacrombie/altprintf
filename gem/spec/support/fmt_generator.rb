@@ -22,9 +22,8 @@ module FmtGenerator
   def random_fmt_args
     [
       -> { ?~ + random_char },
-      -> { ?0 },
-      -> { ?\s },
       -> { "(#{random_chars})" },
+      -> { ?_ + random_char },
       -> { ?- },
       -> { ?^ },
       -> { ?. },

@@ -9,13 +9,12 @@ INC_DIR = File.join(__dir__, '../subprojects/libaltprintf/include/altprintf')
 
 Rake::ExtensionTask.new('altprintf') do |ext|
   ext.lib_dir = 'lib/altprintf'
-  ext.config_script =
-    case ENV['GEM_DEBUG']
-    when nil
-      'extconf_dev.rb'
-    else
-      'extconf_debug.rb'
-    end
+  ext.config_script = 'extconf_dev.rb'
+end
+
+task :clean do
+  sh "rm -rf tmp"
+  sh "rm -f lib/altprintf/altprintf.so"
 end
 
 namespace :gem do

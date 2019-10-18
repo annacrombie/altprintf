@@ -8,7 +8,7 @@ module APIs
   class Generic end
 
   class Cli < Generic
-    EXEC = 'target/release/altprintf'
+    EXEC = File.join(__dir__, '../../../build/cli/altprintf')
 
     def fmt(args)
       `#{EXEC} #{args.map(&:to_s).map(&:shellescape).join(' ')}`
