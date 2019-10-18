@@ -9,14 +9,15 @@ sources:
 tasks:
   - setup: |
       sudo gem install bundler --no-document --quiet
-      cd altprintf/gem
-      bundle install
+      cd altprintf
       meson build
+      cd gem
+      bundle install
   - build: |
       cd altprintf
       ninja -C build
   - build_gem: |
-      cd gem
+      cd altprintf/gem
       bundle exec rake compile
   - test: |
       cd altprintf/gem
