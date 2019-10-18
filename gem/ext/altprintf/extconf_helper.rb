@@ -5,12 +5,15 @@ module ExtconfHelper
   SRC_DIR = File.join(BASE_DIR, 'subprojects/libaltprintf/src/')
   BUILD_DIR = File.join(BASE_DIR, 'build')
   LIB_DIR = File.join(BUILD_DIR, 'subprojects/libaltprintf/')
-  INC_DIR = File.join(BASE_DIR, 'subprojects/libaltprintf/include/altprintf')
+  INC_DIR = File.join(BASE_DIR, 'subprojects/libaltprintf/include')
 
   module_function
 
   def dev_setup
-    have_header(File.join(INC_DIR, 'altprintf.h'))
+    unless find_header('altprintf/altprintf.h', INC_DIR)
+      $stderr.puts("couldn't find header 'altprintf.h'")
+      exit(1)
+    end
 
     unless find_library('altprintf', 'parsef', LIB_DIR)
       $stderr.puts("you haven't built libaltprintf yet")
