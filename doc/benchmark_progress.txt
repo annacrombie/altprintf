@@ -9,3 +9,15 @@ Comparison:
     sprintf - kwargs:    74469.4 i/s - 1.56x  slower
           alt_printf:    53519.5 i/s - 2.17x  slower
  alt_printf - kwargs:    40091.0 i/s - 2.89x  slower
+
+2c537b2 (ruby 2.6.5)
+             sprintf    115.883k (± 0.5%) i/s -    585.410k in   5.051863s
+           altprintf     51.429k (± 0.6%) i/s -    261.360k in   5.082180s
+    sprintf - kwargs     77.386k (± 1.8%) i/s -    391.248k in   5.057369s
+  altprintf - kwargs     41.883k (± 1.6%) i/s -    209.496k in   5.003227s
+
+Comparison:
+             sprintf:   115883.1 i/s
+    sprintf - kwargs:    77386.3 i/s - 1.50x  slower
+           altprintf:    51428.8 i/s - 2.25x  slower
+  altprintf - kwargs:    41882.5 i/s - 2.77x  slower
