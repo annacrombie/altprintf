@@ -21,4 +21,5 @@ Altprintf::SPEC = Gem::Specification.new do |s|
 
   s.add_development_dependency 'rake-compiler', '~> 1.0'
   s.add_development_dependency 'rake', '~> 12.3'
+  s.add_development_dependency 'rspec'
 end unless Altprintf.const_defined?(:'SPEC')
