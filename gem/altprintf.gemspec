@@ -19,7 +19,8 @@ Altprintf::SPEC = Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.5.5'
 
+  s.add_development_dependency 'benchmark-ips', '~> 2.7'
   s.add_development_dependency 'rake-compiler', '~> 1.0'
   s.add_development_dependency 'rake', '~> 12.3'
-  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'rspec', '~> 3.9'
 end unless Altprintf.const_defined?(:'SPEC')
