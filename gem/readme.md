@@ -14,3 +14,33 @@ argument is accepted:
 
 + `<val>` - access the value of the given hash with key `val` rather than
   try to read the next argument.
+
+## Setup
+
+``sh
+$ bundle install
+``
+
+## Compiling
+
+First, you must build `libaltprintf` with the build directory set to `build`.
+
+Then,
+
+```sh
+$ rake compile
+```
+
+## Running tests
+
+Note: You must also have built the cli.
+
+```sh
+$ rspec
+```
+
+## Building the gem
+
+```sh
+$ rake gem:build
+```

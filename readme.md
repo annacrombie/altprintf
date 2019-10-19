@@ -14,11 +14,23 @@ altprintf is a powerful printf-like template language.
 + You need debugging output from your program
   - Good old printf is your friend
 + Altprintf can't do what you need
-  - Submit an issue!
+  - Submit a patch!
 + You need extremely fast formatting
-  - altprintf is about 1/2 the speed of native printf, but I'm looking to
-    improve this.  A big reason for this is because the code is split into
-    several components, a cli front-end, a parser, and the core peice where the
-    output is generated.  Writing it this way opens the door to many different
-    front-ends all using the same core, e.g. a ruby gem, another c program, a
-    cli, etc..
+  - altprintf is not as fast as plain old printf, but I want to get it as close
+    as possible.  I doubt it will ever beat printf because its code is split
+    into a library that can be shared among many implementations, and it does
+    things like determining display width of utf8 characters.
+
+## Building
+
+altprintf uses meson.
+```sh
+$ meson build/
+$ ninja -C build/
+```
+
+## Installation
+
+```sh
+$ sudo ninja -C build/ install
+```
