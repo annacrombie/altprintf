@@ -39,17 +39,15 @@ namespace :gem do
       FileUtils.cp(f, File.join(dir, File.basename(f)))
     end
 
-    FileUtils.cp_r(
-      [Dir["#{SRC_DIR}/*.c"], INC_DIR].flatten,
-      File.join(tmp_dir, 'ext/altprintf/')
-    )
+    ext_dir = File.join(tmp_dir, 'ext/altprintf/')
+    FileUtils.cp_r(Dir["#{SRC_DIR}/*.c"].flatten, ext_dir)
+    FileUtils.cp_r(INC_DIR, ext_dir)
 
-    FileUtils.cd(tmp_dir)
+    FileUtils.cd()
 
-    sh "GEM_BUILD=1 rake build"
+    sh "GEM_BUILD=1 bundle exec \"cd '#{tmp_dir}' && rake build\""
 
-    FileUtils.cp(Dir['pkg/*'], File.join(__dir__, 'pkg'))
-    FileUtils.cd(__dir__)
+    FileUtils.cp(Dir[File.join(tmp_dir, 'pkg/*')], File.join(__dir__, 'pkg'))
     FileUtils.rm_rf(tmp_dir)
   end
 
@@ -58,7 +56,7 @@ namespace :gem do
     load File.join(__dir__, 'altprintf.gemspec')
     pkg = "pkg/#{Altprintf::SPEC.name}-#{Altprintf::SPEC.version}.gem"
 
-    sh "rake gem:build" unless File.exist?(pkg)
+    sh "bundle exec rake gem:build" unless File.exist?(pkg)
     sh "gem push #{pkg}"
   end
 end
