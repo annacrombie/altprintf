@@ -18,7 +18,7 @@ task :clean do
 end
 
 namespace :gem do
-  desc 'copy necessary C files from ../src and build the resulting gem'
+  desc 'copy necessary c files from ../src and build the resulting gem'
   task :build do
     tmp_dir = "/tmp/altprintf_#{SecureRandom.hex(8)}"
     puts "cloning to #{tmp_dir}"
