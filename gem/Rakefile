@@ -43,8 +43,6 @@ namespace :gem do
     FileUtils.cp_r(Dir["#{SRC_DIR}/*.c"].flatten, ext_dir)
     FileUtils.cp_r(INC_DIR, ext_dir)
 
-    FileUtils.cd()
-
     sh "GEM_BUILD=1 bundle exec \"cd '#{tmp_dir}' && rake build\""
 
     FileUtils.cp(Dir[File.join(tmp_dir, 'pkg/*')], File.join(__dir__, 'pkg'))
