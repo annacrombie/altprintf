@@ -22,3 +22,8 @@ tasks:
   - test: |
       cd altprintf/gem
       FUZZ_COUNT=2000 QUIET_RUNNER=1 FAIL_FAST=1 bundle exec rspec
+  - test_gem_install: |
+      cd altprintf/gem
+      bundle exec rake gem:build
+      gem install pkg/*.gem
+      ruby -e "require 'altprintf'; exit(Altprintf.fmt('%s', 'a') == 'a' ? 1 : 0)"
