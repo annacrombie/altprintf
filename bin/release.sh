@@ -1,5 +1,11 @@
 #!/bin/sh -eu
 
+getpermission() {
+  echo "$@ [y/n]"
+  read response
+  [ "$response" = "y" ]
+}
+
 new_ver="$(cat .version)"
 echo "updating version strings to ${new_ver}"
 
@@ -9,14 +15,19 @@ sed -i 's/\(ALTPRINTF_VERSION\) ".*"/\1 "'"${new_ver}"'"/g' \
 sed -i 's/\(VERSION ||=\) ".*"/\1 "'"${new_ver}"'"/g' \
   gem/lib/altprintf/version.rb
 
-echo "commit? [y/n]"
-read response
-if [ "$response" = "y" ]; then
+getpermission "commit?" && {
   git commit -am "release version ${new_ver}"
-fi
 
-echo "tag? [y/n]"
-read response
-if [ "$response" = "y" ]; then
-  git tag v"${new_ver}"
-fi
+  getpermission "tag?" && {
+    git tag v"${new_ver}"
+
+    getpermission "push" && {
+      git push --tags
+
+      getpermission "publish gem?" && {
+        cd gem/
+        bundle exec rake gem:publish
+      }
+    }
+  }
+}
