@@ -2,8 +2,13 @@ require 'rake/extensiontask'
 require 'securerandom'
 require 'fileutils'
 
-SRC_DIR = File.join(__dir__, '../subprojects/libaltprintf/src/')
-INC_DIR = File.join(__dir__, '../subprojects/libaltprintf/include/altprintf')
+ALTPRINTF_SRC =
+  File.join(__dir__, '../subprojects/libaltprintf/').yield_self do |base|
+    Dir[File.join(base, 'src/*.c')] + Dir[File.join(base, 'lib/*.c')]
+  end.flatten
+
+ALTPRINTF_HDRS =
+  File.join(__dir__, '../subprojects/libaltprintf/include/altprintf')
 
 Rake::ExtensionTask.new('altprintf') do |ext|
   ext.lib_dir = 'lib/altprintf'
@@ -38,12 +43,12 @@ namespace :gem do
     end
 
     ext_dir = File.join(tmp_dir, 'ext/altprintf/')
-    FileUtils.cp_r(Dir["#{SRC_DIR}/*.c"].flatten, ext_dir)
-    FileUtils.cp_r(INC_DIR, ext_dir)
+    FileUtils.cp_r(ALTPRINTF_SRC, ext_dir)
+    FileUtils.cp_r(ALTPRINTF_HDRS, ext_dir)
 
     sh "cd '#{tmp_dir}' && gem build altprintf.gemspec"
 
-    FileUtils.cp(Dir[File.join(tmp_dir, '*.gem')], File.join(__dir__, 'pkg'), verbose: true)
+    FileUtils.cp(Dir[File.join(tmp_dir, '*.gem')], File.join(__dir__, 'pkg'))
     FileUtils.rm_rf(tmp_dir)
   end
 
