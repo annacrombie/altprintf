@@ -5,7 +5,7 @@ module Altprintf
   SPEC ||=
     Gem::Specification.new do |s|
       s.name          = 'altprintf'
-      s.version       = ::Altprintf::VERSION.join('.')
+      s.version       = ::Altprintf::VERSION
       s.date          = Date.today.strftime('%Y-%m-%d')
       s.summary       = 'A powerful printf-like template language'
       s.authors       = ['Stone Tickle']
