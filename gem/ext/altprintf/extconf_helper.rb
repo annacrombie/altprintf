@@ -33,6 +33,6 @@ module ExtconfHelper
     end
 
     create_header
-    create_makefile('altprintf')
+    create_makefile('altprintf/altprintf')
   end
 end
