@@ -13,14 +13,12 @@ module Altprintf
       s.homepage      = 'https://github.com/annacrombie/altprintf/tree/master/gem'
       s.license       = 'MIT'
 
-      s.files         = Dir['{**/*}'] - ['Rakefile']
-
-      s.platform = Gem::Platform::RUBY
-      s.extensions = Dir["ext/**/extconf.rb"]
+      s.files         = Dir['{**/*}']
+      s.extensions    = Dir["ext/**/extconf.rb"]
       s.require_paths = ['lib']
 
+      s.platform = Gem::Platform::RUBY
       s.required_ruby_version = '>= 2.5.7'
-
       s.add_development_dependency 'benchmark-ips', '~> 2.7'
       s.add_development_dependency 'rake-compiler', '~> 1.0'
       s.add_development_dependency 'rake', '~> 12.3'
