@@ -27,7 +27,8 @@ namespace :gem do
       'altprintf.gemspec',
       'lib/**/*.rb',
       'ext/**/*.{c,h}',
-      'ext/altprintf/extconf{_helper}.rb'
+      'ext/altprintf/extconf.rb',
+      'ext/altprintf/extconf_helper.rb'
     ].each do |f|
       next if File.directory?(f)
 
