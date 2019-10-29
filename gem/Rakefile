@@ -2,8 +2,6 @@ require 'rake/extensiontask'
 require 'securerandom'
 require 'fileutils'
 
-require 'bundler/gem_tasks' if ENV['GEM_BUILD']
-
 SRC_DIR = File.join(__dir__, '../subprojects/libaltprintf/src/')
 INC_DIR = File.join(__dir__, '../subprojects/libaltprintf/include/altprintf')
 
@@ -42,9 +40,9 @@ namespace :gem do
     FileUtils.cp_r(Dir["#{SRC_DIR}/*.c"].flatten, ext_dir)
     FileUtils.cp_r(INC_DIR, ext_dir)
 
-    sh "GEM_BUILD=1 bundle exec \"cd '#{tmp_dir}' && rake build\""
+    sh "cd '#{tmp_dir}' && gem build altprintf.gemspec"
 
-    FileUtils.cp(Dir[File.join(tmp_dir, 'pkg/*')], File.join(__dir__, 'pkg'))
+    FileUtils.cp(Dir[File.join(tmp_dir, '*.gem')], File.join(__dir__, 'pkg'), verbose: true)
     FileUtils.rm_rf(tmp_dir)
   end
 
