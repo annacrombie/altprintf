@@ -25,5 +25,5 @@ tasks:
   - test_gem_install: |
       cd altprintf/gem
       bundle exec rake gem:build
-      gem install pkg/*.gem
+      sudo gem install pkg/*.gem
       ruby -e "require 'altprintf'; exit(Altprintf.fmt('%s', 'a') == 'a' ? 1 : 0)"
