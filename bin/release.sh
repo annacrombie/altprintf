@@ -3,7 +3,7 @@
 getpermission() {
   local response
 
-  echo "$@ [y/n]"
+  printf "$@ [y/n] "
   read response
   [ "$response" = "y" ]
 }
