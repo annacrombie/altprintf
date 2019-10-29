@@ -14,8 +14,6 @@
 #include <altprintf/altprintf.h>
 #include <altprintf/log.h>
 
-#define MODNAME "Altprintf"
-
 rb_encoding *enc;
 
 char *rbstocs(VALUE *rbstr)
@@ -209,11 +207,44 @@ VALUE rb_altprintf(long passes, size_t argc, VALUE *argv, VALUE self)
 	return final;
 }
 
+/*
+ * call-seq:
+ *	fmt(format_string [, arguments...]) -> String
+ *
+ * Formats a `format_string` with `arguments`.  `format_string` may be any
+ * vaild altprintf format string .
+ * Additionally, a hash may be specified as the last argument, or as keyword
+ * arguments and the values of the hash may be directly accessed in the format
+ * string using < and >.
+ *
+ * For example:
+ *	fmt("hello %<name>", name: "John") #=> "hello John"
+ *
+ * Note that the keys within <> are always assumed to be symbols, so the
+ * following would not work
+ *	fmt("hello %<name>", { "name" => "John" }) #=> "hello John"
+ */
 VALUE rb_altprintf_single_pass(size_t argc, VALUE *argv, VALUE self)
 {
 	return rb_altprintf(1, argc, argv, self);
 }
 
+
+
+/*
+ * call-seq:
+ *   fmtm(passes, format_string [, arguments...]) -> String
+ *
+ * Same as #fmt, but takes an additional argument, passes, which specifies the
+ * number of passes to go over the format string.
+ *
+ * For example:
+ *	fmtm(0, "%%%%%%%%") #=> "%%%%%%%%"
+ *	fmtm(1, "%%%%%%%%") #=> "%%%%"
+ *	fmtm(2, "%%%%%%%%") #=> "%%"
+ *	fmtm(3, "%%%%%%%%") #=> "%"
+ *	fmtm(4, "%%%%%%%%") #=> ""
+ */
 VALUE rb_altprintf_multi_pass(size_t argc, VALUE *argv, VALUE self)
 {
 	long passes;
@@ -233,10 +264,19 @@ void Init_altprintf()
 	size_t len;
 
 	enc = rb_enc_find("UTF-8");
-	mod = rb_define_module(MODNAME);
+
+	/*
+	 * The base module for *Altprintf*.  For documentation on the syntax of
+	 * the format string, see https://github.com/annacrombie/altprintf
+	 */
+	mod = rb_define_module("Altprintf");
 
 	len = strlen(ALTPRINTF_VERSION);
 	ver = rb_external_str_new_with_enc(ALTPRINTF_VERSION, len, enc);
+
+	/*
+	 * The version of libaltprintf that this extension was compiled against.
+	 */
 	rb_define_const(mod, "LIB_VERSION", ver);
 
 	rb_define_module_function(mod, "fmt", rb_altprintf_single_pass, -1);
