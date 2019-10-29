@@ -27,8 +27,7 @@ namespace :gem do
     Dir[
       'readme.md',
       'altprintf.gemspec',
-      'Rakefile',
-      'lib/**/*',
+      'lib/**/*.rb',
       'ext/**/*.{c,h}',
       'ext/altprintf/extconf{_helper}.rb'
     ].each do |f|
