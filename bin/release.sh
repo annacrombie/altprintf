@@ -8,7 +8,7 @@ getpermission() {
   [ "$response" = "y" ]
 }
 
-local new_ver="$(cat .version)"
+new_ver="$(cat .version)"
 
 getpermission "bump version to '${new_ver}'" && {
   sed -i 's/\(ALTPRINTF_VERSION\) ".*"/\1 "'"${new_ver}"'"/g' \
