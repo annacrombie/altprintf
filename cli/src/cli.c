@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <locale.h>
 #include <string.h>
-#include "altprintf/log.h"
-#include "altprintf/parsef.h"
-#include "altprintf/altprintf.h"
+#include <altprintf/log.h>
+#include <altprintf/parsef.h>
+#include <altprintf/altprintf.h>
 
 struct lconv *locale_info;
 enum altprintf_err apf_err;
