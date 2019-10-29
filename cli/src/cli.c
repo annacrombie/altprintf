@@ -92,8 +92,9 @@ int main(int argc, char **argv)
 
 	if (argc < 2) {
 		printf(
-			"altprintf v%s\nusage: %s format [arg1 [arg2 [...]]]\n",
-			ALTPRINTF_VERSION,
+			"altprintf cli, compiled against libaltprintf v"
+			ALTPRINTF_VERSION "\n"
+			"Usage: %s format [arg1 [arg2 [...]]]\n",
 			argv[0]
 			);
 		return 1;
