@@ -4,11 +4,6 @@ Kind of like a to do list, but you don't have to do everything on it.
 
 ## Misc
 
-### Free wcwidth.c
-
-Use [wcwidth.c](https://www.cl.cam.ac.uk/~mgk25/ucs/wcwidth.c) instead of the
-one provided by `wchar.h`.
-
 ## Features
 
 ### Don't consume flag
