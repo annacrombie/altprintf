@@ -1,10 +1,2 @@
 build/
 subprojects/libaltprintf/build/
-
-ext/extconf.h
-ext/Makefile
-*.log
-*.so
-
-Gemfile.lock
-.rspec_status
