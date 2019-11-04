@@ -35,9 +35,9 @@ add_project_arguments(cc.get_supported_arguments([
 math_lib = cc.find_library('m', required : true)
 
 lib_src = files([
-	'src/parsef.c',
+	'src/parse.c',
 	'src/strbuf.c',
-	'src/fmt.c',
+	'src/assemble.c',
 	'src/fmte.c',
 	'lib/cwidth.c'
 ])
@@ -47,16 +47,8 @@ inc = include_directories(['include'])
 libaltprintf = library('altprintf', lib_src, dependencies: math_lib, include_directories: inc, install: true)
 install_headers(
 	files([
-		'include/altprintf/altprintf.h',
-		'include/altprintf/enums.h',
-		'include/altprintf/fmt.h',
-		'include/altprintf/fmte.h',
-		'include/altprintf/log.h',
-		'include/altprintf/parsef.h',
-		'include/altprintf/strbuf.h',
-		'include/altprintf/syntax.h',
-	]),
-	subdir: 'altprintf'
+		'include/altprintf.h',
+	])
 )
 altprintf_dep = declare_dependency(
 	include_directories: inc,

@@ -6,11 +6,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <altprintf/log.h>
-#include <altprintf/strbuf.h>
-#include <altprintf/cwidth.h>
-
-extern struct lconv *locale_info;
+#include "log.h"
+#include "strbuf.h"
+#include "cwidth.h"
 
 struct strbuf *strbuf_new(void)
 {

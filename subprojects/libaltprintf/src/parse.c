@@ -1,11 +1,10 @@
-#include <altprintf/fmte.h>
-#include <altprintf/syntax.h>
-#include <altprintf/log.h>
-#include <altprintf/parsef.h>
+#include "altprintf.h"
+#include "syntax.h"
+#include "log.h"
 
 char *altprintf_pct = "%";
 
-void get_longarg(const char **s, const char **e, char stop, size_t *size)
+static void get_longarg(const char **s, const char **e, char stop, size_t *size)
 {
 	*size = 0;
 
@@ -20,23 +19,23 @@ void get_longarg(const char **s, const char **e, char stop, size_t *size)
 		*e = *s - 1;
 }
 
-struct fmte *parsef(const char **fmt)
+struct apf_fmte *apf_parse(const char **fmt)
 {
 	char *w_c;
 	char **w_a = &w_c;
-	struct fmte *f = fmte_ini();
+	struct apf_fmte *f = apf_fmte_ini();
 	long *l_a = &f->pad;
 
 	LOG("processing %d (%c)\n", **fmt, **fmt);
 
 	if (**fmt != FS_START) {
 		if (**fmt == EOS) {
-			f->type = FEnd;
+			f->type = apf_argt_end;
 			goto return_format;
 		}
 
 		LOG("building raw format\n");
-		f->type = FRaw;
+		f->type = apf_argt_raw;
 
 		f->parenarg_start = *fmt;
 		LOG("scanning long arg\n");
@@ -68,10 +67,10 @@ struct fmte *parsef(const char **fmt)
 			get_longarg(fmt, &f->parenarg_end, FS_A_PARENARG_E, &f->parenarg_len);
 			break;
 		case FS_A_LALIGN:
-			f->align = Left;
+			f->align = apf_algn_left;
 			break;
 		case FS_A_CALIGN:
-			f->align = Center;
+			f->align = apf_algn_center;
 			break;
 		case FS_A_PAD:
 			(*fmt)++;
@@ -89,40 +88,40 @@ struct fmte *parsef(const char **fmt)
 			break;
 		// Psuedo-type
 		case FS_START:
-			f->type = FRaw;
+			f->type = apf_argt_raw;
 			f->parenarg_start = &altprintf_pct[0];
 			f->parenarg_end = &altprintf_pct[1];
 			f->parenarg_len = 1;
 			goto return_format;
 		// Types
 		case FS_T_STRING:
-			f->type = FString;
+			f->type = apf_argt_string;
 			goto return_format;
 		case FS_T_MUL:
-			f->type = FMul;
+			f->type = apf_argt_mul;
 			goto return_format;
 		case FS_T_TERN:
-			f->type = FTern;
+			f->type = apf_argt_tern;
 			goto return_format;
 		case FS_T_ALIGN:
-			f->type = FAlign;
+			f->type = apf_argt_align;
 			goto return_format;
 		case FS_T_INT:
-			f->type = FInt;
+			f->type = apf_argt_int;
 			goto return_format;
 		case FS_T_CHAR:
-			f->type = FChar;
+			f->type = apf_argt_char;
 			goto return_format;
 		case FS_T_DOUBLE:
-			f->type = FDouble;
+			f->type = apf_argt_double;
 			goto return_format;
 		default:
-			apf_err = apfe_invalid_token;
-			f->type = FRaw;
+			apf_errno = apf_err_invalid_token;
+			f->type = apf_argt_raw;
 		}
 	}
 
-	f->type = FEnd;
+	f->type = apf_argt_end;
 return_format:
 	(*fmt)++;
 	return f;

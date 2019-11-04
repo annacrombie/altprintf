@@ -10,12 +10,12 @@ module ExtconfHelper
   module_function
 
   def dev_setup
-    unless find_header('altprintf/altprintf.h', INC_DIR)
+    unless find_header('altprintf.h', INC_DIR)
       $stderr.puts("couldn't find header 'altprintf.h'")
       exit(1)
     end
 
-    unless find_library('altprintf', 'parsef', LIB_DIR)
+    unless find_library('altprintf', 'apf_parse', LIB_DIR)
       $stderr.puts("you haven't built libaltprintf yet")
       exit(1)
     end

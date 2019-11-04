@@ -1,12 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <altprintf/enums.h>
-#include <altprintf/log.h>
-#include <altprintf/fmte.h>
+#include "altprintf.h"
+#include "log.h"
 
-struct fmte *fmte_ini(void)
+struct apf_fmte *apf_fmte_ini(void)
 {
-	struct fmte *f = malloc(sizeof(struct fmte));
+	struct apf_fmte *f = malloc(sizeof(struct apf_fmte));
 
 	f->parenarg_start = NULL;
 	f->parenarg_end = NULL;
@@ -18,8 +17,8 @@ struct fmte *fmte_ini(void)
 
 	f->chararg = ' ';
 	f->padchar = ' ';
-	f->type = FNone;
-	f->align = Left;
+	f->type = apf_argt_none;
+	f->align = apf_algn_left;
 	f->prec = -1;
 	f->pad = 0;
 	f->value = NULL;
@@ -29,7 +28,7 @@ struct fmte *fmte_ini(void)
 	return f;
 }
 
-void fmte_push(struct fmte *a, struct fmte *b)
+void apf_fmte_push(struct apf_fmte *a, struct apf_fmte *b)
 {
 	if (a == b)
 		return;     // refuse to create an infinite loop
@@ -39,9 +38,9 @@ void fmte_push(struct fmte *a, struct fmte *b)
 	a->next = b;
 }
 
-void fmte_destroy(struct fmte *f)
+void apf_fmte_destroy(struct apf_fmte *f)
 {
-	struct fmte *j;
+	struct apf_fmte *j;
 
 	while (f != NULL) {
 		j = f->next;
@@ -51,7 +50,7 @@ void fmte_destroy(struct fmte *f)
 	}
 }
 
-void fmte_inspect(struct fmte *f)
+void apf_fmte_inspect(struct apf_fmte *f)
 {
 	char *parenarg = calloc(f->parenarg_len + 1, sizeof(char));
 	char *anglearg = calloc(f->anglearg_len + 1, sizeof(char));

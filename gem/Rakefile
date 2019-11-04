@@ -7,8 +7,7 @@ ALTPRINTF_SRC =
     Dir[File.join(base, 'src/*.c')] + Dir[File.join(base, 'lib/*.c')]
   end.flatten
 
-ALTPRINTF_HDRS =
-  File.join(__dir__, '../subprojects/libaltprintf/include/altprintf')
+ALTPRINTF_HDRS = Dir[File.join(__dir__, '../subprojects/libaltprintf/include/*.h')]
 
 Rake::ExtensionTask.new('altprintf') do |ext|
   ext.lib_dir = 'lib/altprintf'

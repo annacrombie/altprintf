@@ -1,21 +1,20 @@
-#include <altprintf/syntax.h>
-#include <altprintf/strbuf.h>
-#include <altprintf/fmte.h>
-#include <altprintf/log.h>
-#include <altprintf/fmt.h>
+#include "altprintf.h"
+#include "syntax.h"
+#include "strbuf.h"
+#include "log.h"
 
 #define BUFNUM 25
 
 #define CHECKNULL(p) do {                                \
 		if (p == NULL) {                         \
-			apf_err = apfe_missing_argument; \
+			apf_errno = apf_err_missing_argument; \
 			return;                          \
 		}                                        \
 } while (0)
 
-enum altprintf_err apf_err;
+enum apf_err apf_errno;
 
-void fmt_mul(struct strbuf *sb, struct fmte *f)
+static void fmt_mul(struct strbuf *sb, struct apf_fmte *f)
 {
 	CHECKNULL(f->value);
 
@@ -29,7 +28,7 @@ void fmt_mul(struct strbuf *sb, struct fmte *f)
 			strbuf_append_str(sb, f->parenarg_start, -f->parenarg_len);
 }
 
-void fmt_tern(struct strbuf *sb, struct fmte *f)
+static void fmt_tern(struct strbuf *sb, struct apf_fmte *f)
 {
 	CHECKNULL(f->parenarg_start);
 	CHECKNULL(f->value);
@@ -50,7 +49,7 @@ void fmt_tern(struct strbuf *sb, struct fmte *f)
 	}
 }
 
-char process_escape_seq(char seq)
+static char process_escape_seq(char seq)
 {
 	switch (seq) {
 	case FS_ESC_NL:
@@ -74,7 +73,7 @@ char process_escape_seq(char seq)
 	}
 }
 
-void fmt_raw(struct strbuf *sb, struct fmte *f)
+static void fmt_raw(struct strbuf *sb, struct apf_fmte *f)
 {
 	CHECKNULL(f->parenarg_start);
 
@@ -96,7 +95,7 @@ void fmt_raw(struct strbuf *sb, struct fmte *f)
 	}
 }
 
-void fmt_string(struct strbuf *sb, struct fmte *f)
+static void fmt_string(struct strbuf *sb, struct apf_fmte *f)
 {
 	CHECKNULL(f->value);
 
@@ -104,26 +103,27 @@ void fmt_string(struct strbuf *sb, struct fmte *f)
 	strbuf_append_str(sb, f->value, prec);
 }
 
-void fmt_char(struct strbuf *sb, struct fmte *f)
+static void fmt_char(struct strbuf *sb, struct apf_fmte *f)
 {
 	CHECKNULL(f->value);
 	strbuf_append_char(sb, f->value);
 }
 
-void fmt_int(struct strbuf *sb, struct fmte *f)
+static void fmt_int(struct strbuf *sb, struct apf_fmte *f)
 {
 	CHECKNULL(f->value);
 	strbuf_append_int(sb, f->value);
 }
 
-void fmt_double(struct strbuf *sb, struct fmte *f)
+static void fmt_double(struct strbuf *sb, struct apf_fmte *f)
 {
 	CHECKNULL(f->value);
 	int prec = f->prec == -1 ? 3 : f->prec;
 	strbuf_append_double(sb, f->value, prec);
 }
 
-void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct fmte *))
+static void
+fmt(struct strbuf *sb, struct apf_fmte *f, void (*fmtr)(struct strbuf *, struct apf_fmte *))
 {
 	struct strbuf *tmp = strbuf_new();
 
@@ -139,15 +139,15 @@ void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct
 	if (pad > 0) {
 		LOG("padding: %d\n", pad);
 		switch (f->align) {
-		case Right:
+		case apf_algn_right:
 			strbuf_append_strbuf(sb, tmp);
 			strbuf_pad(sb, f->padchar, pad);
 			break;
-		case Left:
+		case apf_algn_left:
 			strbuf_pad(sb, f->padchar, pad);
 			strbuf_append_strbuf(sb, tmp);
 			break;
-		case Center:
+		case apf_algn_center:
 			strbuf_pad(sb, f->padchar, pad / 2);
 			strbuf_append_strbuf(sb, tmp);
 			strbuf_pad(sb, f->padchar, pad / 2 + pad % 2);
@@ -160,16 +160,16 @@ void fmt(struct strbuf *sb, struct fmte *f, void (*fmtr)(struct strbuf *, struct
 	strbuf_destroy(tmp);
 }
 
-char *assemble_fmt(struct fmte *head)
+char *apf_assemble(struct apf_fmte *head)
 {
-	struct fmte *f = head;
+	struct apf_fmte *f = head;
 	struct strbuf *bufs[BUFNUM];
-	struct fmte *splits[BUFNUM];
+	struct apf_fmte *splits[BUFNUM];
 	size_t buf = 0, i;
 	size_t w, tw, rw;
 	char *final;
 
-	void (*fmtr)(struct strbuf *, struct fmte *) = NULL;
+	void (*fmtr)(struct strbuf *, struct apf_fmte *) = NULL;
 	int loop = 1;
 
 	bufs[buf] = strbuf_new();
@@ -177,39 +177,39 @@ char *assemble_fmt(struct fmte *head)
 	LOG("assembling elements\n");
 	while (loop) {
 		switch (f->type) {
-		case FMul:
+		case apf_argt_mul:
 			fmtr = fmt_mul;
 			break;
-		case FTern:
+		case apf_argt_tern:
 			fmtr = fmt_tern;
 			break;
-		case FInt:
+		case apf_argt_int:
 			fmtr = fmt_int;
 			break;
-		case FChar:
+		case apf_argt_char:
 			fmtr = fmt_char;
 			break;
-		case FDouble:
+		case apf_argt_double:
 			fmtr = fmt_double;
 			break;
-		case FString:
+		case apf_argt_string:
 			fmtr = fmt_string;
 			break;
-		case FRaw:
+		case apf_argt_raw:
 			fmtr = fmt_raw;
 			break;
 
-		case FAlign:
+		case apf_argt_align:
 			buf++;
 			splits[buf] = f;
 			bufs[buf] = strbuf_new();
 			fmtr = NULL;
 			break;
-		case FEnd:
+		case apf_argt_end:
 			loop = 0;
 			fmtr = NULL;
 			break;
-		case FNone:
+		case apf_argt_none:
 			fmtr = NULL;
 			break;
 		}

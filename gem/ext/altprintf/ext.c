@@ -6,13 +6,18 @@
 #undef RUBY_EXTCONF_H
 #endif
 
+#ifdef DEBUG
+#define LOG(...) printf("%s:%d [\e[35m%s\e[0m] ", __FILE__, __LINE__, __func__); printf(__VA_ARGS__);
+#else
+#define LOG(msg, ...)
+#endif
+
 #include "extconf.h"
 #include <stdio.h>
 #include <locale.h>
 #include <ruby.h>
 #include <ruby/encoding.h>
-#include <altprintf/altprintf.h>
-#include <altprintf/log.h>
+#include <altprintf.h>
 
 rb_encoding *enc;
 
@@ -45,7 +50,7 @@ VALUE cstorbs(const char *cstr)
 	return str;
 }
 
-VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *hash)
+VALUE get_entry(struct apf_fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *hash)
 {
 	VALUE sym, entry;
 
@@ -70,7 +75,7 @@ VALUE get_entry(struct fmte *f, size_t argc, size_t *argi, VALUE *argv, VALUE *h
 
 char *rb_apformat(const char *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE *hash)
 {
-	struct fmte *f, *head;
+	struct apf_fmte *f, *head;
 	char *final;
 	int loop = 1;
 	long *tmpi;
@@ -80,42 +85,42 @@ char *rb_apformat(const char *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 	void *tmp;
 	VALUE entry;
 
-	head = f = parsef(&fmt);
+	head = f = apf_parse(&fmt);
 
 	while (loop) {
-		if (apf_err != apfe_none)
+		if (apf_errno != apf_err_none)
 			rb_raise(rb_eArgError, "malformed format string");
 
 		LOG("scanned type: %d\n", f->type);
 
-		if (f->type != FEnd && f->type != FRaw)
+		if (f->type != apf_argt_end && f->type != apf_argt_raw)
 			entry = get_entry(f, argc, argi, argv, hash);
 		else
 			entry = Qnil;
 
 		switch (f->type) {
-		case FString:
+		case apf_argt_string:
 			Check_Type(entry, T_STRING);
 
 			tmp = rbstocs(&entry);
 			goto match;
-		case FTern:
+		case apf_argt_tern:
 			tmpi = malloc(sizeof(long));
 
 			*tmpi = (entry == Qfalse || entry == Qnil) ? 0 : 1;
 
 			tmp = tmpi;
 			goto match;
-		case FMul:
-		case FAlign:
-		case FInt:
+		case apf_argt_mul:
+		case apf_argt_align:
+		case apf_argt_int:
 			Check_Type(entry, T_FIXNUM);
 
 			tmpi = malloc(sizeof(long));
 			*tmpi = FIX2LONG(entry);
 			tmp = tmpi;
 			goto match;
-		case FChar:
+		case apf_argt_char:
 			Check_Type(entry, T_STRING);
 
 			tmpc = malloc(sizeof(char));
@@ -123,7 +128,7 @@ char *rb_apformat(const char *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 			*tmpc = tmps[0];
 			tmp = tmpc;
 			goto match;
-		case FDouble:
+		case apf_argt_double:
 			Check_Type(entry, T_FLOAT);
 
 			tmpd = malloc(sizeof(double));
@@ -132,13 +137,13 @@ char *rb_apformat(const char *fmt, size_t argc, size_t *argi, VALUE *argv, VALUE
 match:
 			f->value = tmp;
 			break;
-		case FRaw:
+		case apf_argt_raw:
 			break;
-		case FEnd:
+		case apf_argt_end:
 			LOG("EOS (end of string)\n");
 			loop = 0;
 			break;
-		case FNone:
+		case apf_argt_none:
 			LOG("error! shouldn' t be none\n");
 			break;
 		}
@@ -147,15 +152,15 @@ match:
 #ifdef DEBUG
 		fmte_inspect(f);
 #endif
-		fmte_push(head, f);
+		apf_fmte_push(head, f);
 		if (loop)
-			f = parsef(&fmt);
+			f = apf_parse(&fmt);
 	}
 
 	LOG("got all fmt elements\n");
-	final = assemble_fmt(head);
+	final = apf_assemble(head);
 	LOG("assembled fmt: %s", final);
-	fmte_destroy(head);
+	apf_fmte_destroy(head);
 	return final;
 }
 
@@ -167,7 +172,7 @@ VALUE rb_altprintf(long passes, size_t argc, VALUE *argv, VALUE self)
 	size_t argi;
 	int free_wfmt;
 
-	apf_err = apfe_none;
+	apf_errno = apf_err_none;
 	rb_scan_args(argc, argv, "1*:", &fmt, &args, &hash);
 	argc--;
 

@@ -1,52 +1,45 @@
 #include <stdio.h>
 #include <locale.h>
 #include <string.h>
-#include <altprintf/log.h>
-#include <altprintf/parsef.h>
-#include <altprintf/altprintf.h>
+#include <altprintf.h>
 
 struct lconv *locale_info;
-enum altprintf_err apf_err;
+enum apf_err apf_errno;
 
 char *format(const char *fmt, int argc, int *argi, char **argv)
 {
 	void *tmp;
-	struct fmte *f, *head;
+	struct apf_fmte *f, *head;
 	size_t len;
 	int loop = 1;
 	char *final;
 
-	head = f = parsef(&fmt);
+	head = f = apf_parse(&fmt);
 
 	while (loop) {
-		LOG("scanned type: %d\n", f->type);
-
-		if (!(f->type == FRaw || f->type == FEnd) && (*argi) >= argc) {
-			LOG("out of values\n");
+		if (!(f->type == apf_argt_raw || f->type == apf_argt_end) && (*argi) >= argc)
 			goto process_next_fmt;
-		}
 
 		switch (f->type) {
-		case FString:
+		case apf_argt_string:
 			len = strlen(argv[(*argi)]) + 1;
 			tmp = calloc(len, sizeof(char));
 			strcpy(tmp, argv[(*argi)]);
 			goto match;
-		case FMul:
-		case FTern:
-		case FAlign:
-		case FInt:
+		case apf_argt_mul:
+		case apf_argt_tern:
+		case apf_argt_align:
+		case apf_argt_int:
 			tmp = malloc(sizeof(long int));
 			long *tmpl = tmp;
 			*tmpl = atol(argv[(*argi)]);
-			LOG("got int %ld, from string \"%s\"\n", *tmpl, argv[(*argi)]);
 			goto match;
-		case FChar:
+		case apf_argt_char:
 			tmp = malloc(sizeof(char));
 			char *tmpc = tmp;
 			*tmpc = *argv[(*argi)];
 			goto match;
-		case FDouble:
+		case apf_argt_double:
 			tmp = malloc(sizeof(double));
 			double *tmpd = tmp;
 			*tmpd = strtod(argv[(*argi)], NULL);
@@ -55,30 +48,23 @@ match:
 			f->value = tmp;
 			(*argi)++;
 			break;
-		case FRaw:
+		case apf_argt_raw:
 			break;
-		case FEnd:
-			LOG("EOS (end of string)\n");
+		case apf_argt_end:
 			loop = 0;
 			break;
-		case FNone:
-			LOG("error! shouldn' t be none\n");
+		case apf_argt_none:
 			break;
 		}
 
 process_next_fmt:
-		LOG("pushing fmt\n");
-#ifdef DEBUG
-		fmte_inspect(f);
-#endif
-		fmte_push(head, f);
+		apf_fmte_push(head, f);
 		if (loop)
-			f = parsef(&fmt);
+			f = apf_parse(&fmt);
 	}
 
-	LOG("got all fmt elements\n");
-	final = assemble_fmt(head);
-	fmte_destroy(head);
+	final = apf_assemble(head);
+	apf_fmte_destroy(head);
 	return final;
 }
 
@@ -117,9 +103,8 @@ int main(int argc, char **argv)
 			break;
 	}
 
-	LOG("final output: '%s'\n", str);
 	printf("%s", str);
 	free(str);
 
-	return apf_err;
+	return apf_errno;
 }
