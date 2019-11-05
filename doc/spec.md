@@ -1,1 +1,0 @@
-altprintf.7.scdoc
