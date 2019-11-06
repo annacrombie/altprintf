@@ -36,3 +36,9 @@ add_project_arguments(cc.get_supported_arguments([
 altprintf_dep = libaltprintf.get_variable('altprintf_dep')
 
 subdir('cli')
+
+scdoc = dependency('scdoc', native: true, required: get_option('man-pages'),
+	version: '>=1.9.0')
+if scdoc.found()
+	subdir('doc')
+endif
