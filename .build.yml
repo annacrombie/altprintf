@@ -4,6 +4,7 @@ packages:
   - ninja
   - ruby
   - ruby-dev
+  - scdoc
 sources:
   - https://github.com/annacrombie/altprintf
 tasks:
