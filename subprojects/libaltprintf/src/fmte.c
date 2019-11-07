@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "altprintf.h"
+#include "fmte.h"
 #include "log.h"
 
 struct apf_fmte *apf_fmte_ini(void)

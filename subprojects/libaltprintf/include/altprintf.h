@@ -15,6 +15,7 @@ enum apf_argt {
 	apf_argt_none,
 	apf_argt_end
 };
+
 enum apf_align { apf_algn_left, apf_algn_right, apf_algn_center };
 
 enum apf_err {
@@ -49,8 +50,6 @@ struct apf_fmte {
 	struct apf_fmte *next;
 };
 
-struct apf_fmte *apf_fmte_ini(void);
-void apf_fmte_inspect(struct apf_fmte *);
 void apf_fmte_push(struct apf_fmte *, struct apf_fmte *);
 void apf_fmte_destroy(struct apf_fmte *);
 struct apf_fmte *apf_parse(const char **);

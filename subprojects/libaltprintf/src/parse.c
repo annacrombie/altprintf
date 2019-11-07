@@ -1,4 +1,5 @@
 #include "altprintf.h"
+#include "fmte.h"
 #include "syntax.h"
 #include "log.h"
 
