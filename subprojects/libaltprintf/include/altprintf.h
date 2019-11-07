@@ -1,6 +1,6 @@
 #ifndef ALTPRINTF_H_
 #define ALTPRINTF_H_
-#define ALTPRINTF_VERSION "0.3.3"
+#define ALTPRINTF_VERSION "0.4.0"
 #include <stdlib.h>
 
 enum apf_argt {
