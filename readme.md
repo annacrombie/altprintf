@@ -3,27 +3,24 @@
 
 altprintf is a powerful printf-like template language.
 
-## Why use it?
+## Features
 
-+ If you need to format/align strings with wide characters
-+ If you want build a tui that is customisable with format strings
-+ If you want fancy output for your cli
++ Some cool format specifiers, like conditionals.
++ Advanced alignment
++ You can use it in your favorite programming language
 
 ## Why not use it?
 
-+ You need debugging output from your program
-  - Good old printf is your friend
-+ Altprintf can't do what you need
-  - Submit a patch!
++ You just need to print some strings
 + You need extremely fast formatting
   - altprintf is not as fast as plain old printf, but I want to get it as close
-    as possible.  I doubt it will ever beat printf because its code is split
-    into a library that can be shared among many implementations, and it does
-    things like determining display width of utf8 characters.
+    as possible.  I doubt it will ever beat printf though, because of its more
+    modular design
 
 ## Building
 
-altprintf uses meson.
+You need `meson` and `ninja`.  If you want man pages, you also need `scdoc`.
+
 ```sh
 $ meson build/
 $ ninja -C build/
@@ -34,3 +31,7 @@ $ ninja -C build/
 ```sh
 $ sudo ninja -C build/ install
 ```
+
+## Docs
+
+See the man pages
