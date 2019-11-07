@@ -12,7 +12,7 @@ new_ver="$(cat .version)"
 
 getpermission "bump version to '${new_ver}'" && {
   sed -i 's/\(ALTPRINTF_VERSION\) ".*"/\1 "'"${new_ver}"'"/g' \
-    subprojects/libaltprintf/include/altprintf/altprintf.h
+    subprojects/libaltprintf/include/altprintf.h
 
   sed -i 's/\(VERSION ||=\) ".*"/\1 "'"${new_ver}"'"/g' \
     gem/lib/altprintf/version.rb
