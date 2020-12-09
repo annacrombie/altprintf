@@ -6,4 +6,4 @@ src = files([
 	'parse.c',
 ])
 
-executable('apf', sources: src, include_directories: inc)
+apf = executable('apf', sources: src, include_directories: inc)
