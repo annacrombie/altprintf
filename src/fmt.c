@@ -243,7 +243,9 @@ parse_subexp(struct apf_interp_ctx *ctx,
 
 	arg->size = apf_fmt(&ctx->buf[ctx->bufi], ctx->blen - ctx->bufi,
 		&partial, ctx->usr_ctx, ctx->cb, ctx->err);
+
 	arg->dat.str = &ctx->buf[ctx->bufi];
+	arg->width = cswidth(arg->dat.str, arg->size);
 
 	if (ctx->err->err) {
 		return false;
