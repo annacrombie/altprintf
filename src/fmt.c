@@ -5,6 +5,7 @@
 
 #include "cswidth.h"
 #include "fmt.h"
+#include "log.h"
 
 struct apf_interp_ctx {
 	const struct apf_template *apft;
