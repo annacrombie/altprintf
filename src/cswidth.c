@@ -269,6 +269,7 @@ codepoint(const char *utf8, uint64_t *res)
 		bytes = 3;
 	} else {
 		assert(false);
+		cp = 0;
 	}
 
 	for (i = 0; i < bytes; i++) {

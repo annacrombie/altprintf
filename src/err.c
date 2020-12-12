@@ -1,8 +1,8 @@
 #include "posix.h"
 
-#include "err.h"
+#include <stdio.h> //snprintf
 
-#include <stdio.h>
+#include "apf.h"
 
 static const char *apf_err_str[] = {
 	[apf_err_ok] = "no error",
@@ -18,6 +18,9 @@ static const char *apf_err_str[] = {
 	[apf_err_too_many_elements] = "too many elements",
 	[apf_err_branch_too_long] = "branch is too long",
 	[apf_err_num_overflow] = "number too big",
+	[apf_err_missing_id_cb] = "missing id callback",
+	[apf_err_missing_sym_cb] = "missing symbol callback",
+	[apf_err_missing_sym] = "unknown symbol",
 };
 
 void

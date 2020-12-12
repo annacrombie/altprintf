@@ -2,12 +2,18 @@
 
 #include <assert.h>
 #include <stdlib.h>  // strtol
+#include <string.h>  // memcpy
 
-#include "parse.h"
+#include "apf.h"
+#include "args.h"
+#include "common.h"
+#include "debug.h"
 
 struct apf_parse_ctx {
 	struct apf_template *apft;
+	apf_parse_sym_cb sym_cb;
 	struct apf_err_ctx *err;
+	void *usr_ctx;
 	uint16_t cap, argi;
 };
 
@@ -15,6 +21,22 @@ static bool parse_template_until(struct apf_parse_ctx *ctx, const char *fmt,
 	const char *stop, const char **endptr);
 
 #define DIGIT(character) (character >= '0' && character <= '9')
+
+static bool
+chr_in_str(char chr, const char *str)
+{
+	if (!str) {
+		return chr == 0;
+	} else {
+		for (; *str; ++str) {
+			if (chr == *str) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
 
 static bool
 parse_escape(struct apf_parse_ctx *ctx, const char *fmt, char *ret)
@@ -67,28 +89,50 @@ parse_transform(char c)
 	}
 }
 
-static uint8_t
-make_id_byte(struct apf_parse_ctx *ctx, uint32_t id_len, bool id_exp)
+static bool
+set_id_hdr(struct apf_parse_ctx *ctx, uint32_t elemi, uint32_t id_len, bool id_exp,
+	uint8_t *id_start)
 {
-	uint8_t byte;
+	uint16_t id_hdr;
+	uint8_t type;
 
 	if (id_exp) {
-		assert(id_len < 64);
-		byte = apft_id_lit | (id_len << 2);
+		id_hdr = id_len;
+		type = apft_id_lit;
 	} else if (id_len) {
-		assert(id_len < 64);
-		byte = apft_id_sym | (id_len << 2);
+		if (ctx->sym_cb) {
+			id_hdr = ctx->sym_cb(ctx->err, ctx->usr_ctx, (char *)id_start, id_len);
+			if (ctx->err->err) {
+				return false;
+			}
+
+			memset(id_start, 0, id_len);
+			ctx->apft->len -= id_len;
+			type = apft_id_num;
+		} else {
+			id_hdr = id_len;
+			type = apft_id_sym;
+		}
 	} else {
-		assert(ctx->argi < 64);
-		byte = apft_id_num | (ctx->argi << 2);
+		id_hdr = ctx->argi;
+		type = apft_id_num;
 		++ctx->argi;
 	}
 
-	return byte;
+	if (id_hdr >= 16384) {
+		ctx->err->err = apf_err_id_too_long;
+		return false;
+	}
+
+	id_hdr <<= 2;
+	id_hdr |= type;
+
+	memcpy(&ctx->apft->elem[elemi + 1], &id_hdr, 2);
+	return true;
 }
 
 static bool
-parse_subexp(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i, uint16_t *subexp_len, char *stopchr)
+parse_subexp(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i, uint32_t *subexp_len, char *stopchr)
 {
 	const char *endptr = NULL;
 
@@ -128,14 +172,14 @@ strtol_check(struct apf_parse_ctx *ctx, uint16_t *i, const char *start)
 static bool
 parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 {
-	uint16_t id_len = 0;
+	uint32_t id_len = 0;
 	uint16_t elemi = ctx->apft->len;
 	uint8_t elem = apft_dat;
 	uint8_t tmp;
+	uint8_t *id_start = NULL;
 	bool id_exp = false;
 
-	ctx->apft->len += 2;
-
+	ctx->apft->len += apf_data_hdr;
 	if (ctx->apft->len >= ctx->cap) {
 		goto full_error;
 	}
@@ -144,26 +188,17 @@ parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 
 	if (fmt[*i] == '=') {
 		id_exp = true;
-
 		if (!parse_subexp(ctx, fmt, i, &id_len, ":}")) {
 			return false;
 		}
-
-		if (fmt[*i] == '}') {
-			goto finished;
-		}
-
-		*i += 1;
 	} else {
+		id_start = &ctx->apft->elem[ctx->apft->len];
 		for (; fmt[*i]; ++(*i)) {
-			if (fmt[*i] == ':') {
-				*i += 1;
+			if (chr_in_str(fmt[*i], ":?}")) {
 				break;
-			} else if (fmt[*i] == '?') {
-				goto parse_conditional;
-			} else if (fmt[*i] == '}') {
-				goto finished;
-			} else if (ctx->apft->len >= ctx->cap) {
+			}
+
+			if (ctx->apft->len >= ctx->cap) {
 				goto full_error;
 			}
 
@@ -171,6 +206,19 @@ parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 			++id_len;
 			++ctx->apft->len;
 		}
+	}
+
+	if (!set_id_hdr(ctx, elemi, id_len, id_exp, id_start)) {
+		ctx->err->err_pos = &fmt[*i - id_len];
+		return false;
+	}
+
+	if (fmt[*i] == ':') {
+		*i += 1;
+	} else if (fmt[*i] == '?') {
+		goto parse_conditional;
+	} else if (fmt[*i] == '}') {
+		goto finished;
 	}
 
 	if ((tmp = parse_algn(fmt[*i + 1])) != 1) {
@@ -245,44 +293,48 @@ parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 		return false;
 	}
 finished:
-	if (id_len >= 64) {
-		ctx->err->err = apf_err_id_too_long;
-		return false;
-	}
-
-	ctx->apft->elem[elemi + 0] = elem;
-	ctx->apft->elem[elemi + 1] = make_id_byte(ctx, id_len, id_exp);
+	ctx->apft->elem[elemi] = elem;
 	return true;
+
 parse_conditional:
 	elem |= apff_conditional;
+	ctx->apft->elem[elemi] = elem;
 
-	uint16_t s1_len = 0, s2_len = 0, cond_argi = ctx->apft->len;
+	uint32_t s1_len = 0, s2_len = 0, cond_argi = ctx->apft->len;
 	if (ctx->apft->len + 2 >= ctx->cap) {
 		goto full_error;
 	}
-	ctx->apft->len += 2;
+	ctx->apft->len += apf_cond_hdr;
+
+	uint16_t argi_start = ctx->argi, arg_max = ctx->argi;
 
 	if (fmt[*i] != ':') {
 		if (!parse_subexp(ctx, fmt, i, &s1_len, ":}")) {
 			return false;
 		}
+		arg_max = ctx->argi;
 	}
 
 	if (fmt[*i] == ':') {
+		ctx->argi = argi_start;
 		if (!parse_subexp(ctx, fmt, i, &s2_len, "}")) {
 			return false;
 		}
+		if (ctx->argi > arg_max) {
+			arg_max = ctx->argi;
+		}
 	}
 
-	if (s1_len > 255 || s2_len > 255) {
+	ctx->argi = arg_max;
+
+	if (s1_len > UINT16_MAX || s2_len > UINT16_MAX) {
 		ctx->err->err = apf_err_branch_too_long;
 		return false;
 	}
 
-	ctx->apft->elem[elemi + 0] = elem;
-	ctx->apft->elem[elemi + 1] = make_id_byte(ctx, id_len, id_exp);
-	ctx->apft->elem[cond_argi + 0] = s1_len; //s1_len > 0 ? s1_len - 1 : 0;
-	ctx->apft->elem[cond_argi + 1] = s2_len; //s2_len > 0 ? s2_len - 1 : 0;
+
+	memcpy(&ctx->apft->elem[cond_argi + apf_cond_arm_1], &s1_len, 2);
+	memcpy(&ctx->apft->elem[cond_argi + apf_cond_arm_2], &s2_len, 2);
 
 	return true;
 full_error:
@@ -291,23 +343,8 @@ full_error:
 }
 
 static bool
-chr_not_in_str(char chr, const char *str)
-{
-	if (!str) {
-		return chr != 0;
-	} else {
-		for (; *str; ++str) {
-			if (chr == *str) {
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-static bool
-parse_template_until(struct apf_parse_ctx *ctx, const char *fmt, const char *stop, const char **endptr)
+parse_template_until(struct apf_parse_ctx *ctx, const char *fmt,
+	const char *stop, const char **endptr)
 {
 	struct apf_str {
 		const char *start;
@@ -317,7 +354,7 @@ parse_template_until(struct apf_parse_ctx *ctx, const char *fmt, const char *sto
 	uint16_t elemi = ctx->apft->len;
 	char c;
 
-	for (; *fmt && chr_not_in_str(*fmt, stop); ++fmt) {
+	for (; *fmt && !chr_in_str(*fmt, stop); ++fmt) {
 		if (*fmt == '{') {
 			if (raw.start) {
 				ctx->apft->elem[elemi] = apft_raw | (raw.len << 1);
@@ -355,6 +392,14 @@ parse_template_until(struct apf_parse_ctx *ctx, const char *fmt, const char *sto
 		ctx->apft->elem[ctx->apft->len] = c;
 		++ctx->apft->len;
 		++raw.len;
+
+		if (raw.len >= 127) {
+			assert(raw.len == 127);
+			ctx->apft->elem[elemi] = apft_raw | (raw.len << 1);
+			elemi = ctx->apft->len;
+			raw.start = NULL;
+			raw.len = 0;
+		}
 	}
 
 	if (stop && *fmt == 0) {
@@ -376,21 +421,25 @@ full_error:
 }
 
 struct apf_template
-apf_parse(uint8_t *buf, uint32_t cap, const char *fmt, struct apf_err_ctx *err)
+apf_parse(uint8_t *buf, uint32_t cap, const char *fmt, void *usr_ctx,
+	apf_parse_sym_cb sym_cb, struct apf_err_ctx *err)
 {
-
 	struct apf_template apft = { .elem = buf };
 
 	struct apf_parse_ctx ctx = {
 		.apft = &apft,
+		.sym_cb = sym_cb,
 		.err = err,
-		.cap = cap
+		.cap = cap,
+		.usr_ctx = usr_ctx,
 	};
 
 	err->ctx = fmt;
 
 	const char *endptr;
 	parse_template_until(&ctx, fmt, NULL, &endptr);
+
+	PRINT_PARSE_TREE(&apft, err);
 
 	return apft;
 }
