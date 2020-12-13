@@ -118,7 +118,9 @@ main(int argc, const char **argv)
 		return 1;
 	}
 
+#ifndef NDEBUG
 	apf_verbose = true;
+#endif
 
 	uint8_t elems[MAX_ELEMS];
 	char buf[BUF_LEN] = { 0 };

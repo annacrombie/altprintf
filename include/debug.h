@@ -14,5 +14,6 @@ void apf_dbg_print_parse_tree(struct apf_template *apft, uint32_t depth, uint32_
 #define PRINT_PARSE_TREE(apft, err) if (!err->err && apf_verbose) apf_dbg_print_parse_tree(apft, 0, 0)
 #else
 #define L(...)
+#define PRINT_PARSE_TREE(apft, err)
 #endif
 #endif

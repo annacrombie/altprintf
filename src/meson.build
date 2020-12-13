@@ -1,19 +1,33 @@
 src = files([
 	'args.c',
 	'cswidth.c',
-	'debug.c', #TODO: only for debug builds
 	'err.c',
 	'fmt.c',
 	'parse.c',
 ])
+flags = []
 
-libapf = library('apf', src, include_directories: inc, install: true)
+if get_option('debug')
+	src += files(['debug.c'])
+else
+	flags += '-DNDEBUG'
+endif
+
 install_headers(files(['../include/apf.h']))
+
+libapf = library(
+	'apf',
+	c_args: flags,
+	include_directories: inc,
+	install: true,
+	sources: src,
+)
 
 apf = executable(
 	'apf',
-	link_with: [libapf],
+	c_args: flags,
 	include_directories: inc,
+	install: false,
+	link_with: [libapf],
 	sources: files(['main.c']),
-	install: false
 )
