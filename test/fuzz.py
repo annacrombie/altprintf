@@ -42,24 +42,10 @@ class CFG(object):
 
         rand_prod = self.prod[symbol][weighted_choice(weights)]
 
-        # pcount is a single object (created in the first call to
-        # this method) that's being passed around into recursive
-        # calls to count how many times productions have been
-        # used.
-        # Before recursive calls the count is updated, and after
-        # the sentence for this call is ready, it is rolled-back
-        # to avoid modifying the parent's pcount.
-        #
         pcount[rand_prod] += 1
 
-        # print(f"{depth *' '}symbol: {Sym.names[symbol]}")
-
+        # TODO: restrict feature currently unused, consider removal
         set_restrict = False
-        if symbol == Sym.id_or_lit and restrict == 0:
-            set_restrict = True
-            restrict = curlen + 64
-            id_start = curlen
-            # print(f"{depth *' '}setting restrict to {restrict}")
 
         for sym in rand_prod:
             # for non-terminals, recurse
@@ -79,17 +65,12 @@ class CFG(object):
                     thing = str(sym)
 
             curlen += len(thing)
-            # print(f"{depth *' '}curlen: {curlen}")
 
             if restrict == 0:
                 sentence += thing
             elif len(thing) + curlen < restrict:
                 sentence += thing
 
-        # if set_restrict:
-        #     print(f"{depth *' '}done with id, len: {curlen - id_start}")
-
-        # print(f"{depth *' '}'{sentence}'")
         # backtracking: clear the modification to pcount
         pcount[rand_prod] -= 1
         return sentence
