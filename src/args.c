@@ -5,7 +5,6 @@
 
 #include "apf.h"
 #include "args.h"
-#include "log.h"
 
 struct apf_arg
 apf_tag_int32_t(int32_t val)
