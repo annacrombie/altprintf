@@ -1,41 +1,42 @@
 project(
 	'altprintf',
 	'c',
-	version: '0.1.0',
+	version: '0.2.0',
 	license: 'GPL-3.0-only',
-	meson_version: '>=0.48.0',
+	meson_version: '>=0.54.0',
 	default_options: [
-		'c_std=c99',
-		'warning_level=2',
-		'default_library=static'
+		'c_std=c11',
+		'warning_level=3',
+		'default_library=static',
+		'b_ndebug=if-release',
 	],
 )
-
-libaltprintf = subproject('libaltprintf')
 
 cc = meson.get_compiler('c')
 
 add_project_arguments(cc.get_supported_arguments([
-	'-Wundef',
+	'-Wno-missing-braces',
+	'-Wendif-labels',
+	'-Wimplicit-fallthrough=2',
+	'-Winit-self',
 	'-Wlogical-op',
 	'-Wmissing-include-dirs',
-	'-Wold-style-definition',
-	'-Wpointer-arith',
-	'-Winit-self',
-	'-Wstrict-prototypes',
-	'-Wimplicit-fallthrough=2',
-	'-Wendif-labels',
-	'-Wstrict-aliasing=2',
-	'-Woverflow',
-
 	'-Wno-missing-braces',
 	'-Wno-missing-field-initializers',
 	'-Wno-unused-parameter',
+	'-Wold-style-definition',
+	'-Woverflow',
+	'-Wpointer-arith',
+	'-Wstrict-aliasing=2',
+	'-Wstrict-prototypes',
+	'-Wundef',
+	'-fstrict-aliasing',
 ]), language: 'c')
 
-altprintf_dep = libaltprintf.get_variable('altprintf_dep')
+inc = include_directories(['include'])
 
-subdir('cli')
+subdir('src')
+subdir('test')
 
 scdoc = dependency('scdoc', native: true, required: get_option('man-pages'),
 	version: '>=1.9.0')
