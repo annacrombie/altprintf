@@ -240,6 +240,7 @@ parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 		++ctx->apft->len;
 	}
 
+	/* TODO: implement this 'w' feature */
 	if (DIGIT(fmt[*i]) || fmt[*i] == 'w') {
 		elem |= apff_width;
 
