@@ -25,8 +25,9 @@ enum apf_err {
 
 struct apf_err_ctx {
 	const char *ctx, *err_pos;
+	uint32_t ctx_len;
 	enum apf_err err;
-	uint8_t err_hl;
+	uint8_t ctx_type;
 };
 
 void apf_strerr(char *buf, uint32_t blen, struct apf_err_ctx *ctx);

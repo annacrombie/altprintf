@@ -41,8 +41,6 @@ format_float(struct apf_err_ctx *err, char *buf, uint32_t blen, float val, uint8
 	uint8_t prec_cpy = prec;
 	bool neg = false;
 
-	L("formatting float: %f\n", val);
-
 	if (val == 0.0f) {
 		if (ilen + 1u + prec > blen) {
 			goto full_err;
@@ -185,7 +183,7 @@ full_err:
 static uint32_t
 format_int_hex(struct apf_err_ctx *err, char *buf, uint32_t blen, uint32_t val)
 {
-	uint8_t bufi = 0;
+	uint16_t bufi = 0;
 	bool started = false;
 	uint32_t v;
 	int32_t i;
@@ -317,11 +315,7 @@ format_data_basic(struct apf_interp_ctx *ctx, struct apf_id *id,
 		args.fill = ' ';
 	}
 	if (ctx->apft->elem[*i] & apff_width) {
-		if (ctx->apft->elem[j] == apff_max_width) {
-			args.width = ctx->blen - ctx->bufi - 1;
-		} else {
-			args.width = ctx->apft->elem[j];
-		}
+		args.width = ctx->apft->elem[j];
 		++j;
 	}
 	if (ctx->apft->elem[*i] & apff_prec) {
@@ -335,10 +329,10 @@ format_data_basic(struct apf_interp_ctx *ctx, struct apf_id *id,
 		args.transform = apf_trans_none;
 	}
 
-	L("{width:%d, fill:'%c', algn:%s, prec:%d, transform:%d}\n",
-		args.width, args.fill,
-		args.algn == apff_align_l ? "left" : "right",
-		args.prec, args.transform);
+	/* L("{width:%d, fill:'%c', algn:%s, prec:%d, transform:%d}\n", */
+	/* 	args.width, args.fill, */
+	/* 	args.algn == apff_align_l ? "left" : "right", */
+	/* 	args.prec, args.transform); */
 
 	/* get argument */
 	if (id->type == apft_id_lit) {
@@ -439,13 +433,11 @@ format_data_conditional(struct apf_interp_ctx *ctx, struct apf_id *id,
 	}
 
 	if (b && arm[0]) {
-		L("true_arm:%d\n", arm[0]);
 		if (!fmt_subexp(ctx, &ctx->apft->elem[j], arm[0], &arg_info)) {
 			return false;
 		}
 		ctx->bufi += arg_info.size;
 	} else if (!b && arm[1]) {
-		L("false_arm:%d\n", arm[1]);
 		if (!fmt_subexp(ctx, &ctx->apft->elem[j + arm[0]], arm[1], &arg_info)) {
 			return false;
 		}
@@ -468,12 +460,11 @@ format_data(struct apf_interp_ctx *ctx, uint32_t *i)
 	memcpy(&id_hdr, &ctx->apft->elem[*i + 1], 2);
 	j = *i + 3;
 
-	L("%s:id:", ctx->apft->elem[*i] & apff_conditional ? "cond" : "basic");
+	/* L("%s:id:", ctx->apft->elem[*i] & apff_conditional ? "cond" : "basic"); */
 
 	switch ((id.type = (id_hdr & 0x3))) {
 	case apft_id_num:
 		id.num = id_hdr >> 2;
-		L("num:%d\n", id.num);
 		if (!ctx->id_cb) {
 			ctx->err->err = apf_err_missing_id_cb;
 			return false;
@@ -482,7 +473,6 @@ format_data(struct apf_interp_ctx *ctx, uint32_t *i)
 	case apft_id_sym:
 		id.sym.len = id_hdr >> 2;
 		id.sym.id = &ctx->apft->elem[j];
-		L("sym:%d:%p\n", id.sym.len, (void *)id.sym.id);
 		if (!ctx->sym_cb) {
 			ctx->err->err = apf_err_missing_sym_cb;
 			return false;
@@ -492,7 +482,6 @@ format_data(struct apf_interp_ctx *ctx, uint32_t *i)
 	case apft_id_lit:
 		id.sym.len = id_hdr >> 2;
 		id.sym.id = &ctx->apft->elem[j];
-		L("lit:%d:%p\n", id.sym.len, (void *)id.sym.id);
 		j += id.sym.len;
 		break;
 	}
@@ -511,19 +500,21 @@ fmt(struct apf_interp_ctx *ctx)
 	uint32_t i, len;
 
 	for (i = 0; i < ctx->apft->len; ++i) {
-		L(">%3d:", i);
 		switch (ctx->apft->elem[i] & 0x1) {
 		case apft_dat:
-			L("dat:");
 			if (!format_data(ctx, &i)) {
+				if (!ctx->err->err_pos) {
+					ctx->err->err_pos = (char *)&ctx->apft->elem[i];
+				}
 				return 0;
 			}
+
 			break;
 		case apft_raw:
 			len = ctx->apft->elem[i] >> 1;
-			L("raw:%d\n", len);
 
 			if (len + ctx->bufi >= ctx->blen) {
+				ctx->err->err_pos = (char *)&ctx->apft->elem[i];
 				ctx->err->err = apf_err_buf_full;
 				return 0;
 			}
@@ -543,14 +534,18 @@ apf_fmt(char *buf, uint32_t blen, const struct apf_template *apft,
 	void *usr_ctx, apf_fmt_id_cb id_cb, apf_fmt_sym_cb sym_cb,
 	struct apf_err_ctx *err)
 {
-	L("formatting\n");
-
 	struct apf_interp_ctx ctx = {
 		.apft = apft, .err = err, .buf = buf, .blen = blen,
 		.usr_ctx = usr_ctx, .id_cb = id_cb, .sym_cb = sym_cb,
 	};
 
 	fmt(&ctx);
+
+	if (err->err) {
+		err->ctx_type = 1;
+		err->ctx_len = apft->len;
+		err->ctx = (char *)apft->elem;
+	}
 
 	ctx.buf[ctx.bufi] = 0;
 	++ctx.bufi;
