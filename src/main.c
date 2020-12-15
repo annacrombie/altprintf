@@ -8,7 +8,7 @@
 #include "apf.h"
 #include "debug.h"
 
-#define BUF_LEN 512
+#define BUF_LEN 4096
 #define MAX_ELEMS 256
 
 struct arg_ctx {
