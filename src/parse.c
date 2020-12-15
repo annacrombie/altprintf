@@ -221,8 +221,14 @@ parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 		goto finished;
 	}
 
-	if ((tmp = parse_algn(fmt[*i + 1])) != 1) {
-		ctx->apft->elem[ctx->apft->len] = fmt[*i];
+	if ((tmp = parse_algn(fmt[*i])) != 1) {
+		if (!fmt[*i + 1]) {
+			ctx->err->err = apf_err_invalid_fmt;
+			ctx->err->err_pos = &fmt[*i + 1];
+			return false;
+		}
+
+		ctx->apft->elem[ctx->apft->len] = fmt[*i + 1];
 
 		elem |= tmp;
 		elem |= apff_align_chr;
@@ -232,9 +238,6 @@ parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 			goto full_error;
 		}
 		++ctx->apft->len;
-	} else if ((tmp = parse_algn(fmt[*i])) != 1) {
-		elem |= tmp;
-		*i += 1;
 	}
 
 	if (DIGIT(fmt[*i]) || fmt[*i] == 'w') {
