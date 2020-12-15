@@ -6,9 +6,7 @@ altprintf - a printf-like template language
 
 # SYNOPSIS
 
-*format string*: (.\*|*format element*)\*
-
-*format element*: %(*format arguments*)\**format function*
+@GRAMMAR@
 
 # DESCRIPTION
 

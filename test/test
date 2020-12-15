@@ -3,8 +3,6 @@
 import subprocess
 from apf_grammar import cfg
 import sys
-
-sys.path.append(".")
 from fuzzer import Fuzzer, str_tree, print_tree
 
 apf = sys.argv[1]

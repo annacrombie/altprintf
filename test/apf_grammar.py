@@ -63,5 +63,3 @@ cfg = (
     .a(s.sym("Nil"), [""])
     .validate()
 )
-
-print(cfg)
