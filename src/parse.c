@@ -157,7 +157,7 @@ strtol_check(struct apf_parse_ctx *ctx, uint16_t *i, const char *start)
 
 	long res = strtol(start, &endptr, 10);
 
-	if (res >= apff_max_width) {
+	if (res > apff_max_width) {
 		ctx->err->err = apf_err_num_overflow;
 		ctx->err->err_pos = start;
 		return false;
