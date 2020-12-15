@@ -1,35 +1,29 @@
 # altprintf
 [![builds.sr.ht status](https://builds.sr.ht/~lattis.svg?search=altprintf)](https://builds.sr.ht/~lattis?search=altprintf)
 
-altprintf is a powerful printf-like template language.
+altprintf is a powerful template language.
 
 ## Features
 
-+ Some cool format specifiers, like conditionals.
-+ Advanced alignment
-+ You can use it in your favorite programming language
++ Cool format specifiers, like conditionals.
++ Utf-8 character width sensitive alignment
++ Nesting expressions
++ Robust; the library makes no calls to malloc, and has an advanced error
+  reporting system
 
-## Why not use it?
-
-+ You just need to print some strings
-+ You need extremely fast formatting
-  - altprintf is not as fast as plain old printf, but I want to get it as close
-    as possible.  I doubt it will ever beat printf though, because of its more
-    modular design
+Note that altprintf is not designed to replace printf.  It is designed with the
+specific use case of providing user-specified templates to customize output.
 
 ## Building
 
-You need `meson` and `ninja`.  If you want man pages, you also need `scdoc`.
+You need `meson`.  If you want man pages, you also need `scdoc`.
+
+Example:
 
 ```sh
-$ meson build/
-$ ninja -C build/
-```
-
-## Installation
-
-```sh
-$ sudo ninja -C build/ install
+meson build
+ninja -C build
+ninja -C build install
 ```
 
 ## Docs
