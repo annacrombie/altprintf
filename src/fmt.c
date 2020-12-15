@@ -401,8 +401,7 @@ format_data_conditional(struct apf_interp_ctx *ctx, struct apf_id *id,
 {
 	struct apf_data arg_info = { 0 };
 	struct apf_arg arg = { 0 };
-	uint16_t arm[2] = { 0 };
-	memcpy(arm, &ctx->apft->elem[j], apf_cond_hdr);
+	uint16_t *arm = (uint16_t *)&ctx->apft->elem[j];
 	j += apf_cond_hdr;
 
 	bool b;
@@ -456,22 +455,21 @@ format_data(struct apf_interp_ctx *ctx, uint32_t *i)
 	uint32_t j;
 	struct apf_id id = { 0 };
 
-	uint16_t id_hdr;
-	memcpy(&id_hdr, &ctx->apft->elem[*i + 1], 2);
+	uint16_t *id_hdr = (uint16_t *)&ctx->apft->elem[*i + 1];
 	j = *i + 3;
 
 	/* L("%s:id:", ctx->apft->elem[*i] & apff_conditional ? "cond" : "basic"); */
 
-	switch ((id.type = (id_hdr & 0x3))) {
+	switch ((id.type = (*id_hdr & 0x3))) {
 	case apft_id_num:
-		id.num = id_hdr >> 2;
+		id.num = *id_hdr >> 2;
 		if (!ctx->id_cb) {
 			ctx->err->err = apf_err_missing_id_cb;
 			return false;
 		}
 		break;
 	case apft_id_sym:
-		id.sym.len = id_hdr >> 2;
+		id.sym.len = *id_hdr >> 2;
 		id.sym.id = &ctx->apft->elem[j];
 		if (!ctx->sym_cb) {
 			ctx->err->err = apf_err_missing_sym_cb;
@@ -480,7 +478,7 @@ format_data(struct apf_interp_ctx *ctx, uint32_t *i)
 		j += id.sym.len;
 		break;
 	case apft_id_lit:
-		id.sym.len = id_hdr >> 2;
+		id.sym.len = *id_hdr >> 2;
 		id.sym.id = &ctx->apft->elem[j];
 		j += id.sym.len;
 		break;
