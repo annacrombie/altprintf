@@ -21,11 +21,11 @@ assert apf_test(cmd, "片{:> 5}", "片 仮名", "仮名")
 assert apf_test(cmd, "{=片{:> 5}:> 8}", " 片 仮名", "仮名")
 
 fuzzer = Fuzzer(cfg)
-amnt = 1000
+amnt = 3000
 for x in range(amnt):
     if x % 1000 == 0:
         print("\r%3d%%, %d / %d" % (x * 100.0 / amnt, x, amnt))
-    tree = fuzzer.gen()
+    tree = fuzzer.gen(cfactor=0.8)
 
     if not apf_test(cmd, str_tree(tree), None, *fuzzer.args()):
         print_tree(tree)

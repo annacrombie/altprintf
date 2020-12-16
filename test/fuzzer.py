@@ -106,8 +106,8 @@ class Fuzzer:
     def __init__(self, cfg):
         self.cfg = cfg
 
-    def gen(self):
-        return self.gen_random_convergent(self.cfg.root, cfactor=0.7)
+    def gen(self, cfactor=0.7):
+        return self.gen_random_convergent(self.cfg.root, cfactor=cfactor)
 
     def args(self):
         r = []
