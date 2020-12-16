@@ -83,7 +83,7 @@ def print_tree(tree, depth=0):
         elif type(node) == list:
             print_tree(node, depth=depth + 1)
         elif type(node) == CharClass:
-            print("  " * depth, node.full_name())
+            print("  " * depth, node.desc())
         elif type(node) == str:
             print("  " * depth, node)
         else:
