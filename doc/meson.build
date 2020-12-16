@@ -23,7 +23,7 @@ man_files = [
 	)],
 	['altprintf', '7', custom_target(
 		'altprintf.7.scd',
-		input: 'altprintf.7.scd.in',
+		input: ['altprintf.7.scd.in', '../test/apf_grammar.py'],
 		output: 'altprintf.7.scd',
 		command: [find_program('./insert.py'), 'grammar', '@INPUT@'],
 		capture: true,
