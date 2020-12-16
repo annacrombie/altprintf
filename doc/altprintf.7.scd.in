@@ -2,7 +2,7 @@ altprintf(7)
 
 # NAME
 
-altprintf - a printf-like template language
+altprintf - a powerful string template language
 
 # SYNOPSIS
 
@@ -10,147 +10,122 @@ altprintf - a printf-like template language
 
 # DESCRIPTION
 
-altprintf is a template language inspired by *printf*(3).  It is intended to
-format strings for display on a terminal or similar, but may be shoehorned into
-other applications.
+altprintf is a string template language.  It is intended to format strings for
+display on a terminal or similar, but may be shoehorned into other
+applications.
 
-# FORMAT STRING
+# FORMAT STRING SYNTAX
 
-A document written in this template language is referred to as a format string.
-This format string is composed of raw text and *format elements*, denoted by a
-%.  Raw text remains unchanged in the output.
+A document written in this template language is referred to as a format string,
+template string, or just a template.  This string is composed of raw text and
+*format elements*, denoted by {}.  Raw text remains unchanged in the output.
 
 ## FORMAT ELEMENT
 
-A *format element* always starts with a %.  After that, any number of arguments
-may be specified, and in any order.  If the same arguments are repeated, the
-value of the last argument is taken.  The final character of every format
-element determines what *format function* will be called to format the
-associated _value_.
+A *format element* is always surrounded by an opening and closing curly brace
+{}.  The interior takes two forms
 
-## FORMAT ARGUMENTS
+- a basic expression
+- a conditional expression
 
-	*(*_text_*)* - the _text_ within *(* and *)* is set to the *paren arg*
+## BASIC EXPRESSION
 
-		default: unset
+The basic expression consists of an optional *name* or *literal*, and optional
+*format options*.  A literal is denoted by the equals sign as the first
+character.  This literal can contain both raw text and format elements.  The
+only difference is that any : needs to be escaped.
 
-	*<*_text_*>* - the _text_ within *<* and *>* is set to the *angle arg*.
+Ex.
 
-		Note: no *format function* uses this argument.
+The simplest format element: {}++
+An element with options: {:>08b}++
+An element with an name: {test}++
+An element with an name and options: {test:>08b}++
+An element with a literal: {=Hello World!}++
+An element with a literal and options: {=Hello World!:10}++
+Nested elements: {=h{=e{=l{=l{=o}}}}}
 
-		default: unset
+## CONDITIONAL EXPRESSION
 
-	*~*_c_ - the _character_ after *~* is set to the *char arg*
+A conditional expression takes the form of an optional *name* followed by *?* and
+two branches separated by *:*.
 
-		default: ' '
+{[name]*?*true expression*:*false expression}
 
-	*\_*_c_ - the _character_ after *\_* is set to the *pad char*
+Note that a literal *name* is not allowed here, as it would be pointless (always
+true).  The expressions are similar to literals above; they may contain raw
+text and format elements.  If you do not need a false branch, you may omit it
+as well as the *:* separator, e.g. {[name]*?*true expression}.
 
-		default: ' '
+If you would like to apply format options to a conditional expression, wrap it
+in a literal:
 
-	*.*[*0-9*]\* - set the *precision*
+{={[name]*?*true expression*:*false expression}:> 25}
 
-		default: unset
+## FORMAT OPTIONS
 
-	\[*0-9*]+ - set the *field width*
+*<* or *>*, followed by a *character* - *<* specifies left-align, *>* specifies
+	right-align. The following *character* is used as a fill character
 
-		default: 0
+	default: left-align with spaces
 
-	The following two flags manipulate one argument: *alignment*.
+\[*0-9*]+ - set the *field width*
 
-		*-* - left-align the output within the *field width*
+	default: 0
 
-		*^* - center-align the output within the *field width*
+*.*[*0-9*]\* - set the *precision*
 
-		the default alignment is right-align.
+	default: unset
 
+*b* or *x* - specify a transformation to be applied to the argument.
+	*b* represents the data as binary, and *x* as hexadecimal.
 
-Any of the *format arguments* may be specified for any *format function*.
+# NAMED ARGUMENTS
 
-## FORMAT FUNCTIONS
+The way named arguments are handled is up to the library consumer.
 
-	*%* - percent
-		output: %
+# POSITIONAL ARGUMENTS
 
-		arguments: *pad char*, *field width*, *alignment*
+If a *format element* is specified without an *name*, it will be assigned a
+positional id.  This id starts at 0 and increments as elements are encountered.
+If a conditional with branches that take arguments is encountered, each branch
+gets assigned the same positional ids.
 
-		example: "%%%%" => "%%"
+```
+                conditional
+               /         \\
+"{}, {ab}, {}, {?{}, {}:{}}, {}"
+ |    |    |   | |   |  |    |
+ 0    |    1   2 |   |  |    5
+      |          |   |  |
+      |          3   4  |
+      |           \\ /   3
+      |         branch  |
+      |               branch
+ named argument counted
 
-	*s* - string
-
-		output: _value_ as a string
-
-		arguments: *pad char*, *precision*, *field width*, *alignment*
-
-		If *precision* is given, it determines the maximum amount of
-		characters to output
-
-		example: "%10s", "hello" => "     hello"
-
-	*c* - character
-
-		output: _value_ as a character
-
-		arguments: *pad char*, *field width*, *alignment*
-
-		example: "%\_-^5c", '!' => "--!--"
-
-	*d* - integer
-
-		output: _value_ as an integer
-
-		arguments: *pad char*, *field width*, *alignment*
-
-		example: "%3d%%", 75 => " 75%"
-
-	*f* - floating point
-
-		output: The double _value_ is rounded and converted to decimal
-		notation in the style [-]ddd.ddd, where the number of digits
-		after the decimal-point character is equal to the *precision*.
-
-		arguments: *pad char*, *precision*, *field width*, *alignment*
-
-		example: "pi: %.3f", 3.14159 => pi: 3.142
-
-	*\** - multiply
-
-		output: repeat *char arg* _value_ times
-
-		arguments: *char arg*, *pad char*, *field width*, *alignment*
-
-		example: "%~@\*", 10 => "@@@@@@@@@@"
-
-	*?* - ternary
-
-		output: split *paren arg* into two parts at the first occurrence
-		of *char arg*.  If _value_ is true, print the first half,
-		otherwise print the second half.
-
-		arguments: *paren arg*, *char arg*, *pad char*, *field width*,
-		*alignment*
-
-		example: "%(yes no)?", 0 => "no"
-
-	*=* - align
-
-		output: none, after all other formats have been processed, add
-		padding at this spot to make the total string equal to _value_
-		width.  If _value_ is smaller than the total width, the string
-		will be truncated to equal _value_ width.  Multiple align
-		formats will be processed in the order they are parsed (from
-		left to right).
-
-		arguments: none
-
-		example: "left%=right", 30 => "left                     right"
+```
 
 # NOTE ABOUT WIDTH
 
 All widths refer to column widths.  For ascii, this is the same as the number
 of characters in the string. e.g. the width of "hello" is 5.  However, many CJK
-characters are double width, e.g. one character is two columns wide.
-*altprintf* uses a variant of *wcswidth*(3) to determine a characters width.
+characters are double width, e.g. 曖 is two columns wide.  *altprintf* uses a
+variant of *wcswidth*(3) to determine a characters width.
+
+# MOTIVATION
+
+Why create a template language when there is already *printf*(3) in the c
+standard library?  There are many reasons.  For one, printf is not designed to
+allow untrusted user input as it's format string.  Also, printf can not
+properly align wide characters, nor does it support conditional printing, named
+fields, and many other necessary features.
+
+For example, consider you are making a command line music player.  You want to
+allow your users to customize how the currently playing track is displayed.
+With printf, the solution would be error prone, since you would have to parse
+the format string anyway to determine how many arguments were necessary and to
+do some validation so printf won't cause a segfault for instance.
 
 # SEE ALSO
 

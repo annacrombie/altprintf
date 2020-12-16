@@ -1,7 +1,7 @@
 # altprintf
 [![builds.sr.ht status](https://builds.sr.ht/~lattis.svg?search=altprintf)](https://builds.sr.ht/~lattis?search=altprintf)
 
-altprintf is a powerful template language.
+altprintf is a powerful string template language.
 
 ## Features
 
