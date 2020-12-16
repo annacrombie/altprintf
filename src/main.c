@@ -8,8 +8,8 @@
 #include "apf.h"
 #include "debug.h"
 
-#define BUF_LEN 4096
-#define MAX_ELEMS 256
+#define OUT_BLEN 4096
+#define ELEM_BLEN 4096
 
 struct arg_ctx {
 	const char **argv;
@@ -104,8 +104,8 @@ fmt_cb(struct apf_err_ctx *err, void *_ctx, uint16_t id)
 static int
 print_err(struct apf_err_ctx *err)
 {
-	char errbuf[BUF_LEN] = { 0 };
-	apf_strerr(errbuf, BUF_LEN, err);
+	char errbuf[OUT_BLEN] = { 0 };
+	apf_strerr(errbuf, OUT_BLEN, err);
 	fprintf(stderr, "\033[31merror\033[0m: %s", errbuf);
 	return 1;
 }
@@ -122,19 +122,19 @@ main(int argc, const char **argv)
 	apf_verbose = true;
 #endif
 
-	uint8_t elems[MAX_ELEMS];
-	char buf[BUF_LEN] = { 0 };
+	uint8_t elems[ELEM_BLEN];
+	char buf[OUT_BLEN] = { 0 };
 
 	struct apf_err_ctx err = { 0 };
 
-	struct apf_template apft = apf_parse(elems, MAX_ELEMS, argv[1], NULL,
+	struct apf_template apft = apf_parse(elems, ELEM_BLEN, argv[1], NULL,
 		NULL, &err);
 
 	if (err.err) {
 		return print_err(&err);
 	}
 
-	apf_fmt(buf, BUF_LEN, &apft, &(struct arg_ctx){ &argv[2], argc - 2, },
+	apf_fmt(buf, OUT_BLEN, &apft, &(struct arg_ctx){ &argv[2], argc - 2, },
 		fmt_cb, fmt_sym_cb, &err);
 
 	if (err.err) {
