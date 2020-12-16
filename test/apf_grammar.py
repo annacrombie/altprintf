@@ -1,9 +1,9 @@
 from fuzzer import Ascii, Utf8, Num
 from grammar import Cfg, Syms
 
-IdChar = Ascii.exclude("?", ":", "}").with_sym_name("IdChar")
+IdChar = Utf8.exclude("?", ":", "}").with_sym_name("IdChar")
 IdStartChar = IdChar.exclude("=").with_sym_name("IdStartChar")
-RawChar = Ascii.exclude("{", "\\").with_sym_name("RawChar")
+RawChar = Utf8.exclude("{", "\\").with_sym_name("RawChar")
 ExprLitChar = RawChar.exclude(":", "}").with_sym_name("ExprLitChar")
 AsciiChar = Ascii
 

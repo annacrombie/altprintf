@@ -49,6 +49,7 @@ static struct apf_arg
 fmt_sym_cb(struct apf_err_ctx *err, void *_ctx, const char *sym, uint16_t len)
 {
 	static char str[45] = "sym:";
+	memset(&str[4], 0, 45 - 4);
 	memcpy(&str[4], sym, len > 40 ? 40 : len);
 	return apf_tag(str);
 }
