@@ -12,15 +12,14 @@ TODO
 
 TODO
 
-# EXAMPLE
+# EXAMPLE PROGRAM
+
+This program takes a format string as its first argument, and treats the
+remaining arguments as positinal arguments.  All arguments are interpreted as
+strings.
 
 ```
-#include <apf.h>
-
-int main(void)
-{
-	TODO: paste the source of a test program!
-}
+@EXAMPLE@
 ```
 
 # SEE ALSO

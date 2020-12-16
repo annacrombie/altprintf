@@ -5,13 +5,27 @@ mandir = get_option('mandir')
 
 sh = find_program('sh', native: true)
 
+example = executable('example',
+	include_directories: inc,
+	install: false,
+	sources: files(['example.c']),
+	link_with: [libapf],
+)
+
 man_files = [
-	['altprintf', '3', 'altprintf.3.scd'],
+	['altprintf', '3', custom_target(
+		'altprintf.3.scd',
+		input: ['altprintf.3.scd.in', example, 'example.c'],
+		output: 'altprintf.3.scd',
+		command: [find_program('./insert.py'), 'example', '@INPUT0@',
+			'@INPUT1@', '@INPUT2@'],
+		capture: true,
+	)],
 	['altprintf', '7', custom_target(
 		'altprintf.7.scd',
 		input: 'altprintf.7.scd.in',
 		output: 'altprintf.7.scd',
-		command: [find_program('./insert_grammar.py'), '@INPUT@'],
+		command: [find_program('./insert.py'), 'grammar', '@INPUT@'],
 		capture: true,
 	)]
 ]

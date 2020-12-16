@@ -35,6 +35,7 @@ add_project_arguments(cc.get_supported_arguments([
 inc = include_directories(['include'])
 
 subdir('src')
+
 subdir('test')
 
 scdoc = dependency('scdoc', native: true, required: get_option('man-pages'),
