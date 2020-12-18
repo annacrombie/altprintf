@@ -23,6 +23,7 @@ static const char *apf_err_str[] = {
 	[apf_err_missing_id_cb] = "missing id callback",
 	[apf_err_missing_sym_cb] = "missing symbol callback",
 	[apf_err_missing_sym] = "unknown symbol",
+	[apf_err_invalid_unicode] = "invalid unicode",
 };
 
 static void

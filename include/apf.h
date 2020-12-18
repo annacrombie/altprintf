@@ -20,6 +20,7 @@ enum apf_err {
 	apf_err_missing_id_cb,
 	apf_err_missing_sym_cb,
 	apf_err_missing_sym,
+	apf_err_invalid_unicode,
 };
 
 struct apf_err_ctx {

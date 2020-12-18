@@ -290,7 +290,10 @@ fmt_subexp(struct apf_interp_ctx *ctx,
 	if (ctx->err->err) {
 		return false;
 	}
-	arg->width = cswidth(&ctx->buf[ctx->bufi], arg->size);
+	if (!cswidth(&ctx->buf[ctx->bufi], arg->size, &arg->width)) {
+		ctx->err->err = apf_err_invalid_unicode;
+		return false;
+	}
 
 	return true;
 }
@@ -374,7 +377,11 @@ format_data_basic(struct apf_interp_ctx *ctx, struct apf_id *id,
 				goto full_err;
 			}
 			memcpy(&ctx->buf[ctx->bufi], arg.str, arg_info.size);
-			arg_info.width = cswidth(&ctx->buf[ctx->bufi], arg_info.size);
+
+			if (!cswidth(&ctx->buf[ctx->bufi], arg_info.size, &arg_info.width)) {
+				ctx->err->err = apf_err_invalid_unicode;
+				return false;
+			}
 			break;
 		default:
 			assert(false);

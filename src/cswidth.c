@@ -78,6 +78,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cswidth.h"
+
 struct interval {
 	int first;
 	int last;
@@ -228,6 +230,7 @@ cpwidth(uint64_t ucs)
 		 (ucs >= 0x30000 && ucs <= 0x3fffd)));
 }
 
+#if 0
 uint8_t
 rune_length(const char *u8)
 {
@@ -245,66 +248,77 @@ rune_length(const char *u8)
 	}
 }
 
-static uint8_t
-codepoint(const char *utf8, uint64_t *res)
+int8_t
+cwidth(const char* utf8)
 {
-	uint8_t bytes, i;
+	uint64_t cp;
+	uint8_t bytes;
+
+	if (codepoint(utf8, &cp, &bytes)) {
+		return cpwidth(cp);
+	} else {
+		return -1;
+	}
+}
+#endif
+
+static bool
+codepoint(const char *utf8, uint8_t len, uint64_t *res, uint8_t *bytes)
+{
+	uint8_t i;
 	uint8_t c;
 	uint64_t cp;
 
-	bytes = 0;
+	*bytes = 0;
 	c = utf8[0];
 
 	if ((c & 0x7f) == c) {
 		cp = c & 0x7f;
-		bytes = 0;
+		*bytes = 0;
 	} else if ((c & 0xdf) == c) {
 		cp = c & 0x1f;
-		bytes = 1;
+		*bytes = 1;
 	} else if ((c & 0xef) == c) {
 		cp = c & 0x0f;
-		bytes = 2;
+		*bytes = 2;
 	} else if ((c & 0xf7) == c) {
 		cp = c & 0x07;
-		bytes = 3;
+		*bytes = 3;
 	} else {
-		assert(false);
 		cp = 0;
+		return false;
 	}
 
-	for (i = 0; i < bytes; i++) {
+	for (i = 0; i < *bytes; i++) {
 		cp <<= 6;
 		cp |= ((unsigned char)utf8[i + 1] & 0x3f);
 	}
 
 	*res = cp;
-	return bytes + 1;
+	*bytes += 1;
+	return true;
 }
 
-int8_t
-cwidth(const char* utf8)
+bool
+cswidth(const char *utf8, uint32_t n, uint32_t *w)
 {
-	uint64_t cp;
-
-	codepoint(utf8, &cp);
-	return cpwidth(cp);
-}
-
-uint32_t
-cswidth(const char *utf8, uint32_t n)
-{
-	uint32_t w = 0;
 	uint64_t cp;
 	size_t i;
+	uint8_t bytes;
 	int8_t r;
 
+	*w = 0;
+
 	for (i = 0; i < n && utf8[i];) {
-		i += codepoint(&utf8[i], &cp);
+		if (!codepoint(&utf8[i], n - i, &cp, &bytes)) {
+			return false;
+		}
+		i += bytes;
 		r = cpwidth(cp);
 		if (r > 0) {
-			w += r;
+			*w += r;
 		}
 	}
 
-	return w;
+	return true;
 }
