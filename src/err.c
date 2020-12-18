@@ -6,6 +6,7 @@
 
 #include "apf.h"
 #include "common.h"
+#include "cswidth.h"
 
 static const char *apf_err_str[] = {
 	[apf_err_ok] = "no error",
@@ -51,12 +52,9 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 			*err_pos = (uint8_t *)&buf[bufi];
 		}
 
-		printf("%p\n", (void *)&elem[i]);
-
 		switch (elem[i] & 0x1) {
 		case apft_dat:
 			write_to_buf(buf, &bufi, blen, "{", 1);
-			printf("dat:\n");
 
 			dat_hdr = elem[i];
 			memcpy(&id_hdr, &elem[i + 1], 2);
@@ -64,10 +62,8 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 			i += 3;
 
 			if (dat_hdr & apff_conditional) {
-				printf("cond:%p\n", (void *)&elem[i - 3]);
 				switch (id_hdr & 0x3) {
 				case apft_id_num:
-					printf("%s, num\n", buf);
 					break;
 				case apft_id_sym:
 					len = id_hdr >> 2;
@@ -75,7 +71,6 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 					i += len;
 					break;
 				default:
-					printf("'%s'\n", buf);
 					assert(false);
 					break;
 				}
@@ -84,10 +79,8 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 				i += 4;
 
 				write_to_buf(buf, &bufi, blen, "?", 1);
-				printf("'%s', %d, %d\n", buf, cond_hdr[0], cond_hdr[1]);
 
 				if (cond_hdr[0]) {
-					printf("  arm:%d:%p\n", cond_hdr[0], (void *)&elem[i]);
 					bufi += rebuild_fmt_str(&buf[bufi], blen - bufi, &elem[i], cond_hdr[0], err_pos);
 					i += cond_hdr[0];
 				}
@@ -173,16 +166,18 @@ void
 apf_strerr(char *buf, uint32_t blen, struct apf_err_ctx *ctx)
 {
 	uint32_t bufi = 0, err_idx;
+	char *fmt_str_start;
 	const uint8_t *rebuilt_err_pos, *rebuilt;
 
 	bufi += snprintf(buf, blen, "%s\n", apf_err_str[ctx->err]);
+	fmt_str_start = &buf[bufi];
 
 	switch (ctx->ctx_type) {
 	case 0:
 		if (blen <= bufi) {
 			return;
 		}
-		bufi += snprintf(&buf[bufi], blen - bufi, "%s\n", ctx->ctx);
+		bufi += snprintf(&buf[bufi], blen - bufi, "%s", ctx->ctx);
 		err_idx = ctx->err_pos - ctx->ctx;
 		break;
 	case 1:
@@ -192,12 +187,21 @@ apf_strerr(char *buf, uint32_t blen, struct apf_err_ctx *ctx)
 			ctx->ctx_len, &rebuilt_err_pos);
 
 		err_idx = rebuilt_err_pos - rebuilt;
-		bufi += snprintf(&buf[bufi], blen - bufi, "\n");
 		break;
 	default:
 		assert(false);
 
 	}
+
+	if (!cswidth(fmt_str_start, err_idx, &err_idx)) {
+		return;
+	}
+
+	if (bufi >= blen) {
+		return;
+	}
+	buf[bufi] = '\n';
+	++bufi;
 
 	uint32_t i;
 	for (i = 0; i < err_idx; ++i) {
