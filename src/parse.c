@@ -342,7 +342,7 @@ parse_conditional:
 
 	return true;
 full_error:
-	ctx->err->err = apf_err_too_many_elements;
+	ctx->err->err = apf_err_buf_full;
 	return false;
 }
 
@@ -420,7 +420,7 @@ parse_template_until(struct apf_parse_ctx *ctx, const char *fmt,
 
 	return true;
 full_error:
-	ctx->err->err = apf_err_too_many_elements;
+	ctx->err->err = apf_err_buf_full;
 	return false;
 }
 

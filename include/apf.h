@@ -15,7 +15,6 @@ enum apf_err {
 	apf_err_invalid_spec,
 	apf_err_unterminated_subexp,
 	apf_err_invalid_transform,
-	apf_err_too_many_elements,
 	apf_err_branch_too_long,
 	apf_err_num_overflow,
 	apf_err_missing_id_cb,

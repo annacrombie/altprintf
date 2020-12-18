@@ -18,7 +18,6 @@ static const char *apf_err_str[] = {
 	[apf_err_invalid_spec] = "invalid specifier",
 	[apf_err_unterminated_subexp] = "unterminated subexpression",
 	[apf_err_invalid_transform] = "invalid transform",
-	[apf_err_too_many_elements] = "too many elements",
 	[apf_err_branch_too_long] = "branch is too long",
 	[apf_err_num_overflow] = "number too big",
 	[apf_err_missing_id_cb] = "missing id callback",
