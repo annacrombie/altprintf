@@ -41,7 +41,20 @@ format_float(struct apf_err_ctx *err, char *buf, uint32_t blen, float val, uint8
 	uint8_t prec_cpy = prec;
 	bool neg = false;
 
-	if (val == 0.0f) {
+	if (val < 0) {
+		neg = true;
+		val *= -1;
+	}
+
+	if (prec) {
+		for (; prec_cpy; --prec_cpy) {
+			val *= 10;
+		}
+	}
+
+	ival = val + 0.5;
+
+	if (ival == 0) {
 		if (ilen + 1u + prec > blen) {
 			goto full_err;
 		}
@@ -61,18 +74,6 @@ format_float(struct apf_err_ctx *err, char *buf, uint32_t blen, float val, uint8
 		}
 	}
 
-	if (val < 0) {
-		neg = true;
-		val *= -1;
-	}
-
-	if (prec) {
-		for (; prec_cpy; --prec_cpy) {
-			val *= 10;
-		}
-	}
-
-	ival = val + 0.5;
 	for (; ival; ival /= 10) {
 		++ilen;
 	}
