@@ -29,7 +29,7 @@ main(int argc, const char **argv)
 	struct apf_template apft;
 	struct fmt_ctx fmt_ctx = { argc - 2, &argv[2] };
 
-	apft = apf_parse(elems, 256, argv[1], NULL, NULL, &err);
+	apft = apf_compile(elems, 256, argv[1], NULL, NULL, &err);
 	if (err.err) {
 		return 1;
 	}
