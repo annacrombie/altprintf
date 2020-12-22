@@ -1,5 +1,3 @@
-# Taken from https://git.sr.ht/~sircmpwn/ctools/tree/master/doc/meson.build
-
 scdoc_prog = find_program(scdoc.get_pkgconfig_variable('scdoc'), native: true)
 mandir = get_option('mandir')
 
@@ -12,20 +10,28 @@ example = executable('example',
 	link_with: [libapf],
 )
 
+test(
+	'example.c',
+	find_program('./example_test.py'),
+	args: [example.full_path()],
+	depends: [example],
+)
+
+inserter = find_program('./insert.py')
+
 man_files = [
 	['altprintf', '3', custom_target(
 		'altprintf.3.scd',
-		input: ['altprintf.3.scd.in', example, 'example.c'],
+		input: ['altprintf.3.scd.in', 'example.c'],
 		output: 'altprintf.3.scd',
-		command: [find_program('./insert.py'), 'example', '@INPUT0@',
-			'@INPUT1@', '@INPUT2@'],
+		command: [inserter, 'example', '@INPUT0@', '@INPUT1@'],
 		capture: true,
 	)],
 	['altprintf', '7', custom_target(
 		'altprintf.7.scd',
 		input: ['altprintf.7.scd.in', '../test/apf_grammar.py'],
 		output: 'altprintf.7.scd',
-		command: [find_program('./insert.py'), 'grammar', '@INPUT@'],
+		command: [inserter, 'grammar', '@INPUT@'],
 		capture: true,
 	)]
 ]

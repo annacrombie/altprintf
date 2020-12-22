@@ -127,6 +127,12 @@ With printf, the solution would be error prone, since you would have to parse
 the format string anyway to determine how many arguments were necessary and to
 do some validation so printf won't cause a segfault for instance.
 
+# EXAMPLES
+
+```
+@EXAMPLES@
+```
+
 # SEE ALSO
 
 *altprintf*(3)

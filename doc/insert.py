@@ -2,31 +2,43 @@
 
 import sys
 
+
 sys.path.append("../test")
 
-from apf_grammar import cfg
-from test import apf_test
-
 mode = sys.argv[1]
-src = sys.argv[2]
+
+with open(sys.argv[2]) as f:
+    src_text = f.read()
+
+
+def insert(text, split_on, insert):
+    split = text.split(split_on)
+    assert len(split) == 2
+
+    return split[0] + insert + split[1]
+
 
 if mode == "grammar":
-    split_at = "@GRAMMAR@"
-    insert = cfg
+    from apf_grammar import cfg
+    from examples import examples
+
+    res = insert(src_text, "@GRAMMAR@", str(cfg))
+    res = insert(res, "@EXAMPLES@", str(examples))
 elif mode == "example":
-    cmd = sys.argv[3]
-    cmd_src = sys.argv[4]
-    assert apf_test(cmd, "{}", "test", "test")
-    split_at = "@EXAMPLE@"
-    with open(cmd_src) as f:
-        insert = f.read()
+    inserts = []
+    with open(sys.argv[3]) as f:
+        inserts += [f.read()]
+
+    from examples import ExampleTesterCmd
+
+    sys.path.append("../doc")
+    from example import examples
+
+    tester = ExampleTesterCmd("example", None)
+    inserts += [tester.format(examples)]
+
+    res = insert(src_text, "@EXAMPLE@", "\n---\n\n".join(inserts))
 else:
     assert False
 
-with open(src) as f:
-    text = f.read().split(split_at)
-    assert len(text) == 2
-
-print(text[0], end="")
-print(insert, end="")
-print(text[1], end="")
+print(res, end="")
