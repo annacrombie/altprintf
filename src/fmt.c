@@ -471,18 +471,10 @@ format_data(struct apf_interp_ctx *ctx, uint32_t *i)
 	switch ((id.type = (*id_hdr & 0x3))) {
 	case apft_id_num:
 		id.num = *id_hdr >> 2;
-		if (!ctx->id_cb) {
-			ctx->err->err = apf_err_missing_id_cb;
-			return false;
-		}
 		break;
 	case apft_id_sym:
 		id.sym.len = *id_hdr >> 2;
 		id.sym.id = &ctx->apft->elem[j];
-		if (!ctx->sym_cb) {
-			ctx->err->err = apf_err_missing_sym_cb;
-			return false;
-		}
 		j += id.sym.len;
 		break;
 	case apft_id_lit:
@@ -544,6 +536,14 @@ apf_fmt(char *buf, uint32_t blen, const struct apf_template *apft,
 		.apft = apft, .err = err, .buf = buf, .blen = blen,
 		.usr_ctx = usr_ctx, .id_cb = id_cb, .sym_cb = sym_cb,
 	};
+
+	if ((apft->flags & apftf_has_id_args) && !id_cb) {
+		err->err = apf_err_missing_id_cb;
+		return 0;
+	} else if ((apft->flags & apftf_has_sym_args) && !sym_cb) {
+		err->err = apf_err_missing_sym_cb;
+		return 0;
+	}
 
 	fmt(&ctx);
 

@@ -22,6 +22,11 @@ enum apf_dat_flags {
 	apff_max_width     = 255,
 };
 
+enum apf_template_flags {
+	apftf_has_id_args = 1 << 3,
+	apftf_has_sym_args = 1 << 4,
+};
+
 enum apf_transform {
 	apf_trans_binary,
 	apf_trans_hex,
