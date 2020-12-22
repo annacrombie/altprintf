@@ -11,7 +11,7 @@
 
 struct apf_parse_ctx {
 	struct apf_template *apft;
-	apf_parse_sym_cb sym_cb;
+	apf_compile_sym_cb sym_cb;
 	struct apf_err_ctx *err;
 	void *usr_ctx;
 	uint16_t cap, argi;
@@ -90,13 +90,13 @@ parse_transform(char c)
 }
 
 static bool
-set_id_hdr(struct apf_parse_ctx *ctx, uint32_t elemi, uint32_t id_len, bool id_exp,
+set_id_hdr(struct apf_parse_ctx *ctx, uint32_t elemi, uint32_t id_len, bool id_lit,
 	uint8_t *id_start)
 {
 	uint16_t id_hdr;
 	uint8_t type;
 
-	if (id_exp) {
+	if (id_lit) {
 		id_hdr = id_len;
 		type = apft_id_lit;
 	} else if (id_len) {
@@ -117,6 +117,15 @@ set_id_hdr(struct apf_parse_ctx *ctx, uint32_t elemi, uint32_t id_len, bool id_e
 		id_hdr = ctx->argi;
 		type = apft_id_num;
 		++ctx->argi;
+	}
+
+	switch (type) {
+	case apft_id_num:
+		ctx->apft->flags |= apftf_has_id_args;
+		break;
+	case apft_id_sym:
+		ctx->apft->flags |= apftf_has_sym_args;
+		break;
 	}
 
 	if (id_hdr >= 16384) {
@@ -177,7 +186,7 @@ parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 	uint8_t elem = apft_dat;
 	uint8_t tmp;
 	uint8_t *id_start = NULL;
-	bool id_exp = false;
+	bool id_lit = false;
 
 	ctx->apft->len += apf_data_hdr;
 	if (ctx->apft->len >= ctx->cap) {
@@ -187,7 +196,7 @@ parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 	*i = 1;
 
 	if (fmt[*i] == '=') {
-		id_exp = true;
+		id_lit = true;
 		if (!parse_subexp(ctx, fmt, i, &id_len, ":}")) {
 			return false;
 		}
@@ -208,7 +217,7 @@ parse_elem(struct apf_parse_ctx *ctx, const char *fmt, uint16_t *i)
 		}
 	}
 
-	if (!set_id_hdr(ctx, elemi, id_len, id_exp, id_start)) {
+	if (!set_id_hdr(ctx, elemi, id_len, id_lit, id_start)) {
 		ctx->err->err_pos = &fmt[*i - id_len];
 		return false;
 	}
@@ -425,8 +434,8 @@ full_error:
 }
 
 struct apf_template
-apf_parse(uint8_t *buf, uint32_t cap, const char *fmt, void *usr_ctx,
-	apf_parse_sym_cb sym_cb, struct apf_err_ctx *err)
+apf_compile(uint8_t *buf, uint32_t cap, const char *fmt, void *usr_ctx,
+	apf_compile_sym_cb sym_cb, struct apf_err_ctx *err)
 {
 	struct apf_template apft = { .elem = buf };
 
@@ -438,10 +447,13 @@ apf_parse(uint8_t *buf, uint32_t cap, const char *fmt, void *usr_ctx,
 		.usr_ctx = usr_ctx,
 	};
 
-	err->ctx = fmt;
-
 	const char *endptr;
 	parse_template_until(&ctx, fmt, NULL, &endptr);
+
+	if (err->err) {
+		err->ctx = fmt;
+		err->stage = apf_stage_compile;
+	}
 
 	PRINT_PARSE_TREE(&apft, err);
 

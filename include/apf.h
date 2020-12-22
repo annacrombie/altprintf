@@ -33,15 +33,16 @@ struct apf_err_ctx {
 void apf_strerr(char *buf, uint32_t blen, struct apf_err_ctx *ctx);
 
 struct apf_template {
-	uint16_t len;
 	uint8_t *elem;
+	uint16_t len;
+	uint16_t flags;
 };
 
-typedef uint16_t ((*apf_parse_sym_cb)(struct apf_err_ctx *err, void *ctx,
-				      const char *sym, uint16_t len));
+typedef uint16_t ((*apf_compile_sym_cb)(struct apf_err_ctx *err, void *ctx,
+					const char *sym, uint16_t len));
 
-struct apf_template apf_parse(uint8_t *buf, uint32_t blen, const char *fmt,
-	void *usr_ctx, apf_parse_sym_cb cb, struct apf_err_ctx *err);
+struct apf_template apf_compile(uint8_t *buf, uint32_t blen, const char *fmt,
+	void *usr_ctx, apf_compile_sym_cb cb, struct apf_err_ctx *err);
 
 enum apf_arg_type {
 	apfat_str,

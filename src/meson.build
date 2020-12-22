@@ -1,9 +1,9 @@
 src = files([
 	'args.c',
+	'compile.c',
 	'cswidth.c',
 	'err.c',
 	'fmt.c',
-	'parse.c',
 ])
 flags = []
 
