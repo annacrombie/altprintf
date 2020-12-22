@@ -548,7 +548,7 @@ apf_fmt(char *buf, uint32_t blen, const struct apf_template *apft,
 	fmt(&ctx);
 
 	if (err->err) {
-		err->ctx_type = 1;
+		err->stage = apf_stage_format;
 		err->ctx_len = apft->len;
 		err->ctx = (char *)apft->elem;
 	}

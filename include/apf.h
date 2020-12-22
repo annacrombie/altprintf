@@ -23,11 +23,16 @@ enum apf_err {
 	apf_err_invalid_unicode,
 };
 
+enum apf_stage {
+	apf_stage_compile,
+	apf_stage_format,
+};
+
 struct apf_err_ctx {
 	const char *ctx, *err_pos;
-	uint32_t ctx_len;
 	enum apf_err err;
-	uint8_t ctx_type;
+	enum apf_stage stage;
+	uint32_t ctx_len;
 };
 
 void apf_strerr(char *buf, uint32_t blen, struct apf_err_ctx *ctx);
@@ -65,7 +70,9 @@ typedef struct apf_arg ((*apf_fmt_sym_cb)(struct apf_err_ctx *err, void *ctx,
 					  const char *sym, uint16_t len));
 
 uint32_t apf_fmt(char *buf, uint32_t blen, const struct apf_template *apft,
-	void *usr_ctx, apf_fmt_id_cb id_cb, apf_fmt_sym_cb sym_cb, struct apf_err_ctx *err);
+	void *usr_ctx, apf_fmt_id_cb id_cb, apf_fmt_sym_cb sym_cb,
+	struct apf_err_ctx *err);
+
 
 #define apf_tag(val) _Generic(val, \
 	const char*: apf_tag_str, \

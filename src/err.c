@@ -172,15 +172,15 @@ apf_strerr(char *buf, uint32_t blen, struct apf_err_ctx *ctx)
 	bufi += snprintf(buf, blen, "%s\n", apf_err_str[ctx->err]);
 	fmt_str_start = &buf[bufi];
 
-	switch (ctx->ctx_type) {
-	case 0:
+	switch (ctx->stage) {
+	case apf_stage_compile:
 		if (blen <= bufi) {
 			return;
 		}
 		bufi += snprintf(&buf[bufi], blen - bufi, "%s", ctx->ctx);
 		err_idx = ctx->err_pos - ctx->ctx;
 		break;
-	case 1:
+	case apf_stage_format:
 		rebuilt_err_pos = (uint8_t *)ctx->err_pos;
 		rebuilt = (uint8_t *)&buf[bufi];
 		bufi += rebuild_fmt_str(&buf[bufi], blen - bufi, (uint8_t *)ctx->ctx,
