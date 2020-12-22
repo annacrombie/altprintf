@@ -28,14 +28,59 @@ static const char *apf_err_str[] = {
 };
 
 static void
-write_to_buf(char *buf, uint32_t *bufi, uint32_t blen, const char *src, uint32_t len)
+write_char_escaped(char *buf, uint32_t *bufi, uint32_t blen, char c)
 {
-	if (*bufi + len > blen) {
+	bool need_escape = false;
+
+	switch (c) {
+	case '\033':
+		need_escape = true;
+		c = 'e';
+		break;
+	case '\t':
+		need_escape = true;
+		c = 't';
+		break;
+	case '\n':
+		need_escape = true;
+		c = 'n';
+		break;
+	case '{': case '}': case ':': case '?': case '=': case '\\':
+		need_escape = true;
+		break;
+	}
+
+	if (need_escape) {
+		if (*bufi + 2 > blen) {
+			return;
+		}
+
+		buf[*bufi] = '\\';
+		*bufi += 1;
+	} else if (*bufi > blen) {
 		return;
 	}
 
-	memcpy(&buf[*bufi], src, len);
-	*bufi += len;
+	buf[*bufi] = c;
+	*bufi += 1;
+}
+
+static void
+write_to_buf(char *buf, uint32_t *bufi, uint32_t blen, const char *src, uint32_t len, bool escape)
+{
+	uint32_t i;
+	for (i = 0; i < len; ++i) {
+		if (escape) {
+			write_char_escaped(buf, bufi, blen, src[i]);
+		} else {
+			if (*bufi > blen) {
+				return;
+			} else {
+				buf[*bufi] = src[i];
+				*bufi += 1;
+			}
+		}
+	}
 }
 
 uint32_t
@@ -54,7 +99,7 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 
 		switch (elem[i] & 0x1) {
 		case apft_dat:
-			write_to_buf(buf, &bufi, blen, "{", 1);
+			write_to_buf(buf, &bufi, blen, "{", 1, false);
 
 			dat_hdr = elem[i];
 			memcpy(&id_hdr, &elem[i + 1], 2);
@@ -67,7 +112,7 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 					break;
 				case apft_id_sym:
 					len = id_hdr >> 2;
-					write_to_buf(buf, &bufi, blen, (char *)&elem[i], len);
+					write_to_buf(buf, &bufi, blen, (char *)&elem[i], len, true);
 					i += len;
 					break;
 				default:
@@ -78,14 +123,14 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 				memcpy(cond_hdr, &elem[i], 4);
 				i += 4;
 
-				write_to_buf(buf, &bufi, blen, "?", 1);
+				write_to_buf(buf, &bufi, blen, "?", 1, false);
 
 				if (cond_hdr[0]) {
 					bufi += rebuild_fmt_str(&buf[bufi], blen - bufi, &elem[i], cond_hdr[0], err_pos);
 					i += cond_hdr[0];
 				}
 
-				write_to_buf(buf, &bufi, blen, ":", 1);
+				write_to_buf(buf, &bufi, blen, ":", 1, false);
 
 				if (cond_hdr[1]) {
 					bufi += rebuild_fmt_str(&buf[bufi], blen - bufi, &elem[i], cond_hdr[1], err_pos);
@@ -97,12 +142,12 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 					break;
 				case apft_id_sym:
 					len = id_hdr >> 2;
-					write_to_buf(buf, &bufi, blen, (char *)&elem[i], len);
+					write_to_buf(buf, &bufi, blen, (char *)&elem[i], len, true);
 					i += len;
 					break;
 				case apft_id_lit:
 					len = id_hdr >> 2;
-					write_to_buf(buf, &bufi, blen, "=", 1);
+					write_to_buf(buf, &bufi, blen, "=", 1, false);
 					bufi += rebuild_fmt_str(&buf[bufi], blen - bufi, &elem[i], len, err_pos);
 					i += len;
 					break;
@@ -111,13 +156,13 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 					break;
 				}
 
-				write_to_buf(buf, &bufi, blen, ":", 1);
+				write_to_buf(buf, &bufi, blen, ":", 1, false);
 
 				if (dat_hdr & apff_align_chr) {
 					write_to_buf(buf, &bufi, blen, (char [2]){
 						dat_hdr & apff_align ? '<' : '>',
 						elem[i]
-					}, 2);
+					}, 2, false);
 					i += 1;
 				}
 
@@ -137,23 +182,23 @@ rebuild_fmt_str(char *buf, uint32_t blen, const uint8_t *elem,
 						assert(false);
 						break;
 					case apf_trans_binary:
-						write_to_buf(buf, &bufi, blen, "b", 1);
+						write_to_buf(buf, &bufi, blen, "b", 1, false);
 						break;
 					case apf_trans_hex:
-						write_to_buf(buf, &bufi, blen, "x", 1);
+						write_to_buf(buf, &bufi, blen, "x", 1, false);
 						break;
 					}
 					i += 1;
 				}
 			}
 
-			write_to_buf(buf, &bufi, blen, "}", 1);
+			write_to_buf(buf, &bufi, blen, "}", 1, false);
 			i -= 1;
 
 			break;
 		case apft_raw:
 			len = elem[i] >> 1;
-			write_to_buf(buf, &bufi, blen, (char *)&elem[i + 1], len);
+			write_to_buf(buf, &bufi, blen, (char *)&elem[i + 1], len, true);
 			i += len;
 			break;
 		}
