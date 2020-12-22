@@ -43,8 +43,12 @@ apf_dbg_print_parse_tree(struct apf_template *apft, uint32_t depth, uint32_t ori
 	uint16_t id_hdr;
 	uint16_t cond_hdr[2];
 
+	if (!depth) {
+		L("parse tree:\n");
+	}
+
 	for (i = 0; i < apft->len; ++i) {
-		tree_printer(depth, ">%3d,%3d:", i, i + orig_i);
+		tree_printer(depth, "(%3d,%3d):", i, i + orig_i);
 		switch (apft->elem[i] & 0x1) {
 		case apft_dat:
 			tree_printer(0, "dat:");
