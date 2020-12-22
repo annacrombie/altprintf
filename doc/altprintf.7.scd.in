@@ -129,7 +129,7 @@ do some validation so printf won't cause a segfault for instance.
 
 # SEE ALSO
 
-*altprintf*(1), *altprintf*(3)
+*altprintf*(3)
 
 # AUTHORS
 
