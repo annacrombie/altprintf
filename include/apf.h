@@ -73,6 +73,7 @@ uint32_t apf_fmt(char *buf, uint32_t blen, const struct apf_template *apft,
 	void *usr_ctx, apf_fmt_id_cb id_cb, apf_fmt_sym_cb sym_cb,
 	struct apf_err_ctx *err);
 
+#define apf_arg_null (struct apf_arg){ 0 }
 
 #define apf_tag(val) _Generic(val, \
 	const char*: apf_tag_str, \
