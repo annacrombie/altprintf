@@ -1,6 +1,7 @@
 image: alpine/edge
 packages:
   - meson
+  - python3-dev
   - samurai
   - scdoc
 sources:
