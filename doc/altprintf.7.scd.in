@@ -2,7 +2,7 @@ altprintf(7)
 
 # NAME
 
-altprintf - a powerful string template language
+altprintf - a string template language
 
 # SYNOPSIS
 
@@ -10,62 +10,80 @@ altprintf - a powerful string template language
 
 # DESCRIPTION
 
-altprintf is a string template language.  It is intended to format strings for
-display on a terminal or similar, but may be shoehorned into other
-applications.
+altprintf is a string template language.
 
 # FORMAT STRING SYNTAX
 
-A document written in this template language is referred to as a format string,
-template string, or just a template.  This string is composed of raw text and
-*format elements*, denoted by {}.  Raw text remains unchanged in the output.
+The basic syntax is similar in form to printf(3).  Ordinary characters are
+copied unchanged to the output string.  When a opening curly brace ({) is
+encountered, the contained *format element* is processed.
 
 ## FORMAT ELEMENT
 
 A *format element* is always surrounded by an opening and closing curly brace
-{}.  The interior takes two forms
+({, and }).  The interior takes two forms:
 
 - a basic expression
 - a conditional expression
 
 ## BASIC EXPRESSION
 
-The basic expression consists of an optional *name* or *literal*, and optional
-*format options*.  A literal is denoted by the equals sign as the first
-character.  This literal can contain both raw text and format elements.  The
-only difference is that any : needs to be escaped.
+{[*name*|=*literal*][*:*[*opts*]]}
+
+A basic expression consists of two parts seperated by a colon (:).  The left
+hand side determines the source from which text will be formatted and output
+while the right hand side contains *format options*.  Either side may be empty.
+
+A source can take three forms:
+
+- empty, in which case an implicit numerical id is generated
+- any character except a non-escaped colon, which will be recorded as the
+  format elements *name*
+- an equals sign (=) followed by any character except a non-escaped colon, which
+  will be processed as a *literal*
+
+In the third form, the *format element* does not get data from arguments, but
+instead uses the embedded *literal* as its source.  This *literal* is a
+fully-fledged format string as well, and may have embedded *format elements*
+which will be processed recursively.
 
 Ex.
 
 The simplest format element: {}++
-An element with options: {:>08b}++
-An element with an name: {test}++
-An element with an name and options: {test:>08b}++
+An element with format options: {:>08b}++
+An element with a name: {test}++
+An element with a name and options: {test:>08b}++
 An element with a literal: {=Hello World!}++
 An element with a literal and options: {=Hello World!:10}++
-Nested elements: {=h{=e{=l{=l{=o}}}}}
+Nested literals and elements: {=h{=e{=l{=l{=o}}}}}
 
 ## CONDITIONAL EXPRESSION
 
-A conditional expression takes the form of an optional *name* followed by *?* and
-two branches separated by *:*.
+{[*name*]?*true expression*[:*false expression*]}
 
-{[name]*?*true expression*:*false expression}
+A conditional expression consists of two parts separated by a question mark
+(?).  The left hand side is the source may be either empty or a *name* with the
+same semantics described above in *basic expression*.  Note that a conditional
+expression may not contain a *literal* as its source.  The right hand side part
+of the conditional consists of two branches separated by *:*.
 
-Note that a literal *name* is not allowed here, as it would be pointless (always
-true).  The expressions are similar to literals above; they may contain raw
-text and format elements.  If you do not need a false branch, you may omit it
-as well as the *:* separator, e.g. {[name]*?*true expression}.
+Ex.
 
-If you would like to apply format options to a conditional expression, wrap it
-in a literal:
-
-{={[name]*?*true expression*:*false expression}:> 25}
+The simplest conditional: {?}++
+A conditional with a name: {test?}++
+A conditional with a true branch: {?yes}++
+A conditional with a false branch: {?:no}++
+A conditional with both branches: {?yes:no}++
+A conditional with format options {={test?yes:no}:> 25}
 
 ## FORMAT OPTIONS
 
-*<* or *>*, followed by a *character* - *<* specifies left-align, *>* specifies
-	right-align. The following *character* is used as a fill character
+*<* or *>*, followed by a *character* - control field alignment
+
+	- *<* left-align
+	- *>* right-align
+
+	*character* is used as a fill character
 
 	default: left-align with spaces
 
@@ -82,7 +100,7 @@ in a literal:
 
 # NAMED ARGUMENTS
 
-The way named arguments are handled is up to the library consumer.
+The way named that arguments are handled is up to the library consumer.
 
 # POSITIONAL ARGUMENTS
 
@@ -115,17 +133,18 @@ variant of *wcswidth*(3) to determine a characters width.
 
 # MOTIVATION
 
-Why create a template language when there is already *printf*(3) in the c
-standard library?  There are many reasons.  For one, printf is not designed to
-allow untrusted user input as it's format string.  Also, printf can not
-properly align wide characters, nor does it support conditional printing, named
-fields, and many other necessary features.
+*altprintf* was designed with a very specific goal in mind.  Allowing users to
+customize a program's functionality through the use of format strings.  For
+this you need some way to provide the user with set fields that they are free
+to reorder.  You would also like the string to be saftey-checked so that bad
+input won't crash your program.  Both of these things would be rather difficult
+to do with *printf*, so many program authors create their own
+application-specific format string language.
 
-For example, consider you are making a command line music player.  You want to
-allow your users to customize how the currently playing track is displayed.
-With printf, the solution would be error prone, since you would have to parse
-the format string anyway to determine how many arguments were necessary and to
-do some validation so printf won't cause a segfault for instance.
+*altprintf* seeks to offer an alternative, which while more general than a
+custom solution, offers many niceities such as conditional printnig,
+wide-character alignment, nested elements, etc. that would get left
+unimplemented in said custom solution.
 
 # EXAMPLES
 
