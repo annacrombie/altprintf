@@ -133,7 +133,7 @@ variant of *wcswidth*(3) to determine a characters width.
 
 # MOTIVATION
 
-*altprintf* was designed with a very specific goal in mind.  Allowing users to
+*altprintf* was designed with a very specific goal in mind: allowing users to
 customize a program's functionality through the use of format strings.  For
 this you need some way to provide the user with set fields that they are free
 to reorder.  You would also like the string to be saftey-checked so that bad

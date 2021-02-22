@@ -1,7 +1,9 @@
 # altprintf
 [![builds.sr.ht status](https://builds.sr.ht/~lattis.svg?search=altprintf)](https://builds.sr.ht/~lattis?search=altprintf)
 
-altprintf is a powerful string template language.
+altprintf is a string template language.  It was designed with a very specific
+goal in mind: allowing users to customize a program's functionality through the
+use of format strings.
 
 ## Features
 
@@ -25,9 +27,9 @@ You need `meson`.  If you want man pages, you also need `scdoc`.
 Example:
 
 ```sh
-meson build
-ninja -C build
-ninja -C build install
+meson setup build
+meson compile -C build
+meson install -C build # for system-wide installation
 ```
 
 ## Docs
