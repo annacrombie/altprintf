@@ -1,7 +1,7 @@
 project(
 	'altprintf',
 	'c',
-	version: '0.2.0',
+	version: '0.5.0',
 	license: 'GPL-3.0-only',
 	meson_version: '>=0.54.0',
 	default_options: [
