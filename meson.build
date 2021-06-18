@@ -2,7 +2,7 @@ project(
 	'altprintf',
 	'c',
 	version: '0.5.0',
-	license: 'GPL-3.0-only',
+	license: 'MIT',
 	meson_version: '>=0.54.0',
 	default_options: [
 		'c_std=c11',
@@ -36,7 +36,7 @@ inc = include_directories(['include'])
 
 subdir('src')
 
-subdir('test')
+#subdir('test')
 
 scdoc = dependency('scdoc', native: true, required: get_option('man-pages'),
 	version: '>=1.9.0')
