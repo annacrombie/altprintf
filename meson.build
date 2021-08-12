@@ -36,7 +36,9 @@ inc = include_directories(['include'])
 
 subdir('src')
 
-#subdir('test')
+if get_option('test')
+	subdir('test')
+endif
 
 scdoc = dependency('scdoc', native: true, required: get_option('man-pages'),
 	version: '>=1.9.0')
