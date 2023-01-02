@@ -2,7 +2,6 @@
 
 import sys
 
-
 sys.path.append("../test")
 
 mode = sys.argv[1]

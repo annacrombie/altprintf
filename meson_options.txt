@@ -1,2 +1,7 @@
-option('man-pages', type: 'feature', value: 'auto', description: 'Generate and install man pages')
-option('test', type: 'boolean', value: true, description: 'run tests')
+option(
+    'man-pages',
+    type: 'feature',
+    value: 'auto',
+    description: 'Generate and install man pages',
+)
+option('test', type: 'boolean', value: false, description: 'run tests')
