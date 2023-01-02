@@ -20,6 +20,21 @@ use of format strings.
 Note that altprintf is not designed to replace printf.  It is designed with the
 specific use case of providing user-specified templates to customize output.
 
+## Example
+
+Here is an example format string to build a statusline for something like
+[swaybar](https://github.com/swaywm/sway/wiki#swaybar-configuration).
+
+```
+{win} {fetching?⇄ }{locked?閉 }{mail?〒{mail} }{cpu:> 3}% {temp}c {bat} {time}
+```
+
+Which could result in a string like:
+
+```
+mochiro.moe -- Mozilla Firefox 〒4   3% 49c 45 08:56
+```
+
 ## Building
 
 You need `meson`.  If you want man pages, you also need `scdoc`.
