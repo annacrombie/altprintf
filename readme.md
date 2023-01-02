@@ -37,14 +37,13 @@ mochiro.moe -- Mozilla Firefox 〒4   3% 49c 45 08:56
 
 ## Building
 
-You need `meson`.  If you want man pages, you also need `scdoc`.
+You need a compatible `meson` implementation.  If you want man pages, you also need `scdoc`.
 
 Example:
 
 ```sh
-meson setup build
-meson compile -C build
-meson install -C build # for system-wide installation
+$meson setup build
+$ninja -C build
 ```
 
 ## Docs
